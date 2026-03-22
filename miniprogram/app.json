@@ -1,14 +1,15 @@
 {
   "pages": [
+    "pages/recipe/recipe",
     "pages/index/index",
     "pages/example/index"
   ],
   "window": {
-    "backgroundColor": "#F6F6F6",
+    "backgroundColor": "#FFF8F5",
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#F6F6F6",
-    "navigationBarTitleText": "云开发 QuickStart",
-    "navigationBarTextStyle": "black"
+    "navigationBarBackgroundColor": "#FF6B35",
+    "navigationBarTitleText": "小厨AI",
+    "navigationBarTextStyle": "white"
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",

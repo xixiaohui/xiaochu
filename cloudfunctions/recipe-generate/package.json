@@ -1,0 +1,17 @@
+{
+  "name": "recipe-generate",
+  "version": "1.0.0",
+  "description": "小厨AI - 食谱生成云函数，接入腾讯混元大模型",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"云函数测试请在根目录运行 npm test\" && exit 0"
+  },
+  "author": "小厨AI",
+  "license": "MIT",
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

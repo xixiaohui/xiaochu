@@ -1,0 +1,803 @@
+/* ============================================
+   食谱生成页面样式 - recipe.wxss
+   设计风格：暖色调（橙红主色）、卡片式布局、圆角设计
+   ============================================ */
+
+/* ==================== 页面基础 ==================== */
+
+/* 页面容器：竖向滚动布局 */
+.page-container {
+  min-height: 100vh;
+  background-color: #FFF8F5;
+  padding-bottom: 40rpx;
+}
+
+/* 页面底部占位，防止内容被遮挡 */
+.page-footer {
+  height: 60rpx;
+}
+
+/* ==================== Hero 顶部区域 ==================== */
+
+/* 顶部英雄区：橙色渐变背景 */
+.hero-section {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 60%, #FFA552 100%);
+  padding: 60rpx 40rpx 80rpx;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景装饰圆形 */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -60rpx;
+  right: -60rpx;
+  width: 200rpx;
+  height: 200rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: -40rpx;
+  left: -40rpx;
+  width: 160rpx;
+  height: 160rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+/* Hero 区主表情符号 */
+.hero-emoji {
+  font-size: 80rpx;
+  line-height: 1;
+  margin-bottom: 16rpx;
+}
+
+/* Hero 主标题 */
+.hero-title {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+/* Hero 副标题 */
+.hero-subtitle {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.90);
+  line-height: 1.6;
+  padding: 0 20rpx;
+}
+
+/* ==================== 通用卡片 ==================== */
+
+/* 内容卡片：白色圆角阴影卡片 */
+.section-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  margin: 24rpx 24rpx 0;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(255, 107, 53, 0.08);
+}
+
+/* 卡片标题行 */
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+/* 卡片图标 */
+.section-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+/* 卡片标题文字 */
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #2D2D2D;
+  flex: 1;
+}
+
+/* 卡片右侧提示文字 */
+.section-hint {
+  font-size: 24rpx;
+  color: #AAAAAA;
+}
+
+/* ==================== 食材输入区 ==================== */
+
+/* 食材标签容器：换行流式布局 */
+.ingredient-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  min-height: 60rpx;
+}
+
+/* 单个食材标签 */
+.ingredient-tag {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #FFF0EA, #FFE4D6);
+  border: 2rpx solid #FFB89A;
+  border-radius: 32rpx;
+  padding: 10rpx 20rpx 10rpx 24rpx;
+  gap: 8rpx;
+  transition: all 0.2s;
+}
+
+/* 标签文字 */
+.tag-text {
+  font-size: 28rpx;
+  color: #FF6B35;
+  font-weight: 500;
+}
+
+/* 删除按钮 */
+.tag-remove {
+  font-size: 32rpx;
+  color: #FF6B35;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* 空状态提示 */
+.ingredient-empty {
+  padding: 20rpx 0;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  color: #C0C0C0;
+  text-align: center;
+  border: 2rpx dashed #FFD4C0;
+  border-radius: 16rpx;
+  line-height: 2;
+}
+
+/* 输入行：输入框 + 添加按钮 */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 食材输入框 */
+.ingredient-input {
+  flex: 1;
+  height: 80rpx;
+  background: #F8F8F8;
+  border-radius: 16rpx;
+  border: 2rpx solid #F0F0F0;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  color: #333333;
+  transition: border-color 0.2s;
+}
+
+.ingredient-input:focus {
+  border-color: #FF6B35;
+  background: #FFFAF8;
+}
+
+/* 输入框占位符样式 */
+.input-placeholder {
+  color: #CCCCCC;
+  font-size: 28rpx;
+}
+
+/* 添加按钮 */
+.add-btn {
+  width: 130rpx !important;
+  height: 80rpx !important;
+  line-height: 80rpx !important;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+  color: #FFFFFF !important;
+  border-radius: 16rpx !important;
+  font-size: 28rpx !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.35) !important;
+}
+
+.add-btn[disabled] {
+  background: #E0E0E0 !important;
+  box-shadow: none !important;
+  color: #AAAAAA !important;
+}
+
+/* 快速添加区域 */
+.quick-add-section {
+  border-top: 2rpx solid #F5F5F5;
+  padding-top: 20rpx;
+}
+
+.quick-add-title {
+  font-size: 26rpx;
+  color: #888888;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+/* 快速添加标签容器 */
+.quick-add-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+/* 快速添加单个标签 */
+.quick-tag {
+  padding: 10rpx 24rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  color: #666666;
+  background: #F9F9F9;
+  transition: all 0.2s;
+}
+
+/* 快速添加标签：选中状态 */
+.quick-tag-selected {
+  background: linear-gradient(135deg, #FFF0EA, #FFE4D6) !important;
+  border-color: #FF6B35 !important;
+  color: #FF6B35 !important;
+  font-weight: 500;
+}
+
+/* ==================== 烹饪参数选择区 ==================== */
+
+/* 参数行 */
+.param-row {
+  margin-bottom: 28rpx;
+}
+
+/* 参数标签 */
+.param-label {
+  display: block;
+  font-size: 28rpx;
+  color: #555555;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+/* 选项组 */
+.param-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+/* 单个选项 */
+.param-option {
+  padding: 14rpx 28rpx;
+  border: 2rpx solid #E8E8E8;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  color: #555555;
+  background: #F9F9F9;
+  transition: all 0.2s;
+}
+
+/* 选中状态 */
+.param-option-active {
+  background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+  border-color: #FF6B35 !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.30);
+}
+
+/* 附加要求行 */
+.extra-req-row {
+  margin-top: 8rpx;
+}
+
+/* 附加要求输入框 */
+.extra-req-input {
+  width: 100%;
+  height: 80rpx;
+  background: #F8F8F8;
+  border-radius: 16rpx;
+  border: 2rpx solid #F0F0F0;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #333333;
+  margin-top: 12rpx;
+  box-sizing: border-box;
+}
+
+/* ==================== 生成按钮区 ==================== */
+
+/* 生成按钮外层容器 */
+.generate-section {
+  padding: 32rpx 24rpx 0;
+}
+
+/* 生成按钮主体 */
+.generate-btn {
+  width: 100% !important;
+  height: 108rpx !important;
+  line-height: 108rpx !important;
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%) !important;
+  border-radius: 24rpx !important;
+  color: #FFFFFF !important;
+  font-size: 34rpx !important;
+  font-weight: 700 !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: 0 8rpx 24rpx rgba(255, 107, 53, 0.40) !important;
+  transition: all 0.3s !important;
+}
+
+/* 加载中状态 */
+.generate-btn-loading {
+  background: linear-gradient(135deg, #FF9B75, #FFB08C) !important;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.20) !important;
+}
+
+/* 禁用状态（无食材时） */
+.generate-btn-disabled {
+  background: #E0E0E0 !important;
+  box-shadow: none !important;
+}
+
+/* 按钮内容布局 */
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.btn-icon {
+  font-size: 36rpx;
+}
+
+/* 加载动画内容 */
+.loading-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+}
+
+/* 加载点动画容器 */
+.loading-dot-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+/* 加载跳跃点 */
+.loading-dot {
+  width: 14rpx;
+  height: 14rpx;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  animation: dotJump 1.2s ease-in-out infinite;
+}
+
+.dot1 { animation-delay: 0s; }
+.dot2 { animation-delay: 0.2s; }
+.dot3 { animation-delay: 0.4s; }
+
+@keyframes dotJump {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-12rpx); opacity: 1; }
+}
+
+/* 缓存命中提示 */
+.cache-tip {
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #888888;
+  background: #F0FFF4;
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  border: 2rpx solid #C6F6D5;
+}
+
+/* ==================== 错误提示 ==================== */
+
+.error-section {
+  padding: 24rpx 24rpx 0;
+}
+
+.error-card {
+  background: #FFF5F5;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  border: 2rpx solid #FFD5D5;
+}
+
+/* 错误标题行 */
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.error-icon {
+  font-size: 36rpx;
+  flex-shrink: 0;
+}
+
+.error-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #C53030;
+}
+
+/* 错误详情文字（支持长文本换行） */
+.error-text {
+  font-size: 26rpx;
+  color: #742A2A;
+  line-height: 1.8;
+  display: block;
+  word-break: break-all;
+  margin-bottom: 20rpx;
+  background: #FED7D7;
+  border-radius: 12rpx;
+  padding: 16rpx;
+}
+
+/* 错误操作按钮行 */
+.error-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.error-retry-btn {
+  flex: 1;
+  height: 68rpx !important;
+  line-height: 68rpx !important;
+  background: #E53E3E !important;
+  color: #FFFFFF !important;
+  border-radius: 12rpx !important;
+  font-size: 26rpx !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* 帮助按钮 */
+.error-help-btn {
+  flex: 1;
+  height: 68rpx !important;
+  line-height: 68rpx !important;
+  background: #FFFFFF !important;
+  color: #E53E3E !important;
+  border-radius: 12rpx !important;
+  font-size: 26rpx !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 2rpx solid #E53E3E !important;
+}
+
+/* ==================== 食谱结果展示 ==================== */
+
+.recipe-result {
+  margin-top: 32rpx;
+}
+
+/* 食谱标题英雄卡 */
+.recipe-hero-card {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 60%, #FFA552 100%);
+  margin: 0 24rpx 0;
+  border-radius: 24rpx;
+  padding: 40rpx 36rpx;
+  box-shadow: 0 8rpx 32rpx rgba(255, 107, 53, 0.30);
+  position: relative;
+  overflow: hidden;
+}
+
+.recipe-hero-card::after {
+  content: '🍳';
+  position: absolute;
+  right: 24rpx;
+  bottom: 16rpx;
+  font-size: 100rpx;
+  opacity: 0.15;
+  line-height: 1;
+}
+
+/* 食谱名称 */
+.recipe-name {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 16rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+/* 食谱描述 */
+.recipe-description {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.90);
+  line-height: 1.7;
+  margin-bottom: 24rpx;
+}
+
+/* 基本信息徽章行 */
+.recipe-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 单个信息徽章 */
+.meta-badge {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(255, 255, 255, 0.20);
+  border-radius: 32rpx;
+  padding: 10rpx 20rpx;
+  backdrop-filter: blur(4px);
+}
+
+.meta-badge-icon {
+  font-size: 28rpx;
+}
+
+.meta-badge-text {
+  font-size: 26rpx;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+/* 食谱标签行 */
+.recipe-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+/* 食谱标签 */
+.recipe-tag-item {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 24rpx;
+  padding: 8rpx 20rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.25);
+}
+
+/* 结果区段标题 */
+.result-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2D2D;
+  margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #F5F5F5;
+}
+
+.result-section-count {
+  font-size: 24rpx;
+  color: #AAAAAA;
+  font-weight: 400;
+}
+
+.result-section-hint {
+  font-size: 24rpx;
+  color: #AAAAAA;
+  font-weight: 400;
+}
+
+/* ==================== 食材清单 ==================== */
+
+.ingredient-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+}
+
+/* 食材项 */
+.ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  font-size: 28rpx;
+}
+
+.ingredient-item-even {
+  background: #FFF8F5;
+}
+
+.ingredient-item-odd {
+  background: #F8F8F8;
+}
+
+/* 食材名称 */
+.ingredient-name {
+  color: #333333;
+  font-weight: 500;
+}
+
+/* 食材用量 */
+.ingredient-amount {
+  color: #FF6B35;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+/* ==================== 烹饪步骤 ==================== */
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* 步骤项 */
+.step-item {
+  display: flex;
+  gap: 24rpx;
+  align-items: flex-start;
+}
+
+/* 步骤编号圆圈 */
+.step-number {
+  width: 56rpx;
+  height: 56rpx;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 53, 0.30);
+}
+
+/* 步骤内容区 */
+.step-content {
+  flex: 1;
+  padding-top: 8rpx;
+}
+
+/* 步骤描述文字 */
+.step-description {
+  font-size: 30rpx;
+  color: #333333;
+  line-height: 1.8;
+  display: block;
+}
+
+/* 步骤小贴士 */
+.step-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  margin-top: 12rpx;
+  background: #FFFBF0;
+  border-radius: 12rpx;
+  padding: 14rpx 16rpx;
+  border-left: 6rpx solid #F6C353;
+}
+
+.tip-icon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.tip-text {
+  font-size: 26rpx;
+  color: #666666;
+  line-height: 1.7;
+}
+
+/* ==================== 营养信息 ==================== */
+
+/* 营养数据四宫格 */
+.nutrition-grid {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #FFF8F5, #FFF0E8);
+  border-radius: 20rpx;
+  padding: 28rpx 0;
+}
+
+/* 单个营养数据 */
+.nutrition-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+/* 数值 */
+.nutrition-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #FF6B35;
+}
+
+/* 标签 */
+.nutrition-label {
+  font-size: 24rpx;
+  color: #888888;
+}
+
+/* 营养数据间分割线 */
+.nutrition-divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: #FFD4C0;
+  flex-shrink: 0;
+}
+
+/* ==================== Token 信息 ==================== */
+
+.token-info {
+  text-align: center;
+  margin: 16rpx 24rpx 0;
+}
+
+.token-text {
+  font-size: 22rpx;
+  color: #CCCCCC;
+}
+
+/* ==================== 操作按钮组 ==================== */
+
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  padding: 24rpx 24rpx 0;
+}
+
+/* 通用操作按钮 */
+.action-btn {
+  flex: 1;
+  height: 96rpx !important;
+  line-height: 96rpx !important;
+  border-radius: 20rpx !important;
+  font-size: 30rpx !important;
+  font-weight: 600 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  transition: all 0.2s !important;
+}
+
+/* 主要按钮（橙色） */
+.action-btn-primary {
+  background: linear-gradient(135deg, #FF6B35, #FF8C42) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6rpx 20rpx rgba(255, 107, 53, 0.35) !important;
+}
+
+/* 次要按钮（白色描边） */
+.action-btn-secondary {
+  background: #FFFFFF !important;
+  color: #FF6B35 !important;
+  border: 2rpx solid #FF6B35 !important;
+}
