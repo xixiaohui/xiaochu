@@ -4,9 +4,9 @@
  *
  * ✅ 无需配置外部 API Key！
  * 通过云开发环境自动关联的 Token 资源包（如 AI小程序成长计划免费包）直接调用。
- * 调用链：cloud.ai.createModel("hunyuan") → 自动使用环境绑定的 Token 额度
+ * 调用链：cloud.ai.createModel("hunyuan-exp") → 自动使用环境绑定的 Token 额度
  *
- * 版本：2.0.0
+ * 版本：2.1.0
  */
 
 'use strict';
@@ -19,23 +19,29 @@ cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
 });
 
+// ==================== 常量配置 ====================
+
+// 混元 provider
+const AI_PROVIDER = 'hunyuan-exp';
+
+// 实际调用模型
+const HUNYUAN_MODEL = 'hunyuan-turbos-latest';
+
+// 超时时间（毫秒）
+const CALL_TIMEOUT = 30000;
+
 // ==================== 错误码定义 ====================
 
-// 统一错误码，方便前端判断错误类型
 const ERROR_CODES = {
-  SUCCESS: 0,        // 成功
-  PARAM_ERROR: 1,    // 参数错误
-  AI_CALL_FAILED: 2, // AI 接口调用失败
-  PARSE_FAILED: 3,   // JSON 解析失败
-  TIMEOUT: 4,        // 超时
+  SUCCESS: 0,
+  PARAM_ERROR: 1,
+  AI_CALL_FAILED: 2,
+  PARSE_FAILED: 3,
+  TIMEOUT: 4,
 };
 
 // ==================== Prompt 构建 ====================
 
-/**
- * 构建系统提示词（基于 prompts/recipe-generation.md Prompt 1）
- * @returns {string} 系统提示词
- */
 const buildSystemPrompt = () => {
   return `你是一位专业的中餐厨师助手，名叫"小厨AI"。你的任务是根据用户提供的食材，快速生成一道美味可口的家常菜食谱。
 
@@ -64,24 +70,15 @@ const buildSystemPrompt = () => {
 }
 3. 根据用户指定的烹饪时间和难度生成合适的食谱
 4. 食谱必须使用用户提供的主要食材，可以补充常见调料
-5. 步骤简洁清晰，适合家庭烹饪`;
+5. 步骤简洁清晰，适合家庭烹饪
+6. 仅输出一个可被 JSON.parse 直接解析的 JSON 对象，不要输出任何解释、前缀、后缀或 Markdown 代码块`;
 };
 
-/**
- * 构建用户提示词
- * @param {string[]} ingredients - 食材列表
- * @param {number} cookTime - 烹饪时间（分钟）
- * @param {string} difficulty - 难度等级（easy/medium/hard）
- * @param {string} extraRequirements - 附加要求
- * @returns {string} 用户提示词
- */
 const buildUserPrompt = (ingredients, cookTime, difficulty, extraRequirements) => {
-  // 食材数组转为中文顿号分隔
   const ingredientsStr = Array.isArray(ingredients)
     ? ingredients.join('、')
     : String(ingredients);
 
-  // 难度英文映射为中文
   const difficultyMap = {
     easy: '简单', medium: '中等', hard: '困难',
     简单: '简单', 中等: '中等', 困难: '困难',
@@ -95,30 +92,22 @@ const buildUserPrompt = (ingredients, cookTime, difficulty, extraRequirements) =
 - 难度要求：${difficultyText}
 - 其他要求：${extraRequirements || '无'}
 
-请直接输出 JSON 格式的食谱，不要有任何其他文字说明。`;
+请仅输出一个可被 JSON.parse 直接解析的 JSON 对象，不要输出任何解释、前缀、后缀或 Markdown 代码块。`;
 };
 
 // ==================== 参数校验 ====================
 
-/**
- * 校验云函数入参
- * @param {Object} event - 云函数事件对象
- * @returns {{ valid: boolean, errorMsg: string }}
- */
 const validateParams = (event) => {
   const { ingredients, cookTime, difficulty } = event;
 
-  // 食材不能为空
   if (!ingredients || (Array.isArray(ingredients) && ingredients.length === 0)) {
     return { valid: false, errorMsg: '食材列表不能为空' };
   }
 
-  // 最多20种食材（防止 Prompt 过长消耗过多 Token）
   if (Array.isArray(ingredients) && ingredients.length > 20) {
     return { valid: false, errorMsg: '食材数量不能超过20种' };
   }
 
-  // 烹饪时间范围校验
   if (cookTime !== undefined) {
     const time = Number(cookTime);
     if (isNaN(time) || time <= 0 || time > 300) {
@@ -126,7 +115,6 @@ const validateParams = (event) => {
     }
   }
 
-  // 难度值校验
   const validDifficulties = ['easy', 'medium', 'hard', '简单', '中等', '困难'];
   if (difficulty && !validDifficulties.includes(difficulty)) {
     return { valid: false, errorMsg: `难度参数无效，支持：${validDifficulties.join(', ')}` };
@@ -137,23 +125,13 @@ const validateParams = (event) => {
 
 // ==================== JSON 解析（三层兜底）====================
 
-/**
- * 解析 AI 返回的食谱 JSON，支持三层兜底
- * ① 直接 JSON.parse
- * ② 提取 Markdown 代码块中的 JSON
- * ③ 提取首个 { 到末尾 } 之间的内容
- * @param {string} rawText - AI 返回的原始文本
- * @returns {Object} 解析后的食谱对象
- */
 const parseRecipeJSON = (rawText) => {
-  // 第①层：直接解析
   try {
     return validateRecipeStructure(JSON.parse(rawText.trim()));
   } catch (e) {
     console.warn('[recipe-generate] 直接JSON解析失败，尝试提取JSON块');
   }
 
-  // 第②层：从 Markdown 代码块提取
   const jsonMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
   if (jsonMatch && jsonMatch[1]) {
     try {
@@ -163,7 +141,6 @@ const parseRecipeJSON = (rawText) => {
     }
   }
 
-  // 第③层：找第一个 { 到最后一个 }
   const firstBrace = rawText.indexOf('{');
   const lastBrace = rawText.lastIndexOf('}');
   if (firstBrace !== -1 && lastBrace > firstBrace) {
@@ -179,11 +156,6 @@ const parseRecipeJSON = (rawText) => {
   });
 };
 
-/**
- * 校验并补全食谱数据结构中的缺失字段
- * @param {Object} recipe - 原始食谱对象
- * @returns {Object} 补全后的食谱对象
- */
 const validateRecipeStructure = (recipe) => {
   if (!recipe || typeof recipe !== 'object') {
     throw new Error('食谱数据格式错误');
@@ -208,32 +180,17 @@ const validateRecipeStructure = (recipe) => {
 
 // ==================== 核心：调用云开发原生 AI ====================
 
-/**
- * 使用云开发原生 AI 接口调用混元大模型生成食谱
- *
- * 关键说明：
- * - 使用 cloud.ai.createModel("hunyuan") 无需任何 API Key
- * - Token 消耗自动计入当前云开发环境绑定的资源包
- * - 使用 streamText 流式接收，最终拼接完整文本
- *
- * @param {string[]} ingredients - 食材列表
- * @param {number} cookTime - 烹饪时间（分钟）
- * @param {string} difficulty - 难度
- * @param {string} extraRequirements - 附加要求
- * @returns {Promise<{recipe: Object, rawText: string, tokensUsed: number}>}
- */
 const callCloudAI = async (ingredients, cookTime, difficulty, extraRequirements) => {
-  // ✅ 使用云开发原生 AI，无需 API Key
-  // 资源包自动关联：cloud.DYNAMIC_CURRENT_ENV 对应的环境绑定了 Token 资源包
-  const model = cloud.ai.createModel('hunyuan');
+  // 如果你的当前 wx-server-sdk 运行时支持 cloud.ai，可继续使用
+  // 关键是 provider 应改为 hunyuan-exp
+  const model = cloud.ai.createModel(AI_PROVIDER);
 
   console.log('[recipe-generate] 使用云开发原生AI，食材：', ingredients.join('、'));
   const startTime = Date.now();
 
-  // 调用流式文本生成
-  const res = await model.streamText({
-    data: {
-      model: 'hunyuan-lite',  // 使用 lite 版本节省 Token
+  const requestPromise = (async () => {
+    const res = await model.streamText({
+      model: HUNYUAN_MODEL,
       messages: [
         {
           role: 'system',
@@ -244,55 +201,60 @@ const callCloudAI = async (ingredients, cookTime, difficulty, extraRequirements)
           content: buildUserPrompt(ingredients, cookTime, difficulty, extraRequirements),
         },
       ],
-      temperature: 0.7,    // 保持适度创意
-      max_tokens: 1024,    // 食谱内容控制在 1024 tokens 内
-    },
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    let rawText = '';
+
+    // 服务端 SDK 按官方文档直接读 textStream
+    for await (const chunk of res.textStream) {
+      rawText += chunk;
+    }
+
+    const elapsed = Date.now() - startTime;
+    console.log(`[recipe-generate] AI调用完成，耗时：${elapsed}ms，文本长度：${rawText.length}`);
+
+    if (!rawText || rawText.trim().length === 0) {
+      throw Object.assign(new Error('AI返回内容为空'), {
+        code: ERROR_CODES.AI_CALL_FAILED,
+      });
+    }
+
+    const recipe = parseRecipeJSON(rawText);
+
+    // 优先使用 SDK 提供的真实 usage
+    let tokensUsed = 0;
+    try {
+      const usage = await res.usage;
+      if (usage && typeof usage.total_tokens === 'number') {
+        tokensUsed = usage.total_tokens;
+      } else {
+        tokensUsed = Math.ceil(rawText.length / 1.5) + 60;
+      }
+    } catch (e) {
+      tokensUsed = Math.ceil(rawText.length / 1.5) + 60;
+    }
+
+    return { recipe, rawText, tokensUsed };
+  })();
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(Object.assign(new Error('AI调用超时，请稍后重试'), {
+        code: ERROR_CODES.TIMEOUT,
+      }));
+    }, CALL_TIMEOUT);
   });
 
-  // 拼接流式返回的文本片段
-  let rawText = '';
-  for await (const chunk of res.textStream) {
-    rawText += chunk;
-  }
-
-  const elapsed = Date.now() - startTime;
-  console.log(`[recipe-generate] AI调用完成，耗时：${elapsed}ms，文本长度：${rawText.length}`);
-
-  if (!rawText || rawText.trim().length === 0) {
-    throw Object.assign(new Error('AI返回内容为空'), {
-      code: ERROR_CODES.AI_CALL_FAILED,
-    });
-  }
-
-  // 解析食谱 JSON
-  const recipe = parseRecipeJSON(rawText);
-
-  // 估算 Token 消耗（云开发 AI 不直接返回 usage，按输出字符粗估）
-  // 中文约 1.5 字符/token，英文约 4 字符/token，这里保守估算
-  const tokensUsed = Math.ceil(rawText.length / 1.5) + 60; // 加60为 Prompt 固定消耗
-
-  return { recipe, rawText, tokensUsed };
+  return Promise.race([requestPromise, timeoutPromise]);
 };
 
 // ==================== 云函数主入口 ====================
 
-/**
- * 云函数主入口
- *
- * 入参（event）：
- *   - ingredients  {string[]}  食材列表（必填）
- *   - cookTime     {number}    烹饪时间分钟（选填，默认30）
- *   - difficulty   {string}    难度 easy/medium/hard（选填，默认easy）
- *   - extraRequirements {string} 附加要求（选填）
- *
- * 返回：
- *   { code: 0, message: 'success', data: { recipe, rawText, tokensUsed } }
- *   { code: 非0, message: '错误描述', data: null }
- */
 exports.main = async (event, context) => {
   console.log('[recipe-generate] 收到请求：', JSON.stringify(event));
 
-  // ---- 参数校验 ----
   const validation = validateParams(event);
   if (!validation.valid) {
     console.warn('[recipe-generate] 参数校验失败：', validation.errorMsg);
@@ -303,7 +265,6 @@ exports.main = async (event, context) => {
     };
   }
 
-  // 提取参数并设置默认值
   const {
     ingredients,
     cookTime = 30,
@@ -312,7 +273,6 @@ exports.main = async (event, context) => {
   } = event;
 
   try {
-    // ---- 调用云开发原生 AI ----
     const { recipe, rawText, tokensUsed } = await callCloudAI(
       ingredients,
       Number(cookTime),
@@ -320,7 +280,7 @@ exports.main = async (event, context) => {
       extraRequirements
     );
 
-    console.log('[recipe-generate] 食谱生成成功：', recipe.name, '，估算Token：', tokensUsed);
+    console.log('[recipe-generate] 食谱生成成功：', recipe.name, '，Token：', tokensUsed);
 
     return {
       code: ERROR_CODES.SUCCESS,
@@ -331,7 +291,6 @@ exports.main = async (event, context) => {
         tokensUsed,
       },
     };
-
   } catch (err) {
     const errorCode = err.code || ERROR_CODES.AI_CALL_FAILED;
     const errorMsg = err.message || 'AI食谱生成失败，请稍后重试';
@@ -348,7 +307,6 @@ exports.main = async (event, context) => {
 
 // ==================== 测试环境导出 ====================
 
-// 仅测试环境暴露内部函数（供 Jest 单元测试使用）
 if (process.env.NODE_ENV === 'test') {
   module.exports._testExports = {
     validateParams,
