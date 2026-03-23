@@ -7,7 +7,7 @@
  * 调用链：wx.cloud.extend.AI → 云开发 AI 服务 → 混元大模型
  *
  * 支持两种调用方案：
- * 1. 【推荐】前端直调：wx.cloud.extend.AI.model.invoke()  — 延迟低，无云函数费用
+ * 1. 【推荐】前端直调：wx.cloud.extend.AI.createModel().streamText() — 延迟低，无云函数费用
  * 2. 【备用】云函数中转：wx.cloud.callFunction('recipe-generate') — 安全性更高
  */
 
@@ -27,8 +27,11 @@ const RETRY_CONFIG = {
   retryDelay: 1000, // 重试间隔（毫秒）
 };
 
-// 混元模型名称（lite 版本节省 Token）
-const HUNYUAN_MODEL = 'hunyuan-lite';
+// 云开发 AI 提供方标识
+const AI_PROVIDER = 'hunyuan-exp';
+
+// 实际调用的混元模型名称
+const HUNYUAN_MODEL = 'hunyuan-turbos-latest';
 
 // ==================== Prompt 构建 ====================
 
@@ -181,82 +184,108 @@ const validateRecipeStructure = (recipe) => {
  * @param {string} extraRequirements - 附加要求
  * @returns {Promise<{recipe: Object, rawText: string, tokensUsed: number}>}
  */
-const callCloudAIFrontend = (ingredients, cookTime, difficulty, extraRequirements) => {
-  return new Promise((resolve, reject) => {
-    // 超时保护
-    const timer = setTimeout(() => {
-      reject(new Error('AI 响应超时，请检查网络后重试'));
+const callCloudAIFrontend = async (ingredients, cookTime, difficulty, extraRequirements) => {
+  console.log('[ai-service] 使用 wx.cloud.extend.AI 新版接口直调，食材：', ingredients.join('、'));
+  const startTime = Date.now();
+
+  // 检查新版 API 是否可用
+  if (
+    typeof wx === 'undefined' ||
+    !wx.cloud ||
+    !wx.cloud.extend ||
+    !wx.cloud.extend.AI ||
+    !wx.cloud.extend.AI.createModel
+  ) {
+    throw new Error('wx.cloud.extend.AI 不可用，请确认：①基础库≥3.7.1 ②已在云开发控制台开启AI功能');
+  }
+
+  let rawText = '';
+  let settled = false;
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error('AI 响应超时，请检查网络后重试'));
+      }
     }, CALL_TIMEOUT);
+  });
 
-    console.log('[ai-service] 使用 wx.cloud.extend.AI 直调，食材：', ingredients.join('、'));
-    const startTime = Date.now();
-
-    // 拼接流式输出文本
-    let rawText = '';
-
-    // 检查 wx.cloud.extend.AI 是否可用（需基础库 >= 3.7.1）
-    if (typeof wx === 'undefined' || !wx.cloud || !wx.cloud.extend || !wx.cloud.extend.AI) {
-      clearTimeout(timer);
-      // 降级到测试/Node.js 环境的模拟响应
-      reject(new Error('wx.cloud.extend.AI 不可用，请确认：①基础库≥3.7.1 ②已在云开发控制台开启AI功能'));
-      return;
-    }
-
+  const requestPromise = (async () => {
     try {
-      // 调用云开发 AI 流式接口
-      wx.cloud.extend.AI.model.invoke({
-        model: HUNYUAN_MODEL,
-        messages: [
-          {
-            role: 'system',
-            content: buildSystemPrompt(),
-          },
-          {
-            role: 'user',
-            content: buildUserPrompt(ingredients, cookTime, difficulty, extraRequirements),
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 1024,
-        // 流式回调：每次收到文本片段时触发
-        onMessage(chunk) {
-          if (chunk && chunk.text) {
-            rawText += chunk.text;
-          }
-        },
-        // 完成回调
-        success() {
-          clearTimeout(timer);
-          const elapsed = Date.now() - startTime;
-          console.log(`[ai-service] AI调用完成，耗时：${elapsed}ms，文本长度：${rawText.length}`);
+      // 新版：先创建模型实例
+      const model = wx.cloud.extend.AI.createModel(AI_PROVIDER);
 
-          if (!rawText || rawText.trim().length === 0) {
-            reject(new Error('AI返回内容为空，请重试'));
-            return;
-          }
-
-          try {
-            const recipe = parseRecipeJSON(rawText);
-            // 按输出字符估算 Token（中文约1.5字符/token）
-            const tokensUsed = Math.ceil(rawText.length / 1.5) + 60;
-            resolve({ recipe, rawText, tokensUsed });
-          } catch (parseErr) {
-            reject(parseErr);
-          }
-        },
-        // 失败回调
-        fail(err) {
-          clearTimeout(timer);
-          console.error('[ai-service] wx.cloud.extend.AI 调用失败：', err);
-          const errMsg = (err && (err.errMsg || err.message || err.msg)) || '未知错误';
-          reject(new Error(`AI调用失败：${errMsg}`));
+      // 新版：通过 streamText 发起流式调用
+      const res = await model.streamText({
+        data: {
+          model: HUNYUAN_MODEL,
+          messages: [
+            {
+              role: 'system',
+              content: buildSystemPrompt(),
+            },
+            {
+              role: 'user',
+              content: buildUserPrompt(ingredients, cookTime, difficulty, extraRequirements),
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 1024,
         },
       });
-    } catch (syncErr) {
-      clearTimeout(timer);
-      reject(syncErr);
+
+      // 读取完整事件流，兼容 reasoning_content / content
+      for await (const event of res.eventStream) {
+        if (!event || !event.data) continue;
+
+        if (event.data === '[DONE]') {
+          break;
+        }
+
+        try {
+          const data = JSON.parse(event.data);
+
+          // 推理内容（某些模型才会返回，这里可忽略，仅兼容）
+          const think = data?.choices?.[0]?.delta?.reasoning_content;
+          if (think) {
+            // 如需调试可开启：
+            // console.log('[ai-service][reasoning]', think);
+          }
+
+          // 正常文本内容
+          const text = data?.choices?.[0]?.delta?.content;
+          if (text) {
+            rawText += text;
+          }
+        } catch (parseEventErr) {
+          // 有些 SSE 事件不一定是标准 JSON，忽略即可
+          console.warn('[ai-service] SSE 事件解析失败，已跳过');
+        }
+      }
+
+      const elapsed = Date.now() - startTime;
+      console.log(`[ai-service] AI调用完成，耗时：${elapsed}ms，文本长度：${rawText.length}`);
+
+      if (!rawText || rawText.trim().length === 0) {
+        throw new Error('AI返回内容为空，请重试');
+      }
+
+      const recipe = parseRecipeJSON(rawText);
+
+      // 流式接口通常不直接返回 usage，这里保留估算逻辑
+      const tokensUsed = Math.ceil(rawText.length / 1.5) + 60;
+
+      settled = true;
+      return { recipe, rawText, tokensUsed };
+    } catch (err) {
+      console.error('[ai-service] wx.cloud.extend.AI 调用失败：', err);
+      const errMsg = (err && (err.errMsg || err.message || err.msg)) || '未知错误';
+      throw new Error(`AI调用失败：${errMsg}`);
     }
-  });
+  })();
+
+  return Promise.race([requestPromise, timeoutPromise]);
 };
 
 // ==================== 方案B：云函数中转 ====================
@@ -307,7 +336,6 @@ const callCloudFunctionFallback = (ingredients, cookTime, difficulty, extraRequi
         console.error('[ai-service] 云函数调用失败：', err);
         const errMsg = (err && err.errMsg) || '云函数调用失败';
 
-        // 友好化错误信息
         let friendlyMsg = errMsg;
         if (errMsg.includes('not found') || errMsg.includes('functionName')) {
           friendlyMsg = '云函数未部署：请在微信开发者工具右键 cloudfunctions/recipe-generate → 上传并部署';
@@ -335,7 +363,6 @@ const callCloudFunctionFallback = (ingredients, cookTime, difficulty, extraRequi
 const callAIWithFallback = async (ingredients, cookTime, difficulty, extraRequirements) => {
   let lastError;
 
-  // 首先尝试前端直调
   for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
     try {
       if (attempt > 0) {
@@ -343,12 +370,16 @@ const callAIWithFallback = async (ingredients, cookTime, difficulty, extraRequir
         await new Promise(r => setTimeout(r, RETRY_CONFIG.retryDelay * attempt));
       }
 
-      // 检查 wx.cloud.extend.AI 是否可用
-      if (typeof wx !== 'undefined' && wx.cloud && wx.cloud.extend && wx.cloud.extend.AI) {
+      if (
+        typeof wx !== 'undefined' &&
+        wx.cloud &&
+        wx.cloud.extend &&
+        wx.cloud.extend.AI &&
+        wx.cloud.extend.AI.createModel
+      ) {
         console.log('[ai-service] 使用前端直调方案（wx.cloud.extend.AI）');
         return await callCloudAIFrontend(ingredients, cookTime, difficulty, extraRequirements);
       } else {
-        // Node.js 测试环境或旧基础库：直接走云函数
         console.log('[ai-service] wx.cloud.extend.AI 不可用，使用云函数中转');
         return await callCloudFunctionFallback(ingredients, cookTime, difficulty, extraRequirements);
       }
@@ -356,7 +387,6 @@ const callAIWithFallback = async (ingredients, cookTime, difficulty, extraRequir
       lastError = err;
       console.warn(`[ai-service] 第 ${attempt + 1} 次调用失败：`, err.message);
 
-      // 如果是 wx.cloud.extend.AI 不可用，直接降级到云函数（不重试）
       if (err.message && err.message.includes('wx.cloud.extend.AI 不可用')) {
         try {
           return await callCloudFunctionFallback(ingredients, cookTime, difficulty, extraRequirements);
@@ -383,13 +413,6 @@ const callAIWithFallback = async (ingredients, cookTime, difficulty, extraRequir
  * @param {string} [params.extraRequirements=''] - 附加要求
  * @param {boolean} [params.useCache=true] - 是否使用本地缓存，默认true
  * @returns {Promise<Object>} 食谱数据
- *
- * @example
- * const result = await quickRecipe({
- *   ingredients: ['鸡蛋', '西红柿'],
- *   cookTime: 20,
- *   difficulty: 'easy'
- * });
  */
 const quickRecipe = async (params) => {
   const {
@@ -400,12 +423,10 @@ const quickRecipe = async (params) => {
     useCache = true,
   } = params;
 
-  // ---- 前置参数验证 ----
   if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
     throw new Error('食材列表不能为空');
   }
 
-  // 过滤空字符串食材
   const cleanIngredients = ingredients
     .map(item => String(item).trim())
     .filter(item => item.length > 0);
@@ -416,7 +437,6 @@ const quickRecipe = async (params) => {
 
   console.log(`[ai-service] quickRecipe 调用，食材：${cleanIngredients.join('、')}，时间：${cookTime}min，难度：${difficulty}`);
 
-  // ---- 查询本地缓存 ----
   if (useCache) {
     const cachedData = cache.getRecipeCache(cleanIngredients, cookTime, difficulty);
     if (cachedData) {
@@ -428,7 +448,6 @@ const quickRecipe = async (params) => {
     }
   }
 
-  // ---- 调用 AI（自动选择方案）----
   let aiResult;
   try {
     aiResult = await callAIWithFallback(
@@ -445,7 +464,6 @@ const quickRecipe = async (params) => {
     throw new Error('AI 返回数据异常，请重试');
   }
 
-  // ---- 构建结果并写入缓存 ----
   const resultData = {
     recipe: aiResult.recipe,
     rawText: aiResult.rawText || '',
@@ -454,7 +472,6 @@ const quickRecipe = async (params) => {
     generatedAt: Date.now(),
   };
 
-  // 写入本地缓存（2小时有效期）
   if (useCache) {
     cache.setRecipeCache(cleanIngredients, cookTime, difficulty, resultData);
   }
@@ -466,24 +483,15 @@ const quickRecipe = async (params) => {
 
 // ==================== 缓存管理 ====================
 
-/**
- * 清除指定条件的食谱缓存
- */
 const clearRecipeCache = (ingredients, cookTime, difficulty) => {
   const key = cache.buildRecipeCacheKey(ingredients, cookTime, difficulty);
   return cache.deleteCache(key);
 };
 
-/**
- * 清除所有食谱缓存
- */
 const clearAllRecipeCache = () => {
   return cache.clearAllCache();
 };
 
-/**
- * 获取 AI 服务缓存统计
- */
 const getCacheStats = () => {
   return cache.getCacheStats();
 };
@@ -491,15 +499,10 @@ const getCacheStats = () => {
 // ==================== 模块导出 ====================
 
 module.exports = {
-  // 核心 AI 功能
   quickRecipe,
-
-  // 缓存管理
   clearRecipeCache,
   clearAllRecipeCache,
   getCacheStats,
-
-  // 内部工具（暴露给高级用法和测试）
   parseRecipeJSON,
   validateRecipeStructure,
   buildSystemPrompt,
