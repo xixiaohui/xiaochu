@@ -801,3 +801,10 @@
   color: #FF6B35 !important;
   border: 2rpx solid #FF6B35 !important;
 }
+
+.hero-emoji {
+  width: 96rpx;
+  height: 96rpx;
+  display: block;
+  margin: 0 auto 20rpx;
+}

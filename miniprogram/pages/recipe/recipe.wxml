@@ -5,7 +5,7 @@
 
   <!-- ========== 顶部标题栏 ========== -->
   <view class="hero-section">
-    <view class="hero-emoji">🍳</view>
+    <image class="hero-emoji" src="/images/icon3.png" mode="aspectFit" ></image>
     <view class="hero-title">小厨AI</view>
     <view class="hero-subtitle">告诉我你有什么食材，我来帮你变出一道好菜</view>
   </view>

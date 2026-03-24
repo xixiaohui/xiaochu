@@ -88,6 +88,12 @@ Page({
   onLoad(options) {
     console.log('[recipe] 页面加载，参数：', options);
 
+    // 开启右上角分享菜单：发送给朋友 + 分享到朋友圈
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    });
+
     // 清理过期缓存（每次进入页面时执行）
     const clearedCount = cache.clearExpiredCache();
     if (clearedCount > 0) {
@@ -118,10 +124,14 @@ Page({
    */
   onShareAppMessage() {
     const recipe = this.data.recipe;
+    const path = this.data.ingredients.length
+      ? `/pages/recipe/recipe?ingredients=${encodeURIComponent(this.data.ingredients.join(','))}`
+      : '/pages/recipe/recipe';
+
     if (recipe) {
       return {
         title: `我用AI生成了一道"${recipe.name}"，快来试试！`,
-        path: '/pages/recipe/recipe',
+        path,
       };
     }
     return {
@@ -404,7 +414,25 @@ Page({
     // 触发系统分享菜单
     wx.showShareMenu({
       withShareTicket: true,
-      menus: ['shareAppMessage'],
+      menus: ['shareAppMessage', 'shareTimeline'],
+    });
+    wx.showActionSheet({
+      itemList: ['发送给朋友', '分享到朋友圈'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          wx.showModal({
+            title: '发送给朋友',
+            content: '请点击右上角“...”后，选择“发送给朋友”',
+            showCancel: false,
+          });
+        } else if (res.tapIndex === 1) {
+          wx.showModal({
+            title: '分享到朋友圈',
+            content: '请点击右上角“...”后，选择“分享到朋友圈”',
+            showCancel: false,
+          });
+        }
+      },
     });
   },
 
@@ -439,5 +467,30 @@ Page({
       errorMsg: '',
     });
   },
+
+  /**
+ * 页面分享到朋友圈配置
+ */
+onShareTimeline() {
+  const recipe = this.data.recipe;
+  const ingredientsQuery = this.data.ingredients.length
+    ? `ingredients=${encodeURIComponent(this.data.ingredients.join(','))}`
+    : '';
+
+  if (recipe) {
+    return {
+      title: `我用AI生成了一道「${recipe.name}」，快来看看！`,
+      query: ingredientsQuery,
+      // 如果后续 recipe 有封面图，可优先使用
+      imageUrl: recipe.imageUrl || '',
+    };
+  }
+
+  return {
+    title: '小厨AI - 用食材生成食谱',
+    query: ingredientsQuery,
+  };
+},
+
 
 });
