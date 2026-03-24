@@ -14,10 +14,10 @@
 
 ```javascript
 // ❌ 修改前（空的，云函数无法调用）
-env: "",
+env: "cloud1-6gsy5gsr3cdc8ba2",
 
 // ✅ 修改后（填入你的环境ID，格式如 prod-xxxxxx 或 dev-xxxxxx）
-env: "prod-xxxxxx",
+env: "cloud1-6gsy5gsr3cdc8ba2",
 ```
 
 **如何获取环境 ID**：
@@ -38,48 +38,74 @@ env: "prod-xxxxxx",
 
 ---
 
-### 第 3 步：在云开发控制台开启 AI 功能
 
-1. 打开 [云开发控制台](https://tcb.cloud.tencent.com/dev)
-2. 选择对应环境
-3. 左侧菜单 → **AI**
-4. 点击「开启 AI 功能」
-5. 确认资源包 `pkg-3l8hj0zy-ai-inspire-free` 已绑定到该环境
-
----
-
-### 第 4 步：（可选）上传云函数作为备用方案
-
-当 `wx.cloud.extend.AI` 不可用时，系统自动降级到云函数。
-
-1. 微信开发者工具左侧 → 展开 `cloudfunctions/`
-2. 右键 `recipe-generate` → 「上传并部署：云端安装依赖」
-3. 等待部署完成
-
-> **注意**：云函数内使用 `cloud.ai.createModel('hunyuan')`，同样无需 API Key。
-
----
 
 ## 架构说明
+腾讯文生模型
+```javascript
+const res = await wx.cloud.extend.AI.createModel(
+  "hunyuan-exp"
+).streamText({
+  data: {
+    model: "hunyuan-turbos-latest",
+    messages: [
+      {
+        role: "user",
+        content: "你好"
+      }
+    ]
+  }
+});
 
-```
-前端（小程序）
-    │
-    ├─ 优先：wx.cloud.extend.AI.model.invoke()
-    │        ↓
-    │    直接调用云开发 AI 服务（延迟低，无额外费用）
-    │        ↓
-    │    混元大模型（hunyuan-lite）
-    │        ↓
-    │    消耗：环境绑定的 Token 资源包
-    │
-    └─ 降级：wx.cloud.callFunction('recipe-generate')
-             ↓
-         云函数（cloud.ai.createModel）
-             ↓
-         混元大模型（hunyuan-lite）
+for await (let event of res.eventStream) {
+  if (event.data === "[DONE]") {
+    break;
+  }
+  const data = JSON.parse(event.data);
+
+  // 当使用 deepseek-r1 时，模型会生成思维链内容
+  const think = data?.choices?.[0]?.delta?.reasoning_content;
+  if (think) {
+    console.log(think);
+  }
+
+  // 打印生成文本内容
+  const text = data?.choices?.[0]?.delta?.content;
+  if (text) {
+    console.log(text);
+  }
+}
 ```
 
+生图模型
+```javascript
+// 调用生图云函数
+wx.cloud.callFunction({
+  name: "<YOUR_FUNCTION_NAME>",
+  data: {
+    prompt: "一只可爱的猫咪在阳光下玩耍"
+  },
+  success: res => {
+    const result = res.result;
+
+    if (result.success) {
+      // 生成成功
+      console.log("生成成功!");
+      console.log("图片URL:", result.imageUrl);
+      console.log("优化后的提示词:", result.revised_prompt);
+
+      // 使用图片
+      // 注意：图片URL有效期为24小时，请及时保存或转存
+    } else {
+      // 生成失败
+      console.error("生成失败:", result.code, result.message);
+    }
+  },
+  fail: err => {
+    console.error("调用失败:", err);
+  }
+});
+```
 ---
 
 ## Token 消耗估算
@@ -92,48 +118,16 @@ env: "prod-xxxxxx",
 
 免费资源包总量：**1亿 tokens**，预计可使用 **6个月**。
 
+
 ---
 
 ## 常见问题排查
 
-### Q: 提示"wx.cloud.extend.AI 不可用"
+- UI 配色风格保持一致，使用微信官方推荐最稳定的UI功能组件
 
-**原因**：基础库版本低于 3.7.1  
-**解决**：微信开发者工具 → 详情 → 本地设置 → 调试基础库 → 选 3.7.1+
-
----
-
-### Q: 提示"云开发 AI 功能未开启"
-
-**原因**：云开发控制台未开启 AI 功能  
-**解决**：[云开发控制台](https://tcb.cloud.tencent.com/dev) → AI → 开启 AI 功能
-
----
-
-### Q: 提示"云开发环境错误"
-
-**原因**：`miniprogram/app.js` 中 `env` 字段为空或填写错误  
-**解决**：填入正确的云开发环境ID（格式：`prod-XXXXXXXX`）
-
----
-
-### Q: 提示"云函数未部署"（降级方案时）
-
-**原因**：`recipe-generate` 云函数未上传  
-**解决**：右键 `cloudfunctions/recipe-generate` → 上传并部署
-
----
-
-### Q: 生成的食谱 JSON 解析失败
-
-**原因**：AI 偶发返回了非标准 JSON 格式  
-**解决**：系统内置三层 JSON 解析兜底，正常可自动恢复；如果反复失败，请重试几次
-
----
 
 ## 参考链接
 
-- [云开发 AI 文档](https://docs.cloudbase.net/ai/miniprogram-using)
-- [wx.cloud.extend.AI SDK 参考](https://docs.cloudbase.net/ai/sdk-reference/init)
-- [AI 小程序成长计划](https://docs.cloudbase.net/ai/ai-inspire-plan)
-- [云开发控制台](https://tcb.cloud.tencent.com/dev#/ai)
+- [云开发 AI 文档](https://developers.weixin.qq.com/miniprogram/dev/wxcloudservice/wxcloud/guide/init.html)
+- [AI 小程序成长计划 生文模型](https://tcb.cloud.tencent.com/dev?envId=cloud1-6gsy5gsr3cdc8ba2&source=mp.weixin.qq.com#/ai?tab=text-aiModel)
+-  [AI 小程序成长计划 生图模型](https://tcb.cloud.tencent.com/dev?envId=cloud1-6gsy5gsr3cdc8ba2&source=mp.weixin.qq.com#/ai?tab=image-aiModel)

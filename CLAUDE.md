@@ -12,6 +12,14 @@
 
 ```
 webapp/
+├── .github/                          # GitHub配置
+│   └── DEVELOPMENT_GUIDE.md         # 开发维护指南（记忆文件）
+├── docs/                            # 文档目录
+│   ├── ARCHITECTURE.md              # 架构设计文档
+│   ├── RECIPE_SCHEMA.md             # 菜谱数据结构定义
+│   └── DEVELOPMENT_LOG.md           # 开发日志和版本记录
+├── backend/                         # 后端服务
+│   ├── database/                   # 数据库设计
 ├── miniprogram/                  # 小程序前端代码
 │   ├── pages/
 │   │   ├── index/               # 首页
@@ -90,49 +98,45 @@ async function quickRecipe(ingredients, cookTime, difficulty) {}
 
 ---
 
-## 环境变量配置
-
-云函数中使用的环境变量（在微信云开发控制台配置）：
-
-| 变量名            | 用途               | 示例值                    |
-|-------------------|-------------------|--------------------------|
-| `HUNYUAN_API_KEY` | 腾讯混元 API 密钥  | `sk-xxxxxxxxxxxxxxxx`    |
-| `HUNYUAN_API_URL` | 混元 API 地址      | `https://api.hunyuan.cloud.tencent.com/v1` |
-
----
-
-## AI 接口规范
 
 ### 混元 API 调用格式
 
+参考这个文生模型
 ```javascript
-// 标准请求格式
-const requestBody = {
-  model: "hunyuan-lite",       // 模型选择：lite / pro / turbo
-  messages: [
-    { role: "system", content: "系统提示词" },
-    { role: "user", content: "用户输入" }
-  ],
-  temperature: 0.7,            // 0.0-1.0，食谱生成用 0.7
-  max_tokens: 1024,            // 最大 Token 数
-  stream: false                // 食谱功能不使用流式输出
-};
-```
-
-### 返回格式标准
-
-```javascript
-// 云函数统一返回
-{
-  code: 0,           // 0=成功, 1=参数错误, 2=AI调用失败, 3=解析失败
-  message: "success",
+const res = await wx.cloud.extend.AI.createModel(
+  "hunyuan-exp"
+).streamText({
   data: {
-    recipe: {},      // 解析后的食谱对象
-    rawText: "",     // AI 原始返回文本
-    tokensUsed: 0    // 本次调用消耗的 Token 数
+    model: "hunyuan-turbos-latest",
+    messages: [
+      {
+        role: "user",
+        content: "你好"
+      }
+    ]
+  }
+});
+
+for await (let event of res.eventStream) {
+  if (event.data === "[DONE]") {
+    break;
+  }
+  const data = JSON.parse(event.data);
+
+  // 当使用 deepseek-r1 时，模型会生成思维链内容
+  const think = data?.choices?.[0]?.delta?.reasoning_content;
+  if (think) {
+    console.log(think);
+  }
+
+  // 打印生成文本内容
+  const text = data?.choices?.[0]?.delta?.content;
+  if (text) {
+    console.log(text);
   }
 }
 ```
+
 
 ---
 
