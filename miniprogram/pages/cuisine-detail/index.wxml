@@ -1,0 +1,136 @@
+<!-- 菜系详情页面 - cuisine-detail/index.wxml -->
+
+<view class="detail-container" wx:if="{{cuisine}}">
+
+  <!-- ========== 菜系顶部 Hero ========== -->
+  <view class="cuisine-hero" style="background: linear-gradient(135deg, {{cuisine.color}}, {{cuisine.color}}CC);">
+    <view class="hero-decoration"></view>
+    <view class="hero-emoji-big">{{cuisine.emoji}}</view>
+    <view class="hero-name">{{cuisine.name}}</view>
+    <view class="hero-full-name">{{cuisine.fullName}}</view>
+    <view class="hero-long-desc">{{cuisine.longDesc}}</view>
+
+    <!-- 菜系特点标签 -->
+    <view class="hero-tags">
+      <view
+        class="hero-tag"
+        wx:for="{{cuisine.tags}}"
+        wx:key="index"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <!-- ========== 常用食材 ========== -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <text class="section-title">🥬 常用食材</text>
+    </view>
+    <view class="ingredient-chips">
+      <view
+        class="ingredient-chip"
+        wx:for="{{cuisine.quickIngredients}}"
+        wx:key="index"
+        style="border-color: {{cuisine.color}}40; color: {{cuisine.color}}; background: {{cuisine.lightColor}};"
+      >{{item}}</view>
+    </view>
+
+    <!-- 一键生成按钮 -->
+    <view
+      class="generate-btn"
+      style="background: {{cuisine.color}};"
+      bindtap="goToRecipeWithCuisine"
+    >
+      <text class="generate-btn-icon">✨</text>
+      <text class="generate-btn-text">AI生成{{cuisine.name}}菜谱</text>
+    </view>
+  </view>
+
+  <!-- ========== 代表菜列表 ========== -->
+  <view class="section-card">
+    <view class="section-title-row">
+      <text class="section-title">🍽️ 代表菜</text>
+      <text class="section-count">共 {{cuisine.representativeDishes.length}} 道</text>
+    </view>
+
+    <!-- 难度筛选 -->
+    <scroll-view class="difficulty-scroll" scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+      <view class="difficulty-tabs">
+        <view
+          class="difficulty-tab {{difficultyFilter === item.id ? 'difficulty-tab-active' : ''}}"
+          wx:for="{{difficultyOptions}}"
+          wx:key="id"
+          bindtap="onDifficultyFilter"
+          data-id="{{item.id}}"
+          style="{{difficultyFilter === item.id ? 'background:' + cuisine.color + '; border-color:' + cuisine.color + ';' : ''}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <!-- 菜品列表 -->
+    <view class="dish-list">
+      <view
+        class="dish-item"
+        wx:for="{{displayDishes}}"
+        wx:key="name"
+      >
+        <!-- 菜品摘要行 -->
+        <view
+          class="dish-summary"
+          bindtap="toggleDishExpand"
+          data-index="{{index}}"
+        >
+          <view class="dish-info">
+            <view class="dish-name-row">
+              <text class="dish-name">{{item.name}}</text>
+              <view class="dish-difficulty-badge {{item.difficulty === 'easy' ? 'badge-easy' : item.difficulty === 'medium' ? 'badge-medium' : 'badge-hard'}}">
+                {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+              </view>
+            </view>
+            <view class="dish-meta">
+              <text class="dish-time">⏱ {{item.cookTime}}分钟</text>
+              <text class="dish-desc">{{item.desc}}</text>
+            </view>
+          </view>
+          <view class="dish-expand-icon {{expandedDishIndex === index ? 'expanded' : ''}}">›</view>
+        </view>
+
+        <!-- 展开详情 -->
+        <view class="dish-detail" wx:if="{{expandedDishIndex === index}}">
+          <view class="dish-ingredients-title">🛒 食材</view>
+          <view class="dish-ingredients">
+            <view
+              class="dish-ingredient-chip"
+              wx:for="{{item.ingredients}}"
+              wx:for-item="ing"
+              wx:key="index"
+              style="border-color: {{cuisine.color}}40; color: {{cuisine.color}}; background: {{cuisine.lightColor}};"
+            >{{ing}}</view>
+          </view>
+
+          <view
+            class="dish-ai-btn"
+            style="background: {{cuisine.color}};"
+            bindtap="goToRecipeWithDish"
+            data-name="{{item.name}}"
+            data-ingredients="{{item.ingredients}}"
+          >
+            ✨ AI生成完整食谱
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空结果 -->
+    <view class="no-dish" wx:if="{{displayDishes.length === 0}}">
+      <text>暂无符合条件的菜品</text>
+    </view>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view style="height: 120rpx;"></view>
+</view>
+
+<!-- 加载中 -->
+<view class="loading-wrap" wx:if="{{!cuisine}}">
+  <view class="loading-text">加载中...</view>
+</view>

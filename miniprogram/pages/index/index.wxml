@@ -1,29 +1,160 @@
-<!--index.wxml-->
-<view class="container">
-  <view class="title">快速了解云开发</view>
-  <view class="top_tip">免鉴权接口调用 免部署后台 高并发</view>
-  <view class="power" wx:key="title" wx:for="{{powerList}}" wx:for-item="power">
-    <view class="power_info" data-index="{{index}}" data-type="{{ power.type }}" bindtap="onClickPowerInfo">
-      <view class="power_info_text">
-        <view class="power_info_text_title">
-          {{power.title}}
-          <view class="power_info_text_tag" wx:if="{{power.tag}}">{{power.tag}}</view>
-        </view>
-        <view class="power_info_text_tip">{{power.tip}}</view>
+<!-- 首页 - 小厨AI v2.0 -->
+<!-- 功能：轮播banner + 菜系导航 + 热门食材快速入口 + 今日推荐 -->
+
+<view class="home-container">
+
+  <!-- ========== 顶部标题区 ========== -->
+  <view class="home-header">
+    <view class="header-left">
+      <image class="header-logo" src="/images/icon3.png" mode="aspectFit"></image>
+      <view class="header-text">
+        <view class="header-title">小厨AI</view>
+        <view class="header-sub">v2.0 · 多菜系智能烹饪</view>
       </view>
-      <image wx:if="{{!power.showItem && power.item.length}}" class="power_info_more" src="../../images/arrow.svg"></image>
-      <image wx:if="{{power.showItem && power.item.length}}" class="power_info_less" src="../../images/arrow.svg"></image>
-      <image wx:if="{{!power.item.length}}" class="power_item_icon" src="../../images/arrow.svg"></image>
     </view>
-    <view wx:if="{{power.showItem}}">
-      <view wx:key="title" wx:for="{{power.item}}">
-        <view class="line"></view>
-        <view class="power_item" bindtap="jumpPage" data-type="{{ item.type }}" data-page="{{item.page}}">
-          <view class="power_item_title">{{item.title}}</view>
-          <image class="power_item_icon" src="../../images/arrow.svg"></image>
+  </view>
+
+  <!-- ========== 轮播 Banner ========== -->
+  <swiper
+    class="banner-swiper"
+    autoplay="{{true}}"
+    interval="3500"
+    circular="{{true}}"
+    indicator-dots="{{true}}"
+    indicator-color="rgba(255,255,255,0.5)"
+    indicator-active-color="#FFFFFF"
+    bindchange="onBannerChange"
+  >
+    <swiper-item
+      wx:for="{{bannerList}}"
+      wx:key="id"
+      bindtap="onBannerTap"
+      data-action="{{item.action}}"
+    >
+      <view class="banner-card" style="background: {{item.bgColor}};">
+        <view class="banner-emoji">{{item.emoji}}</view>
+        <view class="banner-content">
+          <view class="banner-title">{{item.title}}</view>
+          <view class="banner-subtitle">{{item.subtitle}}</view>
+        </view>
+        <view class="banner-arrow">›</view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- ========== 核心功能入口 ========== -->
+  <view class="func-grid">
+    <view class="func-item func-item-main" bindtap="goToRecipe">
+      <view class="func-icon-wrap func-icon-orange">
+        <text class="func-icon">✨</text>
+      </view>
+      <view class="func-info">
+        <view class="func-name">AI生成菜谱</view>
+        <view class="func-desc">输入食材，一键生成</view>
+      </view>
+      <view class="func-arrow">›</view>
+    </view>
+
+    <view class="func-item func-item-sub" bindtap="goToCuisineList">
+      <view class="func-icon-wrap func-icon-purple">
+        <text class="func-icon">🍜</text>
+      </view>
+      <view class="func-info">
+        <view class="func-name">菜系探索</view>
+        <view class="func-desc">八大菜系 · 百味中华</view>
+      </view>
+      <view class="func-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- ========== 热门食材快速入口 ========== -->
+  <view class="section-block">
+    <view class="section-title-row">
+      <text class="section-title">🔥 热门食材直达</text>
+      <text class="section-more" bindtap="goToRecipe">自定义 ›</text>
+    </view>
+    <view class="hot-ingredients-grid">
+      <view
+        class="hot-ing-item"
+        wx:for="{{hotIngredients}}"
+        wx:key="name"
+        bindtap="onHotIngredientTap"
+        data-ingredients="{{item.ingredients}}"
+      >
+        <text class="hot-ing-emoji">{{item.emoji}}</text>
+        <text class="hot-ing-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 菜系导航宫格 ========== -->
+  <view class="section-block">
+    <view class="section-title-row">
+      <text class="section-title">🗺️ 菜系导航</text>
+      <text class="section-more" bindtap="goToCuisineList">全部 ›</text>
+    </view>
+    <view class="cuisine-grid">
+      <view
+        class="cuisine-grid-item"
+        wx:for="{{cuisineList}}"
+        wx:key="id"
+        bindtap="goToCuisineDetail"
+        data-id="{{item.id}}"
+        style="background: {{item.lightColor}}; border-color: {{item.color}}20;"
+      >
+        <text class="cuisine-grid-emoji">{{item.emoji}}</text>
+        <text class="cuisine-grid-name" style="color: {{item.color}};">{{item.name}}</text>
+        <text class="cuisine-grid-desc">{{item.description}}</text>
+        <view class="cuisine-grid-tags">
+          <text
+            class="cuisine-grid-tag"
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+            style="color: {{item.color}}; border-color: {{item.color}}40; background: {{item.color}}15;"
+          >{{tag}}</text>
         </view>
       </view>
     </view>
   </view>
-  <cloud-tip-modal showTipProps="{{showTip}}" title="{{title}}" content="{{content}}"></cloud-tip-modal>
+
+  <!-- ========== 今日精选推荐 ========== -->
+  <view class="section-block">
+    <view class="section-title-row">
+      <text class="section-title">⭐ 今日精选菜系</text>
+      <text class="section-more" bindtap="refreshFeaturedCuisines">换一换</text>
+    </view>
+    <view class="featured-list">
+      <view
+        class="featured-item"
+        wx:for="{{featuredCuisines}}"
+        wx:key="id"
+        bindtap="goToCuisineDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="featured-left" style="background: {{item.color}};">
+          <text class="featured-emoji">{{item.emoji}}</text>
+        </view>
+        <view class="featured-info">
+          <view class="featured-name">{{item.name}}</view>
+          <view class="featured-desc">{{item.description}}</view>
+          <view class="featured-tags">
+            <text
+              class="featured-tag"
+              wx:for="{{item.tags}}"
+              wx:for-item="tag"
+              wx:key="index"
+            >{{tag}}</text>
+          </view>
+        </view>
+        <view class="featured-count">{{item.dishCount}}道菜 ›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部版本信息 -->
+  <view class="home-footer">
+    <text class="footer-text">小厨AI {{version}} · 由腾讯混元大模型驱动</text>
+  </view>
+
 </view>

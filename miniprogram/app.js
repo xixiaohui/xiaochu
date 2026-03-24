@@ -1,5 +1,5 @@
 /**
- * 小厨AI - 小程序入口文件
+ * 小厨AI - 小程序入口文件 v2.0
  * 初始化云开发环境，配置全局数据
  */
 
@@ -20,8 +20,13 @@ App({
       env: "cloud1-6gsy5gsr3cdc8ba2",
 
       // 小程序版本信息
-      version: "1.0.0",
+      version: "2.0.0",
       appName: "小厨AI",
+
+      // 2.0.0 新增：菜系模块相关全局数据
+      presetIngredients: null,   // 从菜系页/首页带入的预设食材
+      presetCuisine: null,       // 预设的菜系信息
+      presetDishName: null,      // 预设的菜名
     };
 
     // 初始化云开发

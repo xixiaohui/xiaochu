@@ -1,0 +1,104 @@
+<!-- 菜系列表页面 - cuisine/index.wxml -->
+
+<view class="cuisine-container">
+
+  <!-- ========== 顶部搜索栏 ========== -->
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索菜系..."
+        placeholder-class="search-placeholder"
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+      />
+      <text class="search-clear" wx:if="{{searchKeyword}}" bindtap="clearSearch">×</text>
+    </view>
+  </view>
+
+  <!-- ========== 筛选标签栏 ========== -->
+  <scroll-view class="filter-scroll" scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+    <view class="filter-tags">
+      <view
+        class="filter-tag {{filterTag === item.id ? 'filter-tag-active' : ''}}"
+        wx:for="{{filterTags}}"
+        wx:key="id"
+        bindtap="onFilterTap"
+        data-id="{{item.id}}"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- ========== 菜系数量提示 ========== -->
+  <view class="result-tip">
+    <text class="result-count">共 {{displayList.length}} 个菜系</text>
+  </view>
+
+  <!-- ========== 菜系列表 ========== -->
+  <view class="cuisine-list" wx:if="{{displayList.length > 0}}">
+    <view
+      class="cuisine-card"
+      wx:for="{{displayList}}"
+      wx:key="id"
+      bindtap="goToDetail"
+      data-id="{{item.id}}"
+    >
+      <!-- 菜系头部 -->
+      <view class="card-header" style="background: {{item.color}};">
+        <view class="card-emoji-wrap">
+          <text class="card-emoji">{{item.emoji}}</text>
+        </view>
+        <view class="card-header-info">
+          <view class="card-name">{{item.name}}</view>
+          <view class="card-sub-desc">{{item.description}}</view>
+        </view>
+        <view class="card-dish-count">{{item.dishCount}}道代表菜</view>
+      </view>
+
+      <!-- 菜系标签 -->
+      <view class="card-body">
+        <view class="card-tags">
+          <view
+            class="card-tag"
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+            style="color: {{item.color}}; background: {{item.lightColor}}; border-color: {{item.color}}30;"
+          >{{tag}}</view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="card-actions">
+          <view
+            class="card-btn card-btn-primary"
+            style="background: {{item.color}};"
+            bindtap="goToDetail"
+            data-id="{{item.id}}"
+            catchtap="goToDetail"
+          >
+            查看菜谱
+          </view>
+          <view
+            class="card-btn card-btn-secondary"
+            style="color: {{item.color}}; border-color: {{item.color}};"
+            bindtap="goToRecipeWithCuisine"
+            data-id="{{item.id}}"
+            data-name="{{item.name}}"
+            catchtap="goToRecipeWithCuisine"
+          >
+            AI生成
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空结果提示 -->
+  <view class="empty-result" wx:if="{{displayList.length === 0}}">
+    <text class="empty-emoji">🔍</text>
+    <text class="empty-text">没有找到相关菜系</text>
+    <text class="empty-sub">试试其他关键词</text>
+  </view>
+
+</view>

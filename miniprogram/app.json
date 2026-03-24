@@ -1,9 +1,37 @@
 {
   "pages": [
-    "pages/recipe/recipe",
     "pages/index/index",
+    "pages/recipe/recipe",
+    "pages/cuisine/index",
+    "pages/cuisine-detail/index",
     "pages/example/index"
   ],
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#FF6B35",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/icons/home.png",
+        "selectedIconPath": "images/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/recipe/recipe",
+        "text": "生成菜谱",
+        "iconPath": "images/icons/goods.png",
+        "selectedIconPath": "images/icons/goods-active.png"
+      },
+      {
+        "pagePath": "pages/cuisine/index",
+        "text": "菜系",
+        "iconPath": "images/icons/examples.png",
+        "selectedIconPath": "images/icons/examples-active.png"
+      }
+    ]
+  },
   "window": {
     "backgroundColor": "#FFF8F5",
     "backgroundTextStyle": "light",

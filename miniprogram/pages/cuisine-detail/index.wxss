@@ -1,0 +1,322 @@
+/* 菜系详情页样式 - cuisine-detail/index.wxss */
+
+page {
+  background-color: #F5F5F5;
+  padding-bottom: 0;
+}
+
+.detail-container {
+  min-height: 100vh;
+  background: #F5F5F5;
+  padding-bottom: 40rpx;
+}
+
+/* ==================== Hero 区域 ==================== */
+.cuisine-hero {
+  padding: 60rpx 36rpx 48rpx;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-decoration {
+  position: absolute;
+  top: -60rpx;
+  right: -60rpx;
+  width: 240rpx;
+  height: 240rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.hero-emoji-big {
+  font-size: 96rpx;
+  margin-bottom: 16rpx;
+}
+
+.hero-name {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 4rpx;
+  margin-bottom: 8rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.hero-full-name {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20rpx;
+}
+
+.hero-long-desc {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+  padding: 0 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  justify-content: center;
+}
+
+.hero-tag {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.2);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: 32rpx;
+  padding: 10rpx 24rpx;
+}
+
+/* ==================== 通用区块 ==================== */
+.section-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  margin: 20rpx 24rpx 0;
+  padding: 28rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2D2D;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: #AAAAAA;
+}
+
+/* ==================== 食材标签 ==================== */
+.ingredient-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.ingredient-chip {
+  font-size: 26rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  border: 2rpx solid;
+  font-weight: 500;
+}
+
+/* ==================== 一键生成按钮 ==================== */
+.generate-btn {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.15);
+}
+
+.generate-btn-icon {
+  font-size: 32rpx;
+}
+
+.generate-btn-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+/* ==================== 难度筛选 ==================== */
+.difficulty-scroll {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.difficulty-tabs {
+  display: flex;
+  gap: 12rpx;
+  padding-bottom: 4rpx;
+  white-space: nowrap;
+}
+
+.difficulty-tab {
+  display: inline-block;
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  color: #666666;
+  background: #F5F5F5;
+  border: 2rpx solid #E8E8E8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.difficulty-tab-active {
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+/* ==================== 菜品列表 ==================== */
+.dish-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dish-item {
+  border-bottom: 2rpx solid #F5F5F5;
+}
+
+.dish-item:last-child {
+  border-bottom: none;
+}
+
+.dish-summary {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 4rpx;
+  gap: 16rpx;
+}
+
+.dish-info {
+  flex: 1;
+}
+
+.dish-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.dish-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2D2D;
+}
+
+/* 难度徽章 */
+.dish-difficulty-badge {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+}
+
+.badge-easy {
+  background: #E8F5E9;
+  color: #388E3C;
+}
+
+.badge-medium {
+  background: #FFF8E1;
+  color: #F57F17;
+}
+
+.badge-hard {
+  background: #FCE4EC;
+  color: #C62828;
+}
+
+.dish-meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.dish-time {
+  font-size: 24rpx;
+  color: #999999;
+  flex-shrink: 0;
+}
+
+.dish-desc {
+  font-size: 24rpx;
+  color: #AAAAAA;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 展开箭头 */
+.dish-expand-icon {
+  font-size: 40rpx;
+  color: #CCCCCC;
+  font-weight: 300;
+  transition: transform 0.2s;
+  transform: rotate(0deg);
+  flex-shrink: 0;
+}
+
+.dish-expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
+/* 展开的详情 */
+.dish-detail {
+  padding: 16rpx 4rpx 24rpx;
+  border-top: 2rpx solid #F8F8F8;
+}
+
+.dish-ingredients-title {
+  font-size: 26rpx;
+  color: #888888;
+  margin-bottom: 14rpx;
+}
+
+.dish-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.dish-ingredient-chip {
+  font-size: 24rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 24rpx;
+  border: 2rpx solid;
+}
+
+/* AI生成按钮 */
+.dish-ai-btn {
+  display: block;
+  text-align: center;
+  padding: 16rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.no-dish {
+  text-align: center;
+  padding: 40rpx;
+  font-size: 28rpx;
+  color: #AAAAAA;
+}
+
+/* ==================== 加载中 ==================== */
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #AAAAAA;
+}

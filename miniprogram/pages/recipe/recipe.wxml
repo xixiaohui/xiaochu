@@ -1,163 +1,94 @@
-<!-- 食谱生成页面 - recipe.wxml -->
-<!-- 小厨AI核心功能页：输入食材 -> AI生成食谱 -> 展示结果 -->
-
+<!-- 食谱生成页面 v2.0 - recipe.wxml -->
 <view class="page-container">
-
-  <!-- ========== 顶部标题栏 ========== -->
   <view class="hero-section">
-    <image class="hero-emoji" src="/images/icon3.png" mode="aspectFit" ></image>
+    <image class="hero-emoji" src="/images/icon3.png" mode="aspectFit"></image>
     <view class="hero-title">小厨AI</view>
     <view class="hero-subtitle">告诉我你有什么食材，我来帮你变出一道好菜</view>
   </view>
 
-  <!-- ========== 食材输入区域 ========== -->
+  <view class="section-card">
+    <view class="section-header">
+      <text class="section-icon">🗺️</text>
+      <text class="section-title">菜系风格</text>
+      <text class="section-hint">可选，不选则自动匹配</text>
+    </view>
+    <scroll-view class="cuisine-scroll" scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+      <view class="cuisine-chips">
+        <view class="cuisine-chip {{selectedCuisine === null ? 'cuisine-chip-active' : ''}}" bindtap="selectCuisine" data-id="__none__">🍽️ 不限</view>
+        <view class="cuisine-chip {{selectedCuisine && selectedCuisine.id === item.id ? 'cuisine-chip-active' : ''}}" wx:for="{{cuisineList}}" wx:key="id" bindtap="selectCuisine" data-id="{{item.id}}" style="{{selectedCuisine && selectedCuisine.id === item.id ? 'background:' + item.color + '; border-color:' + item.color + '; color:#fff;' : 'border-color:' + item.color + '40; color:' + item.color + '; background:' + item.lightColor + ';'}}">{{item.emoji}} {{item.name}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
   <view class="section-card">
     <view class="section-header">
       <text class="section-icon">🥬</text>
       <text class="section-title">我有这些食材</text>
       <text class="section-hint">最多20种</text>
     </view>
-
-    <!-- 已添加的食材标签列表 -->
     <view class="ingredient-tags" wx:if="{{ingredients.length > 0}}">
-      <view
-        class="ingredient-tag"
-        wx:for="{{ingredients}}"
-        wx:key="index"
-        bindtap="removeIngredient"
-        data-index="{{index}}"
-      >
+      <view class="ingredient-tag" wx:for="{{ingredients}}" wx:key="index" bindtap="removeIngredient" data-index="{{index}}">
         <text class="tag-text">{{item}}</text>
         <text class="tag-remove">×</text>
       </view>
+      <view class="clear-all-btn" bindtap="clearAllIngredients"><text>清空</text></view>
     </view>
-
-    <!-- 空状态提示 -->
     <view class="ingredient-empty" wx:if="{{ingredients.length === 0}}">
       <text>点击下方输入框添加食材，例如：鸡蛋、西红柿...</text>
     </view>
-
-    <!-- 食材输入框 + 添加按钮 -->
     <view class="input-row">
-      <input
-        class="ingredient-input"
-        placeholder="输入食材名称，按回车添加"
-        placeholder-class="input-placeholder"
-        value="{{inputValue}}"
-        bindinput="onInputChange"
-        bindconfirm="addIngredient"
-        maxlength="20"
-        disabled="{{isLoading}}"
-      />
-      <button
-        class="add-btn"
-        bindtap="addIngredient"
-        disabled="{{isLoading || !inputValue}}"
-      >添加</button>
+      <input class="ingredient-input" placeholder="输入食材名称，按回车添加" placeholder-class="input-placeholder" value="{{inputValue}}" bindinput="onInputChange" bindconfirm="addIngredient" maxlength="20" disabled="{{isLoading}}"/>
+      <button class="add-btn" bindtap="addIngredient" disabled="{{isLoading || !inputValue}}">添加</button>
     </view>
-
-    <!-- 快速添加常用食材 -->
     <view class="quick-add-section">
       <text class="quick-add-title">快速添加：</text>
       <view class="quick-add-tags">
-        <view
-          class="quick-tag {{quickIngredients[index].selected ? 'quick-tag-selected' : ''}}"
-          wx:for="{{quickIngredients}}"
-          wx:key="name"
-          bindtap="toggleQuickIngredient"
-          data-index="{{index}}"
-          data-name="{{item.name}}"
-        >{{item.name}}</view>
+        <view class="quick-tag {{quickIngredients[index].selected ? 'quick-tag-selected' : ''}}" wx:for="{{quickIngredients}}" wx:key="name" bindtap="toggleQuickIngredient" data-index="{{index}}" data-name="{{item.name}}">{{item.name}}</view>
       </view>
     </view>
   </view>
 
-  <!-- ========== 烹饪参数选择 ========== -->
   <view class="section-card">
     <view class="section-header">
       <text class="section-icon">⚙️</text>
       <text class="section-title">烹饪偏好</text>
     </view>
-
-    <!-- 烹饪时间选择 -->
     <view class="param-row">
       <text class="param-label">⏱ 烹饪时间</text>
       <view class="param-options">
-        <view
-          class="param-option {{cookTime === item.value ? 'param-option-active' : ''}}"
-          wx:for="{{cookTimeOptions}}"
-          wx:key="value"
-          bindtap="setCookTime"
-          data-value="{{item.value}}"
-        >{{item.label}}</view>
+        <view class="param-option {{cookTime === item.value ? 'param-option-active' : ''}}" wx:for="{{cookTimeOptions}}" wx:key="value" bindtap="setCookTime" data-value="{{item.value}}">{{item.label}}</view>
       </view>
     </view>
-
-    <!-- 难度选择 -->
     <view class="param-row">
       <text class="param-label">📊 难度等级</text>
       <view class="param-options">
-        <view
-          class="param-option {{difficulty === item.value ? 'param-option-active' : ''}}"
-          wx:for="{{difficultyOptions}}"
-          wx:key="value"
-          bindtap="setDifficulty"
-          data-value="{{item.value}}"
-        >{{item.label}}</view>
+        <view class="param-option {{difficulty === item.value ? 'param-option-active' : ''}}" wx:for="{{difficultyOptions}}" wx:key="value" bindtap="setDifficulty" data-value="{{item.value}}">{{item.label}}</view>
       </view>
     </view>
-
-    <!-- 附加要求输入 -->
     <view class="extra-req-row">
       <text class="param-label">💬 特别要求（可选）</text>
-      <input
-        class="extra-req-input"
-        placeholder="如：不放辣椒、清淡口味、适合儿童..."
-        placeholder-class="input-placeholder"
-        value="{{extraRequirements}}"
-        bindinput="onExtraReqChange"
-        maxlength="50"
-        disabled="{{isLoading}}"
-      />
+      <input class="extra-req-input" placeholder="如：不放辣椒、清淡口味、适合儿童..." placeholder-class="input-placeholder" value="{{extraRequirements}}" bindinput="onExtraReqChange" maxlength="50" disabled="{{isLoading}}"/>
     </view>
   </view>
 
-  <!-- ========== 生成按钮区域 ========== -->
   <view class="generate-section">
-    <button
-      class="generate-btn {{isLoading ? 'generate-btn-loading' : ''}} {{ingredients.length === 0 ? 'generate-btn-disabled' : ''}}"
-      bindtap="generateRecipe"
-      disabled="{{isLoading || ingredients.length === 0}}"
-    >
-      <!-- 加载状态 -->
+    <button class="generate-btn {{isLoading ? 'generate-btn-loading' : ''}} {{ingredients.length === 0 ? 'generate-btn-disabled' : ''}}" bindtap="generateRecipe" disabled="{{isLoading || ingredients.length === 0}}">
       <view wx:if="{{isLoading}}" class="loading-content">
-        <view class="loading-dot-wrap">
-          <view class="loading-dot dot1"></view>
-          <view class="loading-dot dot2"></view>
-          <view class="loading-dot dot3"></view>
-        </view>
+        <view class="loading-dot-wrap"><view class="loading-dot dot1"></view><view class="loading-dot dot2"></view><view class="loading-dot dot3"></view></view>
         <text>AI 正在为你生成食谱...</text>
       </view>
-      <!-- 正常状态 -->
       <view wx:else class="btn-content">
         <text class="btn-icon">✨</text>
         <text>AI 生成食谱</text>
+        <text wx:if="{{selectedCuisine}}" class="btn-cuisine-hint"> · {{selectedCuisine.name}}风格</text>
       </view>
     </button>
-
-    <!-- 缓存命中提示 -->
-    <view class="cache-tip" wx:if="{{showCacheTip}}">
-      <text>💡 已使用缓存结果，节省了约 {{savedTokens}} tokens</text>
-    </view>
+    <view class="cache-tip" wx:if="{{showCacheTip}}"><text>💡 已使用缓存结果，节省了约 {{savedTokens}} tokens</text></view>
   </view>
 
-  <!-- ========== 错误提示 ========== -->
   <view class="error-section" wx:if="{{errorMsg}}">
     <view class="error-card">
-      <view class="error-header">
-        <text class="error-icon">⚠️</text>
-        <text class="error-title">生成失败</text>
-      </view>
+      <view class="error-header"><text class="error-icon">⚠️</text><text class="error-title">生成失败</text></view>
       <text class="error-text" user-select="true">{{errorMsg}}</text>
       <view class="error-actions">
         <button class="error-retry-btn" bindtap="generateRecipe">🔄 重试</button>
@@ -166,126 +97,91 @@
     </view>
   </view>
 
-  <!-- ========== 食谱结果展示区 ========== -->
   <view class="recipe-result" wx:if="{{recipe}}">
-
-    <!-- 食谱标题卡 -->
     <view class="recipe-hero-card">
       <view class="recipe-name">{{recipe.name}}</view>
       <view class="recipe-description">{{recipe.description}}</view>
-      <!-- 食谱基本信息标签 -->
       <view class="recipe-meta-row">
-        <view class="meta-badge">
-          <text class="meta-badge-icon">⏱</text>
-          <text class="meta-badge-text">{{recipe.cookTime}}分钟</text>
-        </view>
-        <view class="meta-badge">
-          <text class="meta-badge-icon">📊</text>
-          <text class="meta-badge-text">{{recipe.difficulty}}</text>
-        </view>
-        <view class="meta-badge">
-          <text class="meta-badge-icon">👥</text>
-          <text class="meta-badge-text">{{recipe.servings}}人份</text>
-        </view>
-        <view class="meta-badge">
-          <text class="meta-badge-icon">🔥</text>
-          <text class="meta-badge-text">{{recipe.nutrition.calories}}千卡</text>
-        </view>
+        <view class="meta-badge"><text class="meta-badge-icon">⏱</text><text class="meta-badge-text">{{recipe.cookTime}}分钟</text></view>
+        <view class="meta-badge"><text class="meta-badge-icon">📊</text><text class="meta-badge-text">{{recipe.difficulty}}</text></view>
+        <view class="meta-badge"><text class="meta-badge-icon">👥</text><text class="meta-badge-text">{{recipe.servings}}人份</text></view>
+        <view class="meta-badge"><text class="meta-badge-icon">🔥</text><text class="meta-badge-text">{{recipe.nutrition.calories}}千卡</text></view>
       </view>
-      <!-- 标签 -->
       <view class="recipe-tags-row" wx:if="{{recipe.tags && recipe.tags.length > 0}}">
         <view class="recipe-tag-item" wx:for="{{recipe.tags}}" wx:key="index">{{item}}</view>
       </view>
     </view>
 
-    <!-- 食材清单 -->
     <view class="section-card">
-      <view class="result-section-title">
-        <text>🛒 食材清单</text>
-        <text class="result-section-count">共 {{recipe.ingredients.length}} 种</text>
-      </view>
+      <view class="result-section-title"><text>🛒 食材清单</text><text class="result-section-count">共 {{recipe.ingredients.length}} 种</text></view>
       <view class="ingredient-list">
-        <view
-          class="ingredient-item {{index % 2 === 0 ? 'ingredient-item-even' : 'ingredient-item-odd'}}"
-          wx:for="{{recipe.ingredients}}"
-          wx:key="name"
-        >
+        <view class="ingredient-item {{index % 2 === 0 ? 'ingredient-item-even' : 'ingredient-item-odd'}}" wx:for="{{recipe.ingredients}}" wx:key="name">
           <text class="ingredient-name">{{item.name}}</text>
           <text class="ingredient-amount">{{item.amount}}{{item.unit}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 烹饪步骤 -->
     <view class="section-card">
-      <view class="result-section-title">
-        <text>👨‍🍳 烹饪步骤</text>
-        <text class="result-section-count">共 {{recipe.steps.length}} 步</text>
-      </view>
+      <view class="result-section-title"><text>👨‍🍳 烹饪步骤</text><text class="result-section-count">共 {{recipe.steps.length}} 步</text></view>
       <view class="steps-list">
         <view class="step-item" wx:for="{{recipe.steps}}" wx:key="step">
-          <!-- 步骤编号 -->
           <view class="step-number">{{item.step}}</view>
-          <!-- 步骤内容 -->
           <view class="step-content">
             <text class="step-description">{{item.description}}</text>
-            <!-- 小贴士（可选） -->
-            <view class="step-tip" wx:if="{{item.tip}}">
-              <text class="tip-icon">💡</text>
-              <text class="tip-text">{{item.tip}}</text>
-            </view>
+            <view class="step-tip" wx:if="{{item.tip}}"><text class="tip-icon">💡</text><text class="tip-text">{{item.tip}}</text></view>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 营养信息 -->
     <view class="section-card">
-      <view class="result-section-title">
-        <text>🥗 营养信息</text>
-        <text class="result-section-hint">每份参考值</text>
-      </view>
+      <view class="result-section-title"><text>🥗 营养信息</text><text class="result-section-hint">每份参考值</text></view>
       <view class="nutrition-grid">
-        <view class="nutrition-item">
-          <text class="nutrition-value">{{recipe.nutrition.calories}}</text>
-          <text class="nutrition-label">千卡</text>
-        </view>
+        <view class="nutrition-item"><text class="nutrition-value">{{recipe.nutrition.calories}}</text><text class="nutrition-label">千卡</text></view>
         <view class="nutrition-divider"></view>
-        <view class="nutrition-item">
-          <text class="nutrition-value">{{recipe.nutrition.protein}}g</text>
-          <text class="nutrition-label">蛋白质</text>
-        </view>
+        <view class="nutrition-item"><text class="nutrition-value">{{recipe.nutrition.protein}}g</text><text class="nutrition-label">蛋白质</text></view>
         <view class="nutrition-divider"></view>
-        <view class="nutrition-item">
-          <text class="nutrition-value">{{recipe.nutrition.carbs}}g</text>
-          <text class="nutrition-label">碳水</text>
-        </view>
+        <view class="nutrition-item"><text class="nutrition-value">{{recipe.nutrition.carbs}}g</text><text class="nutrition-label">碳水</text></view>
         <view class="nutrition-divider"></view>
-        <view class="nutrition-item">
-          <text class="nutrition-value">{{recipe.nutrition.fat}}g</text>
-          <text class="nutrition-label">脂肪</text>
-        </view>
+        <view class="nutrition-item"><text class="nutrition-value">{{recipe.nutrition.fat}}g</text><text class="nutrition-label">脂肪</text></view>
       </view>
     </view>
 
-    <!-- Token 消耗信息（开发调试用） -->
-    <view class="token-info" wx:if="{{tokenInfo.tokensUsed > 0}}">
-      <text class="token-text">本次消耗：{{tokenInfo.tokensUsed}} tokens</text>
-    </view>
+    <view class="token-info" wx:if="{{tokenInfo.tokensUsed > 0}}"><text class="token-text">本次消耗：{{tokenInfo.tokensUsed}} tokens</text></view>
 
-    <!-- 操作按钮组 -->
     <view class="action-buttons">
-      <button class="action-btn action-btn-secondary" bindtap="resetPage">
-        <text>🔄 重新生成</text>
-      </button>
-      <button class="action-btn action-btn-primary" bindtap="shareRecipe">
-        <text>📤 分享食谱</text>
-      </button>
+      <button class="action-btn action-btn-secondary" bindtap="resetPage"><text>🔄 重新生成</text></button>
+      <button class="action-btn action-btn-poster" bindtap="generatePoster"><text>📸 生成海报</text></button>
+      <button class="action-btn action-btn-primary" bindtap="shareRecipe"><text>📤 分享</text></button>
     </view>
-
   </view>
 
-  <!-- 底部占位 -->
   <view class="page-footer"></view>
-
 </view>
+
+<view class="poster-modal" wx:if="{{showPosterModal}}">
+  <view class="poster-overlay" bindtap="closePosterModal"></view>
+  <view class="poster-panel">
+    <view class="poster-header">
+      <view class="poster-title">📸 菜谱海报</view>
+      <view class="poster-close" bindtap="closePosterModal">×</view>
+    </view>
+    <view class="poster-generating" wx:if="{{posterGenerating}}">
+      <view class="poster-loading-wrap">
+        <view class="loading-dot-wrap"><view class="loading-dot dot1"></view><view class="loading-dot dot2"></view><view class="loading-dot dot3"></view></view>
+        <text class="poster-loading-text">海报生成中...</text>
+      </view>
+    </view>
+    <view class="poster-preview" wx:if="{{posterReady}}">
+      <view class="poster-tip">长按图片可保存到相册</view>
+      <image class="poster-image" src="{{posterImagePath}}" mode="widthFix" show-menu-by-longpress="{{true}}"></image>
+      <view class="poster-actions">
+        <button class="poster-btn poster-btn-save" bindtap="savePoster">💾 保存到相册</button>
+        <button class="poster-btn poster-btn-share" bindtap="sharePoster">📤 分享海报</button>
+      </view>
+    </view>
+  </view>
+</view>
+
+<canvas type="2d" id="posterCanvas" class="poster-canvas-offscreen"></canvas>
