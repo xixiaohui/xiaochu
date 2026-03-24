@@ -1,5 +1,5 @@
-<!-- 首页 - 小厨AI v2.0 -->
-<!-- 功能：轮播banner + 菜系导航 + 热门食材快速入口 + 今日推荐 -->
+<!-- 首页 - 小厨AI v3.0 -->
+<!-- 功能：轮播banner + 菜系导航 + 热门食材 + 减脂菜谱 + 孕妇营养餐 + 今日推荐 -->
 
 <view class="home-container">
 
@@ -9,7 +9,7 @@
       <image class="header-logo" src="/images/icon3.png" mode="aspectFit"></image>
       <view class="header-text">
         <view class="header-title">小厨AI</view>
-        <view class="header-sub">v2.0 · 多菜系智能烹饪</view>
+        <view class="header-sub">v3.0 · 多菜系智能烹饪</view>
       </view>
     </view>
   </view>
@@ -67,6 +67,44 @@
     </view>
   </view>
 
+  <!-- ========== 今天吃什么 - 每日推荐 ========== -->
+  <view class="section-block daily-section" wx:if="{{dailyRecommendation}}">
+    <view class="section-title-row">
+      <text class="section-title">🌟 今天吃什么</text>
+      <text class="section-more" bindtap="refreshDailyRecommendation">换一道</text>
+    </view>
+    <view class="daily-card" bindtap="onDailyRecommendationTap">
+      <view class="daily-left" style="background: {{dailyRecommendation.color}};">
+        <text class="daily-emoji">{{dailyRecommendation.emoji}}</text>
+      </view>
+      <view class="daily-content">
+        <view class="daily-header-row">
+          <text class="daily-name">{{dailyRecommendation.name}}</text>
+          <view class="daily-badge" style="background: {{dailyRecommendation.color}}20; color: {{dailyRecommendation.color}};">
+            {{dailyRecommendation.sourceName}}
+          </view>
+        </view>
+        <text class="daily-desc">{{dailyRecommendation.desc}}</text>
+        <view class="daily-meta">
+          <text class="daily-meta-item">⏱ {{dailyRecommendation.cookTime}}分钟</text>
+          <text class="daily-meta-sep">·</text>
+          <text class="daily-meta-item">{{dailyRecommendation.difficulty === 'easy' ? '简单' : dailyRecommendation.difficulty === 'medium' ? '中等' : '困难'}}</text>
+          <text class="daily-meta-sep" wx:if="{{dailyRecommendation.calories}}">·</text>
+          <text class="daily-meta-item" wx:if="{{dailyRecommendation.calories}}">🔥 {{dailyRecommendation.calories}}卡</text>
+        </view>
+        <view class="daily-tags">
+          <text
+            class="daily-tag"
+            wx:for="{{dailyRecommendation.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+          >{{tag}}</text>
+        </view>
+      </view>
+      <view class="daily-arrow-btn" style="background: {{dailyRecommendation.color}};">›</view>
+    </view>
+  </view>
+
   <!-- ========== 热门食材快速入口 ========== -->
   <view class="section-block">
     <view class="section-title-row">
@@ -84,6 +122,90 @@
         <text class="hot-ing-emoji">{{item.emoji}}</text>
         <text class="hot-ing-name">{{item.name}}</text>
       </view>
+    </view>
+  </view>
+
+  <!-- ========== 减脂菜谱板块 ========== -->
+  <view class="section-block">
+    <view class="section-title-row">
+      <text class="section-title">🥗 减脂菜谱</text>
+      <text class="section-more" bindtap="goToCuisineList">更多 ›</text>
+    </view>
+    <view class="special-meal-scroll">
+      <scroll-view scroll-x="{{true}}" class="meal-scroll-view" enable-flex="{{true}}">
+        <view
+          class="meal-card fat-loss-card"
+          wx:for="{{fatLossMeals}}"
+          wx:key="id"
+          bindtap="onFatLossMealTap"
+          data-name="{{item.name}}"
+          data-ingredients="{{item.ingredients}}"
+        >
+          <view class="meal-card-top fat-loss-top">
+            <text class="meal-card-emoji">🥗</text>
+            <view class="meal-card-calories">{{item.calories}}卡</view>
+          </view>
+          <view class="meal-card-body">
+            <text class="meal-card-name">{{item.name}}</text>
+            <text class="meal-card-desc">{{item.desc}}</text>
+            <view class="meal-card-meta">
+              <text class="meal-meta-item">⏱ {{item.cookTime}}分钟</text>
+              <text class="meal-meta-sep">·</text>
+              <text class="meal-meta-item">蛋白{{item.protein}}g</text>
+            </view>
+            <view class="meal-card-tags">
+              <text
+                class="meal-tag fat-loss-tag"
+                wx:for="{{item.tags}}"
+                wx:for-item="tag"
+                wx:key="index"
+              >{{tag}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- ========== 孕妇营养餐板块 ========== -->
+  <view class="section-block">
+    <view class="section-title-row">
+      <text class="section-title">🤰 孕妇营养餐</text>
+      <text class="section-more" bindtap="goToCuisineList">更多 ›</text>
+    </view>
+    <view class="special-meal-scroll">
+      <scroll-view scroll-x="{{true}}" class="meal-scroll-view" enable-flex="{{true}}">
+        <view
+          class="meal-card pregnancy-card"
+          wx:for="{{pregnancyMeals}}"
+          wx:key="id"
+          bindtap="onPregnancyMealTap"
+          data-name="{{item.name}}"
+          data-ingredients="{{item.ingredients}}"
+        >
+          <view class="meal-card-top pregnancy-top">
+            <text class="meal-card-emoji">🤰</text>
+            <view class="meal-card-calories pregnancy-calories">{{item.calories}}卡</view>
+          </view>
+          <view class="meal-card-body">
+            <text class="meal-card-name">{{item.name}}</text>
+            <text class="meal-card-desc">{{item.desc}}</text>
+            <view class="meal-card-meta">
+              <text class="meal-meta-item">⏱ {{item.cookTime}}分钟</text>
+              <text class="meal-meta-sep">·</text>
+              <text class="meal-meta-item">{{item.nutrients[0]}}</text>
+            </view>
+            <view class="meal-card-tags">
+              <text
+                class="meal-tag pregnancy-tag"
+                wx:for="{{item.tags}}"
+                wx:for-item="tag"
+                wx:key="index"
+              >{{tag}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
     </view>
   </view>
 

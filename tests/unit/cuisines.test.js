@@ -3,7 +3,8 @@
  * 覆盖：CUISINES(30条)、FAT_LOSS_MEALS(30条)、PREGNANCY_MEALS(30条)
  *       getCuisineById、getCuisineList、findRelatedCuisines、getRandomCuisines、getCuisineDishes
  *       getFatLossMeals、getPregnancyMeals、getPregnancyMealsByNutrient、getFatLossMealsByCalories
- * 版本：2.1.0
+ *       getDailyRecommendation
+ * 版本：3.0.0
  */
 
 'use strict';
@@ -586,5 +587,75 @@ describe('【测试套件12】getFatLossMealsByCalories 函数', () => {
       expect(meal).toHaveProperty('calories');
       expect(typeof meal.calories).toBe('number');
     });
+  });
+});
+
+// ==================== 测试套件13：getDailyRecommendation 每日推荐 ====================
+
+describe('【测试套件13】getDailyRecommendation 每日推荐函数', () => {
+  test('TC13.1 - 应返回非null对象', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(result).not.toBeNull();
+    expect(typeof result).toBe('object');
+  });
+
+  test('TC13.2 - 返回结果应包含必要字段', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(result).toHaveProperty('name');
+    expect(result).toHaveProperty('desc');
+    expect(result).toHaveProperty('cookTime');
+    expect(result).toHaveProperty('difficulty');
+    expect(result).toHaveProperty('ingredients');
+    expect(result).toHaveProperty('sourceType');
+    expect(result).toHaveProperty('sourceName');
+    expect(result).toHaveProperty('emoji');
+    expect(result).toHaveProperty('color');
+    expect(result).toHaveProperty('tags');
+  });
+
+  test('TC13.3 - sourceType 应为合法值', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    const validTypes = ['cuisine', 'fat_loss', 'pregnancy'];
+    expect(validTypes).toContain(result.sourceType);
+  });
+
+  test('TC13.4 - 多次调用同一天内返回相同结果（确定性）', () => {
+    const result1 = cuisinesUtil.getDailyRecommendation();
+    const result2 = cuisinesUtil.getDailyRecommendation();
+    expect(result1.name).toBe(result2.name);
+    expect(result1.sourceType).toBe(result2.sourceType);
+  });
+
+  test('TC13.5 - ingredients 应为数组', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(Array.isArray(result.ingredients)).toBe(true);
+  });
+
+  test('TC13.6 - cookTime 应为正数', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(result.cookTime).toBeGreaterThan(0);
+  });
+
+  test('TC13.7 - 难度应为合法值', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    const validDifficulties = ['easy', 'medium', 'hard'];
+    expect(validDifficulties).toContain(result.difficulty);
+  });
+
+  test('TC13.8 - emoji字段应为非空字符串', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(typeof result.emoji).toBe('string');
+    expect(result.emoji.length).toBeGreaterThan(0);
+  });
+
+  test('TC13.9 - color字段应为有效颜色值', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(typeof result.color).toBe('string');
+    expect(result.color.startsWith('#')).toBe(true);
+  });
+
+  test('TC13.10 - tags字段应为数组', () => {
+    const result = cuisinesUtil.getDailyRecommendation();
+    expect(Array.isArray(result.tags)).toBe(true);
   });
 });
