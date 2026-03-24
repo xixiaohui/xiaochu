@@ -1,0 +1,9 @@
+{
+  "name": "data-init",
+  "version": "2.1.0",
+  "description": "小厨AI数据初始化云函数 - 将菜系、减脂餐、孕妇营养餐数据写入云数据库",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
