@@ -1661,6 +1661,78 @@ const getFatLossMealsByCalories = (maxCalories = 300) => {
   return FAT_LOSS_MEALS.filter(m => m.calories <= maxCalories);
 };
 
+/**
+ * 根据当前时间获取每日推荐菜
+ * 逻辑：用当天日期（0-based）作为索引，从所有菜肴池中确定性地选出一道
+ * 池子包括：菜系代表菜 + 减脂餐 + 孕妇营养餐
+ * @returns {Object} 推荐菜肴 { name, desc, cookTime, difficulty, ingredients, sourceType, sourceName, emoji, color, tags }
+ */
+const getDailyRecommendation = () => {
+  // 构建所有菜肴池
+  const allDishes = [];
+
+  // 加入菜系代表菜
+  CUISINES.forEach(cuisine => {
+    cuisine.representativeDishes.forEach(dish => {
+      allDishes.push({
+        ...dish,
+        sourceType: 'cuisine',
+        sourceName: cuisine.name,
+        emoji: cuisine.emoji,
+        color: cuisine.color,
+        tags: dish.ingredients ? dish.ingredients.slice(0, 3) : [],
+        category: 'cuisine',
+      });
+    });
+  });
+
+  // 加入减脂餐
+  FAT_LOSS_MEALS.forEach(meal => {
+    allDishes.push({
+      name: meal.name,
+      desc: meal.desc,
+      cookTime: meal.cookTime,
+      difficulty: meal.difficulty,
+      ingredients: meal.ingredients,
+      sourceType: 'fat_loss',
+      sourceName: '减脂餐',
+      emoji: '🥗',
+      color: '#4CAF50',
+      tags: meal.tags || [],
+      calories: meal.calories,
+      category: 'fat_loss',
+    });
+  });
+
+  // 加入孕妇营养餐
+  PREGNANCY_MEALS.forEach(meal => {
+    allDishes.push({
+      name: meal.name,
+      desc: meal.desc,
+      cookTime: meal.cookTime,
+      difficulty: meal.difficulty,
+      ingredients: meal.ingredients,
+      sourceType: 'pregnancy',
+      sourceName: '孕妇营养餐',
+      emoji: '🤰',
+      color: '#E91E63',
+      tags: meal.tags || [],
+      calories: meal.calories,
+      category: 'pregnancy',
+    });
+  });
+
+  if (allDishes.length === 0) return null;
+
+  // 使用当天日期作为确定性索引
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  const hourSlot = Math.floor(now.getHours() / 8); // 0-早, 1-午, 2-晚
+  const index = (dayOfYear * 3 + hourSlot) % allDishes.length;
+
+  return allDishes[index];
+};
+
 // ==================== 模块导出 ====================
 
 module.exports = {
@@ -1676,4 +1748,5 @@ module.exports = {
   getPregnancyMeals,
   getPregnancyMealsByNutrient,
   getFatLossMealsByCalories,
+  getDailyRecommendation,
 };
