@@ -5,7 +5,9 @@
  *   2. 保存用户生成的菜谱到云数据库
  *   3. 获取用户历史菜谱
  *   4. AI生成指定菜系风格的菜谱
- * 版本：2.0.0
+ *   5. 获取减脂餐列表（支持热量筛选）
+ *   6. 获取孕妇营养餐列表（支持孕期阶段筛选）
+ * 版本：2.1.0
  */
 
 'use strict';
@@ -20,8 +22,11 @@ cloud.init({
 
 // 集合名称
 const COLLECTIONS = {
-  RECIPES: 'recipes',         // 用户生成的菜谱
-  CUISINE_LIKES: 'cuisine_likes', // 菜系收藏/点赞
+  RECIPES: 'recipes',               // 用户生成的菜谱
+  CUISINE_LIKES: 'cuisine_likes',   // 菜系收藏/点赞
+  CUISINES: 'cuisines',             // 菜系基础数据
+  FAT_LOSS_MEALS: 'fat_loss_meals', // 减脂餐系列
+  PREGNANCY_MEALS: 'pregnancy_meals', // 孕妇营养餐系列
 };
 
 // AI 配置
@@ -306,6 +311,114 @@ exports.main = async (event, context) => {
           ingredients, cookTime, difficulty, cuisineName, cuisineDesc, extraReq
         );
         return { code: ERROR_CODES.SUCCESS, message: 'success', data: { recipe } };
+      }
+
+      // 获取减脂餐列表（从云数据库读取）
+      case 'getFatLossMeals': {
+        const { maxCalories, limit = 30, page = 1 } = event;
+        const db = cloud.database();
+        const _ = db.command;
+        const skip = (page - 1) * limit;
+
+        try {
+          let query = db.collection(COLLECTIONS.FAT_LOSS_MEALS);
+          if (maxCalories && maxCalories > 0) {
+            query = query.where({ calories: _.lte(maxCalories) });
+          }
+
+          const countResult = await query.count();
+          const result = await query.skip(skip).limit(limit).get();
+
+          return {
+            code: ERROR_CODES.SUCCESS,
+            message: 'success',
+            data: {
+              list: result.data,
+              total: countResult.total,
+              page,
+              limit,
+            },
+          };
+        } catch (dbErr) {
+          console.error('[cuisine-service] 获取减脂餐失败:', dbErr);
+          return { code: ERROR_CODES.DB_ERROR, message: '获取减脂餐数据失败', data: null };
+        }
+      }
+
+      // 获取孕妇营养餐列表（从云数据库读取）
+      case 'getPregnancyMeals': {
+        const { trimester, nutrient, limit = 30, page = 1 } = event;
+        const db = cloud.database();
+        const _ = db.command;
+        const skip = (page - 1) * limit;
+
+        try {
+          let whereClause = {};
+          if (trimester) {
+            whereClause.trimester = _.elemMatch(_.eq(trimester));
+          }
+
+          let query = db.collection(COLLECTIONS.PREGNANCY_MEALS);
+          if (Object.keys(whereClause).length > 0) {
+            query = query.where(whereClause);
+          }
+
+          const countResult = await query.count();
+          let list = (await query.skip(skip).limit(limit).get()).data;
+
+          // 按营养素关键词过滤（云数据库不支持数组内字符串模糊，前端过滤）
+          if (nutrient) {
+            list = list.filter(m =>
+              m.nutrients && m.nutrients.some(n =>
+                n.includes(nutrient) || nutrient.includes(n)
+              )
+            );
+          }
+
+          return {
+            code: ERROR_CODES.SUCCESS,
+            message: 'success',
+            data: {
+              list,
+              total: countResult.total,
+              page,
+              limit,
+            },
+          };
+        } catch (dbErr) {
+          console.error('[cuisine-service] 获取孕妇营养餐失败:', dbErr);
+          return { code: ERROR_CODES.DB_ERROR, message: '获取孕妇营养餐数据失败', data: null };
+        }
+      }
+
+      // 获取菜系列表（从云数据库读取）
+      case 'getCuisines': {
+        const { limit = 30, page = 1 } = event;
+        const db = cloud.database();
+        const skip = (page - 1) * limit;
+
+        try {
+          const countResult = await db.collection(COLLECTIONS.CUISINES).count();
+          const result = await db.collection(COLLECTIONS.CUISINES)
+            .orderBy('sortOrder', 'asc')
+            .skip(skip)
+            .limit(limit)
+            .get();
+
+          return {
+            code: ERROR_CODES.SUCCESS,
+            message: 'success',
+            data: {
+              list: result.data,
+              total: countResult.total,
+              page,
+              limit,
+            },
+          };
+        } catch (dbErr) {
+          console.error('[cuisine-service] 获取菜系列表失败:', dbErr);
+          return { code: ERROR_CODES.DB_ERROR, message: '获取菜系数据失败', data: null };
+        }
       }
 
       default:
