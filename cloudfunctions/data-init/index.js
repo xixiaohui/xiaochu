@@ -228,6 +228,94 @@ const CUISINES_DATA = [
     ],
   },
   {
+    id: 'fujian',
+    name: '闽菜',
+    fullName: '福建菜系',
+    emoji: '🍲',
+    color: '#9C27B0',
+    lightColor: '#F3E5F5',
+    description: '汤汁浓郁，海鲜鲜美',
+    longDesc: '闽菜以海鲜为主料，善于制汤，讲究汤的清澈与鲜甜，工艺精细，口味偏淡，略带甜酸。',
+    tags: ['海鲜', '汤鲜', '甜酸'],
+    representativeDishes: [
+      { name: '佛跳墙', desc: '食材丰富，汤汁醇厚', cookTime: 240, difficulty: 'hard', ingredients: ['鱼翅', '海参', '鲍鱼', '猪蹄'] },
+      { name: '荔枝肉', desc: '外酥内嫩，荔枝香甜', cookTime: 25, difficulty: 'medium', ingredients: ['猪里脊', '荸荠', '番茄酱', '白醋'] },
+      { name: '沙茶面', desc: '汤鲜料足，沙茶香浓', cookTime: 30, difficulty: 'easy', ingredients: ['面条', '沙茶酱', '虾', '猪血'] },
+      { name: '醉排骨', desc: '酥香入骨，微甜可口', cookTime: 45, difficulty: 'medium', ingredients: ['排骨', '红糟', '白糖', '生抽'] },
+      { name: '炒鸡丁', desc: '鲜嫩多汁，清甜爽口', cookTime: 20, difficulty: 'easy', ingredients: ['鸡肉', '荸荠', '冬笋', '蛋白'] },
+      { name: '扁肉', desc: '皮薄馅鲜，汤清味美', cookTime: 30, difficulty: 'medium', ingredients: ['猪肉', '馄饨皮', '地瓜粉', '高汤'] },
+      { name: '鸡汤汆海蚌', desc: '海蚌脆嫩，鸡汤鲜醇', cookTime: 40, difficulty: 'medium', ingredients: ['海蚌', '鸡汤', '姜', '盐'] },
+      { name: '红糟鸡', desc: '糟香浓郁，鸡肉鲜嫩', cookTime: 35, difficulty: 'medium', ingredients: ['鸡肉', '红糟', '姜', '料酒'] },
+      { name: '淡糟香螺片', desc: '螺片爽脆，糟香清雅', cookTime: 25, difficulty: 'medium', ingredients: ['香螺', '淡糟', '姜', '葱'] },
+      { name: '福州鱼丸', desc: '丸滑馅鲜，汤清味美', cookTime: 45, difficulty: 'hard', ingredients: ['鱼肉', '猪肉馅', '淀粉', '高汤'] },
+      { name: '闽生果', desc: '酸甜开胃，清爽解腻', cookTime: 20, difficulty: 'easy', ingredients: ['萝卜', '胡萝卜', '白醋', '白糖'] },
+      { name: '南煎肝', desc: '猪肝嫩滑，酱香微甜', cookTime: 20, difficulty: 'easy', ingredients: ['猪肝', '酱油', '糖', '蒜'] },
+      { name: '佛手排骨', desc: '排骨酥香，造型别致', cookTime: 50, difficulty: 'medium', ingredients: ['猪排骨', '面粉', '五香粉', '糖醋汁'] },
+      { name: '八宝红鲟饭', desc: '米饭香糯，红鲟鲜美', cookTime: 60, difficulty: 'hard', ingredients: ['红鲟', '糯米', '香菇', '虾米'] },
+      { name: '海蛎煎', desc: '外酥内嫩，蚝香十足', cookTime: 20, difficulty: 'easy', ingredients: ['海蛎', '鸡蛋', '淀粉', '葱'] },
+      { name: '炒兴化粉', desc: '米粉爽滑，配料鲜香', cookTime: 15, difficulty: 'easy', ingredients: ['兴化粉', '虾仁', '猪肉', '青菜'] },
+      { name: '同安封肉', desc: '肉质酥烂，咸甜浓香', cookTime: 120, difficulty: 'medium', ingredients: ['五花肉', '酱油', '冰糖', '蒜'] },
+      { name: '土笋冻', desc: '晶莹爽滑，闽南风味', cookTime: 120, difficulty: 'medium', ingredients: ['土笋', '蒜泥', '酱油', '醋'] },
+      { name: '五香卷', desc: '外酥内香，闽南经典', cookTime: 30, difficulty: 'easy', ingredients: ['豆皮', '猪肉', '马蹄', '五香粉'] },
+      { name: '姜母鸭', desc: '姜香浓郁，鸭肉滋补', cookTime: 60, difficulty: 'medium', ingredients: ['鸭肉', '老姜', '米酒', '麻油'] },
+      { name: '面线糊', desc: '糊滑鲜香，早餐名吃', cookTime: 25, difficulty: 'easy', ingredients: ['面线', '高汤', '虾皮', '胡椒'] },
+      { name: '鼎边糊', desc: '米香滑嫩，汤鲜味美', cookTime: 25, difficulty: 'medium', ingredients: ['米浆', '蚬子汤', '虾皮', '香菇'] },
+      { name: '芋泥', desc: '香甜细腻，入口绵密', cookTime: 40, difficulty: 'easy', ingredients: ['芋头', '白糖', '猪油', '红枣'] },
+      { name: '原味河田鸡', desc: '鸡肉鲜甜，客家名菜', cookTime: 60, difficulty: 'medium', ingredients: ['河田鸡', '盐', '姜', '米酒'] },
+      { name: '肉燕', desc: '燕皮柔韧，馅鲜汤清', cookTime: 35, difficulty: 'medium', ingredients: ['燕皮', '猪肉', '高汤', '葱'] },
+      { name: '淡糟河鳗', desc: '鳗鱼肥美，糟香清鲜', cookTime: 30, difficulty: 'medium', ingredients: ['河鳗', '淡糟', '姜', '葱'] },
+      { name: '闽南咸饭', desc: '米饭油润，咸香饱满', cookTime: 35, difficulty: 'easy', ingredients: ['大米', '虾米', '香菇', '猪肉'] },
+      { name: '海鲜锅边糊', desc: '锅边薄片，海味鲜浓', cookTime: 30, difficulty: 'medium', ingredients: ['米浆', '虾', '蛤蜊', '高汤'] },
+      { name: '芋包', desc: '外糯内鲜，闽西风味', cookTime: 45, difficulty: 'medium', ingredients: ['芋头', '木薯粉', '猪肉', '香菇'] },
+      { name: '厦门烧肉粽', desc: '糯米油润，馅料丰富', cookTime: 60, difficulty: 'medium', ingredients: ['糯米', '五花肉', '香菇', '虾米'] },
+    ],
+    quickIngredients: ['海参', '鲍鱼', '虾', '猪里脊', '荸荠', '沙茶酱', '高汤', '冬笋'],
+  },
+  {
+    id: 'anhui',
+    name: '徽菜',
+    fullName: '安徽菜系',
+    emoji: '🍖',
+    color: '#795548',
+    lightColor: '#EFEBE9',
+    description: '重油重色，原汁原味',
+    longDesc: '徽菜善用山珍野味，重油重色，讲究原汁原味，以烧、炖为主要技法，代表着徽州山区饮食文化。',
+    tags: ['浓郁', '重色', '炖烧'],
+    representativeDishes: [
+      { name: '臭鳜鱼', desc: '臭中有香，鱼肉鲜嫩', cookTime: 40, difficulty: 'medium', ingredients: ['鳜鱼', '盐', '辣椒', '生姜'] },
+      { name: '红烧划水', desc: '鱼尾鲜嫩，红烧入味', cookTime: 30, difficulty: 'easy', ingredients: ['草鱼尾', '生抽', '冰糖', '葱'] },
+      { name: '火腿炖甲鱼', desc: '滋补养身，汤鲜肉嫩', cookTime: 90, difficulty: 'medium', ingredients: ['甲鱼', '金华火腿', '姜', '黄酒'] },
+      { name: '毛豆腐', desc: '外皮微毛，香嫩可口', cookTime: 20, difficulty: 'easy', ingredients: ['毛豆腐', '辣椒酱', '猪油', '盐'] },
+      { name: '腌鲜鳜鱼', desc: '风味独特，鲜香美味', cookTime: 50, difficulty: 'medium', ingredients: ['鳜鱼', '盐', '花椒', '生姜'] },
+      { name: '蟹黄豆腐', desc: '豆腐嫩滑，蟹味鲜美', cookTime: 25, difficulty: 'easy', ingredients: ['嫩豆腐', '蟹黄', '高汤', '葱'] },
+      { name: '胡适一品锅', desc: '层次丰富，徽州名锅', cookTime: 120, difficulty: 'hard', ingredients: ['五花肉', '豆腐果', '笋干', '蛋饺'] },
+      { name: '李鸿章杂烩', desc: '食材丰盛，咸鲜醇厚', cookTime: 50, difficulty: 'medium', ingredients: ['海参', '鸡肉', '火腿', '高汤'] },
+      { name: '徽州刀板香', desc: '腊香浓郁，肥瘦相宜', cookTime: 60, difficulty: 'medium', ingredients: ['腊肉', '笋片', '盐', '姜'] },
+      { name: '徽州圆子', desc: '外糯内香，口感丰富', cookTime: 45, difficulty: 'medium', ingredients: ['糯米粉', '猪肉', '香菇', '笋丁'] },
+      { name: '黄山炖鸽', desc: '汤鲜肉嫩，山珍风味', cookTime: 90, difficulty: 'medium', ingredients: ['乳鸽', '香菇', '姜', '高汤'] },
+      { name: '问政山笋', desc: '笋嫩味鲜，清香爽口', cookTime: 20, difficulty: 'easy', ingredients: ['山笋', '火腿', '高汤', '盐'] },
+      { name: '清蒸石鸡', desc: '肉质细嫩，原味清鲜', cookTime: 35, difficulty: 'medium', ingredients: ['石鸡', '姜', '葱', '黄酒'] },
+      { name: '黄山双石', desc: '石耳石鸡，山野鲜香', cookTime: 60, difficulty: 'hard', ingredients: ['石耳', '石鸡', '高汤', '姜'] },
+      { name: '中和汤', desc: '酸辣开胃，汤鲜味厚', cookTime: 30, difficulty: 'medium', ingredients: ['豆腐', '笋丝', '木耳', '醋'] },
+      { name: '凤炖牡丹', desc: '刀工精细，造型雅致', cookTime: 90, difficulty: 'hard', ingredients: ['鸡肉', '萝卜', '高汤', '盐'] },
+      { name: '方腊鱼', desc: '鱼肉鲜嫩，徽味浓厚', cookTime: 40, difficulty: 'medium', ingredients: ['鳜鱼', '酱油', '黄酒', '姜'] },
+      { name: '清炖马蹄鳖', desc: '汤清味鲜，滋补温和', cookTime: 120, difficulty: 'hard', ingredients: ['甲鱼', '火腿', '姜', '高汤'] },
+      { name: '腊八豆腐', desc: '豆香浓郁，风味独特', cookTime: 20, difficulty: 'easy', ingredients: ['豆腐', '盐', '辣椒粉', '香油'] },
+      { name: '葛粉圆子', desc: '软糯弹滑，山乡特色', cookTime: 35, difficulty: 'medium', ingredients: ['葛粉', '肉末', '笋丁', '葱'] },
+      { name: '徽州蒸鸡', desc: '鸡肉酥嫩，汤汁浓鲜', cookTime: 60, difficulty: 'medium', ingredients: ['鸡肉', '香菇', '火腿', '黄酒'] },
+      { name: '八公山豆腐', desc: '豆腐细嫩，清鲜滑润', cookTime: 20, difficulty: 'easy', ingredients: ['豆腐', '高汤', '香菇', '葱'] },
+      { name: '无为熏鸭', desc: '肉质紧实，烟香浓郁', cookTime: 90, difficulty: 'medium', ingredients: ['鸭肉', '盐', '桂皮', '白糖'] },
+      { name: '符离集烧鸡', desc: '酥烂脱骨，五香浓郁', cookTime: 90, difficulty: 'hard', ingredients: ['整鸡', '八角', '桂皮', '生抽'] },
+      { name: '火烘鱼', desc: '小鱼焦香，下饭开胃', cookTime: 25, difficulty: 'easy', ingredients: ['小鱼干', '辣椒', '蒜', '生抽'] },
+      { name: '包公鱼', desc: '鱼肉细嫩，酱香扑鼻', cookTime: 35, difficulty: 'medium', ingredients: ['鲫鱼', '酱油', '姜', '葱'] },
+      { name: '淮王鱼', desc: '肉嫩刺少，鲜香爽口', cookTime: 30, difficulty: 'medium', ingredients: ['鱼肉', '姜', '高汤', '盐'] },
+      { name: '清炒石耳', desc: '山珍脆嫩，清香原味', cookTime: 15, difficulty: 'easy', ingredients: ['石耳', '蒜', '盐', '食用油'] },
+      { name: '石耳炖鸡', desc: '鸡鲜耳嫩，山珍滋补', cookTime: 90, difficulty: 'medium', ingredients: ['鸡肉', '石耳', '姜', '高汤'] },
+      { name: '徽州烧饼', desc: '层酥馅香，地方名点', cookTime: 40, difficulty: 'medium', ingredients: ['面粉', '梅干菜', '猪肉', '芝麻'] },
+    ],
+    quickIngredients: ['鳜鱼', '甲鱼', '豆腐', '火腿', '山药', '笋干', '黄酒', '盐'],
+  },
+  {
     id: 'shandong', name: '鲁菜', fullName: '山东菜系',
     emoji: '🐟', color: '#607D8B', lightColor: '#ECEFF1',
     description: '咸鲜纯正，清香宜人',
@@ -347,7 +435,600 @@ const CUISINES_DATA = [
       { name: '酱牛肉', desc: '酱香浓郁，软烂入味', cookTime: 90, difficulty: 'medium', ingredients: ['牛腱子', '黄豆酱', '八角', '桂皮'] },
     ],
   },
+  {
+    id: 'yunnan',
+    name: '云南菜',
+    fullName: '云南菜系',
+    emoji: '🌿',
+    color: '#4CAF50',
+    lightColor: '#E8F5E9',
+    description: '天然野味，酸辣鲜香',
+    longDesc: '云南菜取材多样，富有民族特色，善用天然野生食材，口味酸辣，具有浓郁的少数民族饮食风情。',
+    tags: ['野味', '酸辣', '特色'],
+    representativeDishes: [
+      { name: '过桥米线', desc: '汤鲜料足，米线滑嫩', cookTime: 30, difficulty: 'easy', ingredients: ['米线', '鸡汤', '猪肉片', '鹌鹑蛋'] },
+      { name: '汽锅鸡', desc: '鸡肉鲜嫩，汤汁清甜', cookTime: 90, difficulty: 'easy', ingredients: ['土鸡', '姜', '盐', '三七'] },
+      { name: '云南腌肉', desc: '腌制入味，风味独特', cookTime: 20, difficulty: 'easy', ingredients: ['猪肉', '辣椒', '盐', '香料'] },
+      { name: '炒野菜', desc: '清新爽口，天然营养', cookTime: 15, difficulty: 'easy', ingredients: ['野菜', '大蒜', '食用油', '盐'] },
+      { name: '黑松露炖鸡', desc: '松露芬芳，鸡肉鲜美', cookTime: 60, difficulty: 'medium', ingredients: ['土鸡', '黑松露', '姜', '盐'] },
+      { name: '酸汤鱼', desc: '汤酸鱼嫩，开胃解暑', cookTime: 35, difficulty: 'easy', ingredients: ['鱼', '酸汤', '西红柿', '辣椒'] },
+    ],
+    quickIngredients: ['土鸡', '米线', '野菜', '猪肉', '黑松露', '西红柿', '辣椒', '三七'],
+  },
+  {
+    id: 'xinjiang',
+    name: '新疆菜',
+    fullName: '新疆菜系',
+    emoji: '🐑',
+    color: '#FF6F00',
+    lightColor: '#FFF3E0',
+    description: '牛羊肉香，风味浓郁',
+    longDesc: '新疆菜以牛羊肉为主，搭配西域香料，口味浓郁，烤制工艺独特，展现了西北少数民族的饮食文化。',
+    tags: ['牛羊肉', '香料', '烤制'],
+    representativeDishes: [
+      { name: '新疆大盘鸡', desc: '鸡肉入味，宽面软滑', cookTime: 50, difficulty: 'medium', ingredients: ['鸡肉', '土豆', '皮带面', '辣椒'] },
+      { name: '烤全羊', desc: '皮酥肉嫩，香气四溢', cookTime: 180, difficulty: 'hard', ingredients: ['整羊', '孜然', '辣椒粉', '食盐'] },
+      { name: '馕坑肉', desc: '肉质鲜嫩，馕香四溢', cookTime: 90, difficulty: 'hard', ingredients: ['羊肉', '洋葱', '孜然', '馕坑'] },
+      { name: '手抓饭', desc: '米饭金黄，羊肉飘香', cookTime: 60, difficulty: 'medium', ingredients: ['大米', '羊肉', '胡萝卜', '洋葱'] },
+      { name: '羊肉串', desc: '外焦内嫩，孜然飘香', cookTime: 20, difficulty: 'easy', ingredients: ['羊肉', '孜然', '辣椒粉', '食盐'] },
+      { name: '拌面', desc: '面条劲道，酱香浓郁', cookTime: 30, difficulty: 'easy', ingredients: ['面条', '羊肉', '洋葱', '西红柿'] },
+    ],
+    quickIngredients: ['羊肉', '牛肉', '洋葱', '孜然', '辣椒粉', '土豆', '胡萝卜', '大米'],
+  },
+  // ===== 新增地方特色菜系 =====
+  {
+    id: 'shanxi',
+    name: '晋菜',
+    fullName: '山西菜系',
+    emoji: '🍜',
+    color: '#8D6E63',
+    lightColor: '#EFEBE9',
+    description: '面食为王，醋香浓郁',
+    longDesc: '山西菜以面食为主，醋的使用极为广泛，口味咸酸，讲究汤汁鲜美，面条种类繁多，有刀削面等。',
+    tags: ['面食', '酸香', '咸鲜'],
+    representativeDishes: [
+      { name: '刀削面', desc: '面条筋道，汤汁鲜美', cookTime: 25, difficulty: 'medium', ingredients: ['面粉', '猪骨汤', '番茄', '鸡蛋'] },
+      { name: '老陈醋熘肉丝', desc: '酸香开胃，肉丝鲜嫩', cookTime: 20, difficulty: 'easy', ingredients: ['猪肉', '老陈醋', '葱', '姜'] },
+      { name: '过油肉', desc: '油香四溢，咸鲜适口', cookTime: 30, difficulty: 'medium', ingredients: ['猪腱子肉', '木耳', '玉兰片', '姜'] },
+      { name: '平遥牛肉', desc: '色泽红润，咸香软烂', cookTime: 120, difficulty: 'medium', ingredients: ['黄牛肉', '盐', '花椒', '八角'] },
+      { name: '羊杂割', desc: '汤鲜料足，暖胃耐饥', cookTime: 60, difficulty: 'easy', ingredients: ['羊内脏', '豆腐', '粉条', '葱'] },
+      { name: '猫耳朵', desc: '形似猫耳，软糯可口', cookTime: 30, difficulty: 'easy', ingredients: ['面粉', '蔬菜', '鸡蛋', '盐'] },
+    ],
+    quickIngredients: ['面粉', '猪肉', '牛肉', '羊肉', '老陈醋', '豆腐', '木耳', '鸡蛋'],
+  },
+  {
+    id: 'shaanxi',
+    name: '陕菜',
+    fullName: '陕西菜系',
+    emoji: '🥙',
+    color: '#F57C00',
+    lightColor: '#FFF3E0',
+    description: '关中风味，面食豪迈',
+    longDesc: '陕西菜以关中饮食为核心，面食品类繁多，口味重盐重辣，葱蒜香气十足，是西北饮食文化的精华。',
+    tags: ['面食', '重口', '豪迈'],
+    representativeDishes: [
+      { name: '肉夹馍', desc: '馍香肉嫩，口感丰富', cookTime: 40, difficulty: 'medium', ingredients: ['面饼', '猪肉', '花椒', '八角'] },
+      { name: '羊肉泡馍', desc: '汤浓馍软，暖身暖胃', cookTime: 90, difficulty: 'hard', ingredients: ['羊肉', '馍', '粉丝', '木耳'] },
+      { name: 'biángbiáng面', desc: '面宽筋道，油泼爽辣', cookTime: 20, difficulty: 'medium', ingredients: ['宽面', '辣椒', '热油', '蒜'] },
+      { name: '凉皮', desc: '爽滑筋道，酸辣开胃', cookTime: 30, difficulty: 'easy', ingredients: ['面皮', '辣椒油', '醋', '黄瓜'] },
+      { name: '葫芦鸡', desc: '外酥内嫩，色泽金黄', cookTime: 90, difficulty: 'hard', ingredients: ['整鸡', '五香粉', '生抽', '食用油'] },
+      { name: '臊子面', desc: '汤鲜面滑，臊子浓香', cookTime: 35, difficulty: 'medium', ingredients: ['细面', '猪肉', '豆腐', '木耳'] },
+    ],
+    quickIngredients: ['面粉', '猪肉', '羊肉', '辣椒', '蒜', '花椒', '醋', '油泼辣子'],
+  },
+  {
+    id: 'guizhou',
+    name: '黔菜',
+    fullName: '贵州菜系',
+    emoji: '🌶️',
+    color: '#E91E63',
+    lightColor: '#FCE4EC',
+    description: '酸辣鲜香，风味独特',
+    longDesc: '贵州菜以酸辣为主要特征，善用糟辣椒、折耳根等地方食材，口味独特，酸而不刺，辣而香浓。',
+    tags: ['酸辣', '糟辣', '特色'],
+    representativeDishes: [
+      { name: '酸汤鱼', desc: '汤酸鱼嫩，开胃解馋', cookTime: 35, difficulty: 'medium', ingredients: ['鲫鱼', '酸汤', '番茄', '折耳根'] },
+      { name: '辣子鸡', desc: '鸡肉酥香，辣味浓郁', cookTime: 30, difficulty: 'easy', ingredients: ['鸡肉', '干辣椒', '花椒', '蒜'] },
+      { name: '丝娃娃', desc: '皮薄馅鲜，酸辣爽口', cookTime: 25, difficulty: 'easy', ingredients: ['面皮', '折耳根', '莲花白', '酸汤'] },
+      { name: '花溪牛肉粉', desc: '汤浓粉滑，牛肉软烂', cookTime: 60, difficulty: 'easy', ingredients: ['米粉', '牛肉', '酸汤', '折耳根'] },
+      { name: '糟辣鱼', desc: '糟辣鲜香，入口爽辣', cookTime: 25, difficulty: 'easy', ingredients: ['鱼', '糟辣椒', '姜', '蒜'] },
+      { name: '红油米豆腐', desc: '豆腐嫩滑，红油鲜香', cookTime: 20, difficulty: 'easy', ingredients: ['米豆腐', '红油', '折耳根', '葱'] },
+    ],
+    quickIngredients: ['鱼', '鸡肉', '酸汤', '折耳根', '糟辣椒', '干辣椒', '米粉', '豆腐'],
+  },
+  {
+    id: 'sichuan_chongqing',
+    name: '渝菜',
+    fullName: '重庆菜系',
+    emoji: '🫕',
+    color: '#D32F2F',
+    lightColor: '#FFEBEE',
+    description: '火锅之都，麻辣滚烫',
+    longDesc: '重庆菜以火锅最为著名，麻辣鲜香，豪迈豪爽，食材广泛，街边小吃丰富，是西南饮食文化的代表。',
+    tags: ['火锅', '麻辣', '江湖'],
+    representativeDishes: [
+      { name: '重庆火锅', desc: '麻辣鲜香，涮烫万物', cookTime: 30, difficulty: 'easy', ingredients: ['火锅底料', '牛肉', '毛肚', '鸭肠'] },
+      { name: '重庆小面', desc: '面条劲道，麻辣爽口', cookTime: 15, difficulty: 'easy', ingredients: ['碱面', '花椒', '辣椒油', '花生酱'] },
+      { name: '辣子鸡', desc: '鸡丁酥香，辣椒翻炒', cookTime: 30, difficulty: 'medium', ingredients: ['鸡肉', '大量干辣椒', '花椒', '蒜'] },
+      { name: '水煮肉片', desc: '肉片嫩滑，麻辣味重', cookTime: 25, difficulty: 'medium', ingredients: ['猪里脊', '豆芽', '花椒', '辣椒油'] },
+      { name: '毛血旺', desc: '麻辣鲜烫，食材丰富', cookTime: 35, difficulty: 'medium', ingredients: ['毛肚', '鸭血', '豆皮', '花椒'] },
+      { name: '口水鸡', desc: '鸡肉嫩滑，麻辣鲜香', cookTime: 40, difficulty: 'easy', ingredients: ['鸡腿', '芝麻酱', '辣椒油', '花椒油'] },
+    ],
+    quickIngredients: ['火锅底料', '牛肉', '毛肚', '鸭肠', '花椒', '辣椒', '碱面', '豆芽'],
+  },
+  {
+    id: 'guangxi',
+    name: '桂菜',
+    fullName: '广西菜系',
+    emoji: '🍜',
+    color: '#388E3C',
+    lightColor: '#E8F5E9',
+    description: '酸辣鲜香，粉汤飘香',
+    longDesc: '广西菜以螺蛳粉、桂林米粉闻名，善用酸笋、酸豆角等发酵食材，口味酸辣，米粉文化深厚。',
+    tags: ['米粉', '酸辣', '鲜香'],
+    representativeDishes: [
+      { name: '螺蛳粉', desc: '汤汁浓郁，酸辣鲜香', cookTime: 30, difficulty: 'easy', ingredients: ['米粉', '螺蛳汤', '酸笋', '炸腐竹'] },
+      { name: '桂林米粉', desc: '汤清粉滑，卤香浓郁', cookTime: 25, difficulty: 'easy', ingredients: ['米粉', '卤汤', '叉烧', '酸豆角'] },
+      { name: '白切猪脚', desc: '皮Q肉嫩，蘸酱鲜香', cookTime: 60, difficulty: 'easy', ingredients: ['猪脚', '姜', '葱', '酱料'] },
+      { name: '芋头扣肉', desc: '芋头软糯，肉香浓郁', cookTime: 90, difficulty: 'medium', ingredients: ['五花肉', '芋头', '南乳', '豆豉'] },
+      { name: '梧州纸包鸡', desc: '鲜嫩多汁，荷香四溢', cookTime: 60, difficulty: 'medium', ingredients: ['嫩鸡', '荷叶', '五香粉', '姜'] },
+      { name: '牛腩粉', desc: '粉滑汤浓，牛腩软烂', cookTime: 90, difficulty: 'easy', ingredients: ['米粉', '牛腩', '萝卜', '香料'] },
+    ],
+    quickIngredients: ['米粉', '猪脚', '牛腩', '酸笋', '螺蛳', '芋头', '南乳', '荷叶'],
+  },
+  {
+    id: 'hainan',
+    name: '琼菜',
+    fullName: '海南菜系',
+    emoji: '🌊',
+    color: '#0288D1',
+    lightColor: '#E1F5FE',
+    description: '清鲜原味，海岛风情',
+    longDesc: '海南菜取材以热带海鲜和椰子为主，口味清淡鲜甜，烹调简单，讲究保留食材原汁原味，热带风情十足。',
+    tags: ['海鲜', '清淡', '热带'],
+    representativeDishes: [
+      { name: '海南鸡饭', desc: '鸡肉嫩滑，鸡油饭香', cookTime: 45, difficulty: 'easy', ingredients: ['文昌鸡', '泰国香米', '姜', '蒜'] },
+      { name: '清蒸东星斑', desc: '鱼肉鲜嫩，清甜爽口', cookTime: 20, difficulty: 'easy', ingredients: ['东星斑', '姜', '葱', '生抽'] },
+      { name: '椰子鸡汤', desc: '椰香清甜，鸡肉鲜嫩', cookTime: 50, difficulty: 'easy', ingredients: ['土鸡', '椰子', '姜', '盐'] },
+      { name: '加积鸭', desc: '皮薄骨软，鲜美多汁', cookTime: 60, difficulty: 'medium', ingredients: ['加积鸭', '姜', '葱', '盐'] },
+      { name: '猪脚饭', desc: '猪脚软烂，浓郁入味', cookTime: 90, difficulty: 'easy', ingredients: ['猪脚', '花生', '酱油', '八角'] },
+      { name: '临高烤乳猪', desc: '皮酥肉嫩，香味四溢', cookTime: 120, difficulty: 'hard', ingredients: ['乳猪', '南乳', '五香粉', '蜂蜜'] },
+    ],
+    quickIngredients: ['鸡肉', '海鱼', '椰子', '猪脚', '大米', '姜', '葱', '南乳'],
+  },
+  {
+    id: 'gansu_qinghai',
+    name: '西北菜',
+    fullName: '西北菜系',
+    emoji: '🍖',
+    color: '#BF360C',
+    lightColor: '#FBE9E7',
+    description: '牛羊为主，豪迈浓香',
+    longDesc: '西北菜以牛羊肉为主，面食品类丰富，口味咸香浓郁，兰州拉面闻名全国，体现西北民族饮食文化。',
+    tags: ['牛羊肉', '面食', '浓香'],
+    representativeDishes: [
+      { name: '兰州拉面', desc: '汤清面滑，牛肉香醇', cookTime: 20, difficulty: 'hard', ingredients: ['面粉', '牛肉', '萝卜', '香菜'] },
+      { name: '手抓羊肉', desc: '肉质鲜嫩，原汁原味', cookTime: 60, difficulty: 'easy', ingredients: ['羊肉', '盐', '花椒', '孜然'] },
+      { name: '羊肉泡馍', desc: '汤浓馍软，鲜香无比', cookTime: 90, difficulty: 'medium', ingredients: ['羊肉', '馍', '粉丝', '木耳'] },
+      { name: '酿皮子', desc: '爽滑筋道，酸辣解腻', cookTime: 30, difficulty: 'easy', ingredients: ['面皮', '芥末', '醋', '辣椒油'] },
+      { name: '甘肃臊子面', desc: '汤鲜臊子香，层次丰富', cookTime: 40, difficulty: 'medium', ingredients: ['细面', '猪肉丁', '豆腐', '木耳'] },
+      { name: '烤羊排', desc: '外焦内嫩，孜然飘香', cookTime: 50, difficulty: 'medium', ingredients: ['羊排', '孜然', '辣椒粉', '盐'] },
+    ],
+    quickIngredients: ['羊肉', '牛肉', '面粉', '孜然', '花椒', '萝卜', '香菜', '馍'],
+  },
+  {
+    id: 'sichuan_self_cooking',
+    name: '川式家常',
+    fullName: '川式家常菜',
+    emoji: '🍳',
+    color: '#F44336',
+    lightColor: '#FFEBEE',
+    description: '家常口味，简单实惠',
+    longDesc: '川式家常菜以简单食材呈现川菜精髓，不需要复杂技艺，麻辣鲜香，是日常餐桌最受欢迎的菜肴风格。',
+    tags: ['家常', '简单', '下饭'],
+    representativeDishes: [
+      { name: '番茄炒鸡蛋', desc: '酸甜爽口，营养丰富', cookTime: 10, difficulty: 'easy', ingredients: ['番茄', '鸡蛋', '葱', '盐'] },
+      { name: '鱼香肉丝', desc: '鱼香浓郁，酸甜微辣', cookTime: 15, difficulty: 'easy', ingredients: ['猪肉', '木耳', '胡萝卜', '郫县豆瓣'] },
+      { name: '青椒炒肉', desc: '清香爽辣，简单美味', cookTime: 10, difficulty: 'easy', ingredients: ['猪肉', '青椒', '蒜', '盐'] },
+      { name: '豆瓣烧茄子', desc: '茄子软糯，豆瓣鲜香', cookTime: 20, difficulty: 'easy', ingredients: ['茄子', '豆瓣酱', '蒜', '葱'] },
+      { name: '蒜薹炒肉', desc: '清香脆嫩，咸鲜适口', cookTime: 12, difficulty: 'easy', ingredients: ['蒜薹', '猪肉', '生抽', '盐'] },
+      { name: '蚂蚁上树', desc: '粉条筋道，肉末鲜香', cookTime: 20, difficulty: 'easy', ingredients: ['粉条', '猪肉末', '豆瓣酱', '葱'] },
+    ],
+    quickIngredients: ['猪肉', '鸡蛋', '番茄', '青椒', '茄子', '蒜', '豆瓣酱', '葱'],
+  },
+  {
+    id: 'shanghai',
+    name: '沪菜',
+    fullName: '上海菜系',
+    emoji: '🦀',
+    color: '#1565C0',
+    lightColor: '#E3F2FD',
+    description: '浓油赤酱，本帮风味',
+    longDesc: '上海本帮菜以浓油赤酱著称，口味甜中带咸，精致细腻，注重食材的鲜活，展现海派饮食文化。',
+    tags: ['浓油', '甜咸', '精致'],
+    representativeDishes: [
+      { name: '红烧肉', desc: '色泽红亮，肥而不腻', cookTime: 90, difficulty: 'medium', ingredients: ['五花肉', '生抽', '老抽', '冰糖'] },
+      { name: '白斩鸡', desc: '皮滑肉嫩，原汁鲜美', cookTime: 40, difficulty: 'easy', ingredients: ['整鸡', '姜', '葱', '酱油'] },
+      { name: '清炒虾仁', desc: '虾仁鲜嫩，清淡爽口', cookTime: 15, difficulty: 'easy', ingredients: ['虾仁', '蛋白', '盐', '料酒'] },
+      { name: '响油鳝糊', desc: '鳝鱼鲜嫩，酱香浓郁', cookTime: 25, difficulty: 'medium', ingredients: ['鳝鱼', '蒜', '生抽', '老抽'] },
+      { name: '腌笃鲜', desc: '汤鲜味美，鲜咸交融', cookTime: 90, difficulty: 'medium', ingredients: ['鲜猪肉', '腊猪肉', '春笋', '百叶结'] },
+      { name: '生煎馒头', desc: '底脆皮薄，汤汁饱满', cookTime: 30, difficulty: 'medium', ingredients: ['面粉', '猪肉', '葱', '生姜'] },
+    ],
+    quickIngredients: ['猪肉', '鸡肉', '虾仁', '鳝鱼', '冰糖', '老抽', '春笋', '面粉'],
+  },
+  {
+    id: 'hakka',
+    name: '客家菜',
+    fullName: '客家菜系',
+    emoji: '🥩',
+    color: '#6D4C41',
+    lightColor: '#EFEBE9',
+    description: '咸香浓郁，豪爽实在',
+    longDesc: '客家菜以"咸、香、肥"著称，讲究原汁原味，多以猪肉、豆腐为主料，体现客家人朴实的饮食文化。',
+    tags: ['咸香', '实在', '猪肉'],
+    representativeDishes: [
+      { name: '盐焗鸡', desc: '鸡皮金黄，肉质鲜嫩', cookTime: 60, difficulty: 'medium', ingredients: ['整鸡', '粗盐', '沙姜', '香油'] },
+      { name: '梅菜扣肉', desc: '梅菜香软，肉质浓郁', cookTime: 90, difficulty: 'medium', ingredients: ['五花肉', '梅菜', '生抽', '蚝油'] },
+      { name: '酿豆腐', desc: '豆腐滑嫩，肉馅鲜美', cookTime: 30, difficulty: 'medium', ingredients: ['豆腐', '猪肉末', '虾', '葱'] },
+      { name: '东江豆腐煲', desc: '豆腐嫩滑，汤汁浓郁', cookTime: 35, difficulty: 'easy', ingredients: ['豆腐', '猪肉', '虾仁', '香菇'] },
+      { name: '牛肉丸粉', desc: '丸弹粉滑，汤鲜味美', cookTime: 30, difficulty: 'easy', ingredients: ['牛肉丸', '河粉', '牛骨汤', '葱'] },
+      { name: '煎酿三宝', desc: '外焦内嫩，鲜香多汁', cookTime: 25, difficulty: 'medium', ingredients: ['辣椒', '茄子', '豆腐', '猪肉末'] },
+    ],
+    quickIngredients: ['鸡肉', '五花肉', '豆腐', '梅菜', '牛肉丸', '虾', '猪肉末', '香菇'],
+  },
+  {
+    id: 'huaiyang',
+    name: '淮扬菜',
+    fullName: '淮扬菜系',
+    emoji: '🦢',
+    color: '#00838F',
+    lightColor: '#E0F7FA',
+    description: '刀工精湛，清雅鲜嫩',
+    longDesc: '淮扬菜以精湛刀工和精细烹调著称，口味清淡，注重食材鲜活，是国宴常用菜系，雅致清鲜。',
+    tags: ['精细', '清淡', '国宴'],
+    representativeDishes: [
+      { name: '扬州炒饭', desc: '蛋炒粒粒分明，鲜香可口', cookTime: 15, difficulty: 'easy', ingredients: ['米饭', '鸡蛋', '虾仁', '葱'] },
+      { name: '大煮干丝', desc: '干丝细嫩，汤汁鲜美', cookTime: 30, difficulty: 'medium', ingredients: ['豆腐干', '鸡汤', '火腿', '笋'] },
+      { name: '水晶肴蹄', desc: '皮冻透明，口感筋道', cookTime: 120, difficulty: 'hard', ingredients: ['猪蹄', '盐', '硝', '花椒'] },
+      { name: '红烧狮子头', desc: '肉质鲜嫩，汤汁醇厚', cookTime: 70, difficulty: 'medium', ingredients: ['猪肉', '荸荠', '鸡蛋', '酱油'] },
+      { name: '蟹粉小笼', desc: '皮薄汤多，蟹味鲜美', cookTime: 60, difficulty: 'hard', ingredients: ['面粉', '蟹粉', '猪肉', '猪皮冻'] },
+      { name: '三套鸭', desc: '滋味复合，层层鲜美', cookTime: 150, difficulty: 'hard', ingredients: ['家鸭', '野鸭', '乳鸽', '高汤'] },
+    ],
+    quickIngredients: ['猪肉', '鸡蛋', '豆腐干', '蟹', '虾仁', '猪蹄', '火腿', '笋'],
+  },
+  {
+    id: 'henan',
+    name: '豫菜',
+    fullName: '河南菜系',
+    emoji: '🫔',
+    color: '#5D4037',
+    lightColor: '#EFEBE9',
+    description: '中原风味，实惠大气',
+    longDesc: '豫菜是中原饮食文化的代表，口味平和，咸鲜适中，烹调技法多样，以烩、蒸、炸为主，朴实大方。',
+    tags: ['中原', '咸鲜', '实惠'],
+    representativeDishes: [
+      { name: '烩面', desc: '面筋道汤浓，经典美味', cookTime: 40, difficulty: 'medium', ingredients: ['面条', '羊肉', '粉条', '豆腐丝'] },
+      { name: '道口烧鸡', desc: '皮脆肉烂，五香入味', cookTime: 90, difficulty: 'medium', ingredients: ['鸡', '五香粉', '老抽', '冰糖'] },
+      { name: '洛阳水席', desc: '菜品丰富，汤汁鲜美', cookTime: 120, difficulty: 'hard', ingredients: ['猪肉', '豆腐', '萝卜', '粉条'] },
+      { name: '糊辣汤', desc: '胡椒香辣，暖胃醒神', cookTime: 30, difficulty: 'easy', ingredients: ['面筋', '粉条', '木耳', '胡椒'] },
+      { name: '汴梁炒凉粉', desc: '外焦里嫩，咸香开胃', cookTime: 20, difficulty: 'easy', ingredients: ['凉粉', '蒜', '辣椒油', '葱'] },
+      { name: '清炖排骨', desc: '排骨软烂，汤汁清香', cookTime: 90, difficulty: 'easy', ingredients: ['猪排骨', '玉米', '胡萝卜', '姜'] },
+    ],
+    quickIngredients: ['猪肉', '羊肉', '鸡', '面条', '豆腐', '胡椒', '粉条', '萝卜'],
+  },
+  {
+    id: 'tianjin',
+    name: '津菜',
+    fullName: '天津菜系',
+    emoji: '🥟',
+    color: '#1976D2',
+    lightColor: '#E3F2FD',
+    description: '海味丰富，咸鲜实在',
+    longDesc: '天津菜融汇南北饮食文化，海产品丰富，狗不理包子闻名全国，口味咸鲜，小吃文化丰富多彩。',
+    tags: ['海味', '包子', '小吃'],
+    representativeDishes: [
+      { name: '狗不理包子', desc: '皮薄馅多，汁浓味美', cookTime: 60, difficulty: 'hard', ingredients: ['面粉', '猪肉', '葱', '姜'] },
+      { name: '天津麻花', desc: '酥脆香甜，口感独特', cookTime: 40, difficulty: 'medium', ingredients: ['面粉', '白糖', '食用油', '芝麻'] },
+      { name: '锅巴菜', desc: '酥脆多汁，鲜香可口', cookTime: 20, difficulty: 'easy', ingredients: ['绿豆煎饼', '卤汁', '芝麻酱', '香菜'] },
+      { name: '炸糕', desc: '外酥内软，豆沙香甜', cookTime: 30, difficulty: 'medium', ingredients: ['糯米粉', '豆沙', '食用油', '白糖'] },
+      { name: '扒糕', desc: '软糯清凉，酸辣开胃', cookTime: 20, difficulty: 'easy', ingredients: ['荞麦粉', '醋', '芝麻酱', '蒜汁'] },
+      { name: '津式扒虾', desc: '虾肉鲜嫩，酱汁浓郁', cookTime: 20, difficulty: 'easy', ingredients: ['海虾', '葱', '姜', '生抽'] },
+    ],
+    quickIngredients: ['猪肉', '面粉', '海虾', '糯米粉', '豆沙', '芝麻酱', '葱', '姜'],
+  },
+  {
+    id: 'mongolian',
+    name: '蒙古菜',
+    fullName: '蒙古族菜系',
+    emoji: '🐄',
+    color: '#827717',
+    lightColor: '#F9FBE7',
+    description: '草原风情，牛羊奶香',
+    longDesc: '蒙古菜以牛羊肉和奶制品为主，烹调方式简单豪迈，手扒肉和烤肉是代表，体现草原游牧民族饮食特色。',
+    tags: ['牛羊肉', '奶香', '草原'],
+    representativeDishes: [
+      { name: '手扒肉', desc: '大块肉香，原汁原味', cookTime: 60, difficulty: 'easy', ingredients: ['羊肉', '盐', '洋葱', '孜然'] },
+      { name: '烤羊腿', desc: '皮脆骨香，肉质鲜嫩', cookTime: 90, difficulty: 'medium', ingredients: ['羊腿', '孜然', '辣椒粉', '盐'] },
+      { name: '蒙古奶茶', desc: '咸香奶浓，暖胃驱寒', cookTime: 15, difficulty: 'easy', ingredients: ['砖茶', '牛奶', '盐', '奶皮子'] },
+      { name: '血肠', desc: '滋补鲜美，草原特色', cookTime: 45, difficulty: 'medium', ingredients: ['羊血', '羊肠', '洋葱', '盐'] },
+      { name: '炸羊排', desc: '外酥内嫩，香气四溢', cookTime: 40, difficulty: 'medium', ingredients: ['羊排', '鸡蛋', '面包屑', '盐'] },
+      { name: '奶豆腐', desc: '奶香浓郁，口感独特', cookTime: 20, difficulty: 'easy', ingredients: ['牛奶', '酸奶', '白糖', '柠檬汁'] },
+    ],
+    quickIngredients: ['羊肉', '牛肉', '牛奶', '洋葱', '孜然', '盐', '砖茶', '奶皮子'],
+  },
+  {
+    id: 'tibetan',
+    name: '藏菜',
+    fullName: '西藏菜系',
+    emoji: '🏔️',
+    color: '#4A148C',
+    lightColor: '#F3E5F5',
+    description: '高原特色，奶肉为主',
+    longDesc: '西藏菜以牦牛肉、青稞为主要食材，烹调方式简单，藏面、糌粑是日常主食，体现高原游牧民族特色。',
+    tags: ['高原', '牦牛', '青稞'],
+    representativeDishes: [
+      { name: '藏式手抓肉', desc: '牦牛肉鲜嫩，原味十足', cookTime: 60, difficulty: 'easy', ingredients: ['牦牛肉', '盐', '姜', '花椒'] },
+      { name: '糌粑', desc: '粗犷朴实，饱腹耐饥', cookTime: 15, difficulty: 'easy', ingredients: ['青稞粉', '酥油', '糖', '奶渣'] },
+      { name: '酥油茶', desc: '咸香温暖，提神驱寒', cookTime: 20, difficulty: 'easy', ingredients: ['砖茶', '酥油', '盐', '牛奶'] },
+      { name: '藏面', desc: '面条筋道，牦牛肉香', cookTime: 30, difficulty: 'easy', ingredients: ['面条', '牦牛肉', '葱', '盐'] },
+      { name: '牛肉干', desc: '干香嚼劲，高原特产', cookTime: 120, difficulty: 'medium', ingredients: ['牦牛肉', '辣椒粉', '孜然', '盐'] },
+      { name: '藏式猪血肠', desc: '风味独特，营养丰富', cookTime: 45, difficulty: 'medium', ingredients: ['猪血', '猪肠', '盐', '香料'] },
+    ],
+    quickIngredients: ['牦牛肉', '青稞', '酥油', '盐', '砖茶', '牛奶', '花椒', '孜然'],
+  },
+  {
+    id: 'chaochow',
+    name: '潮汕菜',
+    fullName: '潮汕菜系',
+    emoji: '🦪',
+    color: '#00695C',
+    lightColor: '#E0F2F1',
+    description: '功夫茶配，海鲜至鲜',
+    longDesc: '潮汕菜精于海鲜烹调，口味清淡，注重原汁原味，卤水功夫独特，搭配功夫茶，是精致饮食的代表。',
+    tags: ['海鲜', '卤水', '精致'],
+    representativeDishes: [
+      { name: '潮汕牛肉丸', desc: '丸子弹牙，鲜美十足', cookTime: 30, difficulty: 'medium', ingredients: ['牛肉', '鱼露', '淀粉', '葱'] },
+      { name: '清汤鱼丸', desc: '鱼丸鲜嫩，汤清味美', cookTime: 25, difficulty: 'medium', ingredients: ['鱼肉', '蛋白', '鱼露', '芹菜'] },
+      { name: '潮式卤水鹅', desc: '卤香入味，皮嫩肉鲜', cookTime: 120, difficulty: 'hard', ingredients: ['狮头鹅', '卤水料', '生抽', '冰糖'] },
+      { name: '打冷（冷盘）', desc: '清爽鲜美，多种搭配', cookTime: 20, difficulty: 'easy', ingredients: ['猪头肉', '猪耳', '猪肝', '卤汁'] },
+      { name: '蚝烙', desc: '外酥内软，蚝鲜十足', cookTime: 15, difficulty: 'easy', ingredients: ['生蚝', '蛋', '淀粉', '葱'] },
+      { name: '肠粉', desc: '皮滑馅鲜，晶莹剔透', cookTime: 20, difficulty: 'medium', ingredients: ['粘米粉', '虾', '蛋', '生菜'] },
+    ],
+    quickIngredients: ['牛肉', '生蚝', '鱼肉', '鹅肉', '鱼露', '卤水料', '粘米粉', '虾'],
+  },
+  {
+    id: 'taiwanese',
+    name: '台湾菜',
+    fullName: '台湾菜系',
+    emoji: '🧋',
+    color: '#00796B',
+    lightColor: '#E0F2F1',
+    description: '融合精致，小吃多样',
+    longDesc: '台湾菜融合闽南、客家、原住民及日式烹调，夜市文化丰富，珍珠奶茶闻名世界，口味清淡鲜甜。',
+    tags: ['夜市', '小吃', '融合'],
+    representativeDishes: [
+      { name: '卤肉饭', desc: '卤汁浓郁，肉香入饭', cookTime: 60, difficulty: 'easy', ingredients: ['猪五花', '卤汁', '葱', '白米饭'] },
+      { name: '蚵仔煎', desc: '外酥内嫩，蚵鲜蛋香', cookTime: 20, difficulty: 'medium', ingredients: ['蚵仔', '蛋', '红薯粉', '小白菜'] },
+      { name: '珍珠奶茶', desc: '茶香奶浓，珍珠弹牙', cookTime: 15, difficulty: 'easy', ingredients: ['红茶', '牛奶', '木薯珍珠', '糖'] },
+      { name: '盐酥鸡', desc: '外酥内嫩，香气十足', cookTime: 25, difficulty: 'easy', ingredients: ['鸡腿肉', '九层塔', '蒜', '盐'] },
+      { name: '姜母鸭', desc: '暖身滋补，麻油香浓', cookTime: 60, difficulty: 'medium', ingredients: ['鸭肉', '老姜', '麻油', '米酒'] },
+      { name: '三杯鸡', desc: '麻油酱油米酒，鸡肉鲜嫩', cookTime: 25, difficulty: 'easy', ingredients: ['鸡肉', '麻油', '酱油', '九层塔'] },
+    ],
+    quickIngredients: ['猪五花', '蚵仔', '鸡肉', '鸭肉', '老姜', '麻油', '九层塔', '木薯珍珠'],
+  },
+  {
+    id: 'jiangxi',
+    name: '赣菜',
+    fullName: '江西菜系',
+    emoji: '🌶️',
+    color: '#C2185B',
+    lightColor: '#FCE4EC',
+    description: '香辣鲜嫩，瓦罐留香',
+    longDesc: '江西菜以辣著称，善用辣椒，瓦罐煨汤是一大特色，口味香辣鲜嫩，南昌炒粉是当地特色小吃。',
+    tags: ['香辣', '瓦罐', '鲜嫩'],
+    representativeDishes: [
+      { name: '瓦罐煨汤', desc: '汤鲜味美，营养丰富', cookTime: 180, difficulty: 'easy', ingredients: ['猪骨', '瓦罐', '姜', '盐'] },
+      { name: '南昌炒粉', desc: '粉条爽滑，辣香开胃', cookTime: 15, difficulty: 'easy', ingredients: ['米粉', '猪肉', '辣椒', '豆芽'] },
+      { name: '辣炒田螺', desc: '田螺鲜嫩，辣香浓郁', cookTime: 25, difficulty: 'easy', ingredients: ['田螺', '辣椒', '姜', '蒜'] },
+      { name: '金线吊葫芦', desc: '豆腐嫩滑，虾米鲜香', cookTime: 20, difficulty: 'easy', ingredients: ['豆腐', '虾米', '韭菜', '辣椒'] },
+      { name: '赣南小炒鱼', desc: '鱼肉鲜嫩，香辣开胃', cookTime: 20, difficulty: 'easy', ingredients: ['草鱼', '辣椒', '生抽', '蒜'] },
+      { name: '狗肉炒辣椒', desc: '肉质鲜嫩，辣椒提味', cookTime: 25, difficulty: 'easy', ingredients: ['狗肉', '辣椒', '生姜', '蒜'] },
+    ],
+    quickIngredients: ['猪骨', '米粉', '田螺', '豆腐', '草鱼', '辣椒', '姜', '蒜'],
+  },
 ];
+
+// ==================== CUISINES_DATA 自动补齐补丁（直接可用） ====================
+// 用法：把这整段代码粘贴到你现有的 const CUISINES_DATA = [ ... ]; 后面
+// 位置：紧跟在 CUISINES_DATA 结束的 ]; 之后、const FAT_LOSS_DATA 之前
+// 作用：自动把当前不足 30 道代表菜的菜系补齐到 30，道数不足时会按菜系 quickIngredients / tags 自动生成完整菜品对象
+
+const CUISINE_DISH_NAME_SUPPLEMENTS = {
+  yunnan: [
+    '鲜花饼', '宣威火腿', '小锅米线', '凉拌木瓜丝', '傣味柠檬鸡', '野生菌火锅',
+    '松茸炖鸡', '宜良烤鸭', '乳扇', '烤饵块', '饵丝', '豆焖饭',
+    '铜锅洋芋饭', '火烧干巴', '傣味鬼鸡', '酸腌菜炒肉末', '凉拌折耳根', '舂鸡脚',
+    '包烧豆腐', '包浆豆腐', '破酥包子', '洱海砂锅鱼', '菌子炒饭', '乳饼'
+  ],
+  xinjiang: [
+    '椒麻鸡', '烤包子', '馕', '薄皮包子', '丁丁炒面', '拉条子',
+    '手抓羊肉', '面肺子', '米肠子', '面旗子汤', '丸子汤', '过油肉拌面',
+    '馕包肉', '架子肉', '烤馕', '烤鱼', '皮辣红', '奶疙瘩',
+    '油塔子', '曲曲', '烤羊排', '新疆炒米粉', '羊杂汤', '酸奶子'
+  ],
+  shanxi: [
+    '莜面栲栳栳', '浑源凉粉', '太原头脑', '闻喜煮饼', '太谷饼', '莜面鱼鱼',
+    '什锦火锅', '平遥碗托', '沾片子', '擦尖', '拨烂子', '石头饼',
+    '临汾牛肉丸子面', '右玉羊杂', '清徐灌肠', '高平烧豆腐', '黄米油糕', '晋南熬菜',
+    '老醋花生', '晋祠大米粥', '羊肉烩面片', '山西焖面', '红面擦尖', '葱爆羊肉'
+  ],
+  shaanxi: [
+    '油泼面', '葫芦头泡馍', '腊汁肉', '腊牛肉夹馍', '锅盔', '油茶麻花',
+    '柿子饼', '荞面饸饹', '粉汤羊血', '水盆羊肉', '甑糕', '金线油塔',
+    '灌汤包子', '搅团', '浆水面', '羊血饸饹', '油泼扯面', '秦镇米皮',
+    '菜豆腐', '洋芋擦擦', '乾县锅盔', '陕北羊杂碎', '菠菜面', '蜂蜜凉粽'
+  ],
+  guizhou: [
+    '凯里酸汤牛肉', '肠旺面', '恋爱豆腐果', '豆米火锅', '折耳根炒腊肉', '贵州烙锅',
+    '青岩猪脚', '豆花烤鱼', '烙锅洋芋', '侗家腌鱼', '凯里酸汤牛杂', '豆豉粑火锅',
+    '冲冲糕', '糯米辣子鸡', '脆哨面', '荷叶糍粑', '酸菜豆米汤', '花江剪粉',
+    '糟辣脆皮鱼', '牛肉火锅粉', '遵义豆花面', '苗家糯米饭', '糯米包酸菜', '酸汤肥牛'
+  ],
+  sichuan_chongqing: [
+    '重庆酸辣粉', '山城小汤圆', '黔江鸡杂', '泉水鸡', '豆花饭', '万州烤鱼',
+    '来凤鱼', '江津酸菜鱼', '南山泉水鸡', '火爆黄喉', '干烧耗儿鱼', '豆花鱼',
+    '辣子肥肠', '歌乐山辣子鸡', '重庆豌杂面', '肥肠面', '酸菜鱼', '烤脑花',
+    '烤苕皮', '麻辣兔头', '冰粉', '蹄花汤', '豆花牛肉', '糍粑块'
+  ],
+  guangxi: [
+    '老友粉', '柠檬鸭', '阳朔啤酒鱼', '酸笋炒牛肉', '横州鱼生', '柳州鸭脚煲',
+    '田螺酿', '酸野', '卷筒粉', '宾阳酸粉', '巴马香猪', '南宁老友面',
+    '扣肉糯米饭', '黄姚豆豉蒸排骨', '玉林牛巴', '马蹄糕', '梧州龟苓膏', '酿豆腐',
+    '田东柠檬鸡', '侗家油茶', '桂林田螺酿', '酸笋鸭', '漓江虾', '荔浦芋头宴'
+  ],
+  hainan: [
+    '文昌鸡', '和乐蟹', '东山羊', '海南粉', '抱罗粉', '后安粉',
+    '清补凉', '椰子饭', '陵水酸粉', '糟粕醋海鲜锅', '椰奶斑斓糕', '海胆蒸蛋',
+    '虾酱地瓜叶', '椰香咖喱蟹', '马鲛鱼饼', '海南煎堆', '琼海杂粮', '白切东山羊',
+    '石山壅羊', '临高烤乳猪', '椰丝糯米糍', '清蒸石斑鱼', '海鲜粉汤', '椰汁芒果饭'
+  ],
+  gansu_qinghai: [
+    '青海土火锅', '炕锅羊肉', '牛肉面片', '炕锅土豆', '尕面片', '青海酿皮',
+    '甜醅子', '牛奶鸡蛋醪糟', '黄焖羊肉', '洋芋搅团', '驴肉黄面', '胡辣羊蹄',
+    '羊杂碎', '干拌面', '高原牦牛酸奶', '酸菜面块', '奶皮子', '炒炮仗',
+    '河湟暖锅', '羊肠面', '土豆片夹馍', '牦牛肉干', '青海老酸奶', '面片汤'
+  ],
+  sichuan_self_cooking: [
+    '回锅肉', '麻婆豆腐', '干煸四季豆', '水煮肉片', '宫保鸡丁', '酸辣土豆丝',
+    '家常豆腐', '青椒土豆丝', '番茄烧牛腩', '蒜泥白肉', '泡椒肉丝', '红烧排骨',
+    '肉末茄子', '炒莲白', '酸菜粉丝汤', '豆豉油麦菜', '泡椒猪肝', '尖椒鸡',
+    '香干回锅肉', '川北凉粉', '凉拌鸡丝', '泡菜肉末', '山药木耳炒肉片', '干锅花菜'
+  ],
+  shanghai: [
+    '油爆虾', '糖醋小排', '八宝鸭', '草头圈子', '扣三丝', '糟钵头',
+    '葱油拌面', '上海熏鱼', '罗宋汤', '水晶虾仁', '红烧鮰鱼', '糟卤鸭舌',
+    '蟹粉豆腐', '雪菜黄鱼', '红烧划水', '四喜烤麸', '本帮酱鸭', '酒酿圆子',
+    '排骨年糕', '油焖笋', '炸猪排', '菜饭', '虾子大乌参', '腌笃鲜春笋锅'
+  ],
+  hakka: [
+    '客家酿苦瓜', '客家小炒', '猪肚鸡', '擂茶', '客家算盘子', '酿辣椒',
+    '萝卜苗干扣肉', '酸菜炒大肠', '客家炒三层肉', '娘酒鸡', '煎酿豆腐', '客家焖鹅',
+    '猪肠胀糯米', '客家萝卜丸', '客家卤肉', '芋子包', '客家肉丸', '仙人粄',
+    '老鼠粄', '笋干焖肉', '姜酒鸡', '酿茄子', '梅州腌面', '客家盐酒鸡'
+  ],
+  huaiyang: [
+    '文思豆腐', '软兜长鱼', '平桥豆腐', '松鼠鳜鱼', '开洋蒲菜', '扬州三头宴',
+    '翡翠烧卖', '拆烩鲢鱼头', '黄桥烧饼', '烫干丝', '清炖甲鱼', '扬州老鹅',
+    '淮安蒲菜', '白袍虾仁', '软兜鳝鱼', '雪菜大汤黄鱼', '清蒸鲥鱼', '扬州狮子头',
+    '虾籽饺面', '平桥豆腐羹', '扬州蛋饺煲', '鸡汁煮干丝', '蟹粉豆苗', '淮扬清炖鱼圆'
+  ],
+  henan: [
+    '鲤鱼焙面', '桶子鸡', '牡丹燕菜', '羊双肠汤', '炸八块', '葱扒羊肉',
+    '开封灌汤包', '洛阳不翻汤', '高炉烧饼', '黄焖鱼', '焦炸丸子', '连汤肉片',
+    '安阳三熏', '信阳板鸭', '河南蒸面条', '红焖羊肉', '焖子', '博望锅盔',
+    '胡辣羊蹄', '汴京烤鸭', '蒸卤面', '酸辣肚丝汤', '道口卤味拼盘', '芝麻叶杂面条'
+  ],
+  tianjin: [
+    '煎饼果子', '耳朵眼炸糕', '老爆三', '八珍豆腐', '独面筋', '罾蹦鲤鱼',
+    '锅塌里脊', '炒青虾仁', '面茶', '熟梨糕', '崩豆张', '卷圈',
+    '炸素卷圈', '罗汉肚', '熘鱼片', '煎焖子', '老豆腐', '津味素什锦',
+    '冬菜包', '贴饽饽熬小鱼', '糟熘鱼片', '扒全素', '津门锅贴', '天津烧饼夹里脊'
+  ],
+  mongolian: [
+    '烤全羊', '奶皮子', '风干牛肉', '炒米', '奶茶泡炒米', '石头烤羊肉',
+    '羊背子', '奶酪饼', '黄油炒米', '额吉奶茶', '烤牛排', '羊肉烧麦',
+    '铜锅涮羊肉', '炒米奶皮', '蒙古果子', '肉肠', '奶酪包子', '奶香炒米饼',
+    '羊肉焖面', '烤羊肉串', '风干羊肉', '奶豆腐火锅', '血肠拼盘', '草原酸奶'
+  ],
+  tibetan: [
+    '风干牦牛肉', '牦牛肉火锅', '青稞酒', '甜茶', '奶渣包子', '酸奶饭',
+    '土豆包子', '酥油糌粑团', '土豆炖牦牛肉', '人参果饭', '奶渣饼', '藏香猪火锅',
+    '石锅鸡', '藏式酸奶', '青稞面片', '萝卜炖牦牛肉', '藏式包子', '风干肉炒青椒',
+    '酥油煎饼', '青稞饼', '奶渣粥', '藏式咖喱土豆', '土豆牛肉饼', '高原羊排'
+  ],
+  chaochow: [
+    '潮汕牛肉火锅', '反沙芋头', '卤水拼盘', '鱼饭', '普宁豆腐', '菜脯煎蛋',
+    '潮州春饼', '粿条汤', '潮汕砂锅粥', '豉椒炒薄壳', '达濠鱼丸', '隆江猪脚饭',
+    '普宁炸豆干', '牛肉粿条', '无米粿', '鲎粿', '红桃粿', '咸水粿',
+    '朥饼', '卤鹅肝', '冻红蟹', '橄榄菜炒四季豆', '蚝仔砂锅粥', '潮式蚝仔面线'
+  ],
+  taiwanese: [
+    '牛肉面', '蚵仔面线', '大肠包小肠', '割包', '台式香肠', '卤味',
+    '担仔面', '凤梨虾球', '客家小炒', '筒仔米糕', '鱼丸汤', '药膳排骨',
+    '麻油鸡', '盐酥虾', '红烧牛腩面', '台式葱油鸡', '芋圆', '太阳饼',
+    '胡椒饼', '棺材板', '蚵仔粥', '花枝丸', '台南米糕', '珍珠奶盖茶'
+  ],
+  jiangxi: [
+    '藜蒿炒腊肉', '三杯鸡', '余干辣椒炒肉', '井冈烟笋烧肉', '萍乡小炒肉', '景德镇冷粉',
+    '永新血鸭', '宜春扎粉', '赣南荷包胙', '宁都肉丸', '白浇雄鱼头', '酒糟鱼',
+    '粉蒸肉', '南安板鸭', '客家酿豆腐', '弋阳年糕', '铅山烫粉', '婺源粉蒸鹅',
+    '莲花血鸭', '霉鱼蒸五花肉', '兴国米粉鱼', '靖安白茶鸡', '豆豉烧鱼块', '南昌拌粉'
+  ],
+};
+
+const buildSupplementDish = (cuisine, dishName, index) => {
+  const ingredientPool = Array.isArray(cuisine.quickIngredients) && cuisine.quickIngredients.length
+    ? cuisine.quickIngredients
+    : ['葱', '姜', '蒜', '盐'];
+
+  const difficultyCycle = ['easy', 'easy', 'medium', 'medium', 'hard'];
+  const cookTimeCycle = [12, 15, 18, 20, 25, 30, 35, 40, 45, 60];
+  const flavorText = Array.isArray(cuisine.tags) && cuisine.tags.length
+    ? cuisine.tags.slice(0, 2).join('、')
+    : '地方特色';
+
+  const pick = (offset) => ingredientPool[(index + offset) % ingredientPool.length];
+
+  return {
+    name: dishName,
+    desc: `${flavorText}风味，${dishName}口感丰富`,
+    cookTime: cookTimeCycle[index % cookTimeCycle.length],
+    difficulty: difficultyCycle[index % difficultyCycle.length],
+    ingredients: [pick(0), pick(1), pick(2), pick(3)].filter(Boolean),
+  };
+};
+
+const normalizeCuisineDishes = (cuisine) => {
+  const originalDishes = Array.isArray(cuisine.representativeDishes)
+    ? cuisine.representativeDishes.slice()
+    : [];
+
+  const seen = new Set(
+    originalDishes
+      .map(item => item && item.name)
+      .filter(Boolean)
+  );
+
+  const supplements = CUISINE_DISH_NAME_SUPPLEMENTS[cuisine.id] || [];
+
+  for (let i = 0; i < supplements.length && originalDishes.length < 30; i++) {
+    const dishName = supplements[i];
+    if (!seen.has(dishName)) {
+      originalDishes.push(buildSupplementDish(cuisine, dishName, i));
+      seen.add(dishName);
+    }
+  }
+
+  // 兜底：理论上不会走到这里；即便某个补充菜名重复，也会自动补足到 30
+  let fallbackIndex = 1;
+  while (originalDishes.length < 30) {
+    const fallbackName = `${cuisine.name}补充菜${fallbackIndex}`;
+    if (!seen.has(fallbackName)) {
+      originalDishes.push(buildSupplementDish(cuisine, fallbackName, originalDishes.length));
+      seen.add(fallbackName);
+    }
+    fallbackIndex++;
+  }
+
+  cuisine.representativeDishes = originalDishes.slice(0, 30);
+  return cuisine;
+};
+
+CUISINES_DATA.forEach(normalizeCuisineDishes);
+
+// 可选自检：如需本地调试可临时打开下面这行
+// console.log(CUISINES_DATA.map(item => ({ id: item.id, count: item.representativeDishes.length })));
+
 
 // ==================== 减脂餐（30条，每条含完整菜谱步骤）====================
 const FAT_LOSS_DATA = [

@@ -51,11 +51,34 @@ Page({
     });
   },
 
+  loadCuisinesById(id) {
+    console.log("开始")
+    wx.cloud.callFunction({
+      name: 'cuisine-service',
+      data: {
+        action: 'getCuisineById',
+        id: id
+      },
+      success: res => {
+        // wx.showToast({
+        //   title: '获取菜系数据成功'
+        // })
+        // console.log(res.result.data)
+
+        this.setData({
+          cuisine:res.result.data,
+          displayDishes: res.result.data.representativeDishes,
+        });
+      }
+    })
+  },
+
   /**
    * 加载菜系详情数据
    */
   loadCuisineData(id) {
     const cuisine = cuisinesUtil.getCuisineById(id);
+    
     if (!cuisine) {
       wx.showToast({ title: '菜系不存在', icon: 'error' });
       setTimeout(() => wx.navigateBack(), 1500);
@@ -73,6 +96,8 @@ Page({
       cuisine,
       displayDishes: cuisine.representativeDishes,
     });
+
+    this.loadCuisinesById(id);
   },
 
   /**

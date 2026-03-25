@@ -1,0 +1,19 @@
+<view class="page-container">
+
+  <button class="btn primary" bindtap="initData">
+    初始化全部数据
+  </button>
+  <button class="btn primary" bindtap="initCuisines">
+    初始化菜系数据
+  </button>
+
+
+  <button class="btn primary" bindtap="loadCuisinesById">
+    获取菜系数据
+  </button>
+
+  <button class="btn secondary" bindtap="checkStatus">
+    查看状态
+  </button>
+
+</view>

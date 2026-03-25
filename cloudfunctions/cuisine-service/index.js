@@ -22,9 +22,9 @@ cloud.init({
 
 // 集合名称
 const COLLECTIONS = {
-  RECIPES: 'recipes',               // 用户生成的菜谱
-  CUISINE_LIKES: 'cuisine_likes',   // 菜系收藏/点赞
-  CUISINES: 'cuisines',             // 菜系基础数据
+  RECIPES: 'recipes', // 用户生成的菜谱
+  CUISINE_LIKES: 'cuisine_likes', // 菜系收藏/点赞
+  CUISINES: 'cuisines', // 菜系基础数据
   FAT_LOSS_MEALS: 'fat_loss_meals', // 减脂餐系列
   PREGNANCY_MEALS: 'pregnancy_meals', // 孕妇营养餐系列
 };
@@ -67,7 +67,10 @@ const saveRecipe = async (openid, recipe, cuisineId, ingredients) => {
       },
     });
 
-    return { success: true, id: result._id };
+    return {
+      success: true,
+      id: result._id
+    };
   } catch (err) {
     console.error('[cuisine-service] 保存菜谱失败：', err);
     throw err;
@@ -83,11 +86,15 @@ const getUserRecipes = async (openid, page = 1, pageSize = 10) => {
 
   try {
     const countResult = await db.collection(COLLECTIONS.RECIPES)
-      .where({ openid })
+      .where({
+        openid
+      })
       .count();
 
     const result = await db.collection(COLLECTIONS.RECIPES)
-      .where({ openid })
+      .where({
+        openid
+      })
       .orderBy('createdAt', 'desc')
       .skip(skip)
       .limit(pageSize)
@@ -116,11 +123,17 @@ const likeRecipe = async (openid, recipeId) => {
     // 检查是否已点赞
     const likeKey = `${openid}_${recipeId}`;
     const likeResult = await db.collection(COLLECTIONS.CUISINE_LIKES)
-      .where({ likeKey })
+      .where({
+        likeKey
+      })
       .count();
 
     if (likeResult.total > 0) {
-      return { success: true, liked: false, message: '已取消点赞' };
+      return {
+        success: true,
+        liked: false,
+        message: '已取消点赞'
+      };
     }
 
     // 添加点赞记录
@@ -140,7 +153,11 @@ const likeRecipe = async (openid, recipeId) => {
       },
     });
 
-    return { success: true, liked: true, message: '点赞成功' };
+    return {
+      success: true,
+      liked: true,
+      message: '点赞成功'
+    };
   } catch (err) {
     console.error('[cuisine-service] 点赞失败：', err);
     throw err;
@@ -184,7 +201,14 @@ const generateCuisineRecipe = async (ingredients, cookTime, difficulty, cuisineN
   const model = cloud.ai.createModel(AI_PROVIDER);
 
   const ingStr = Array.isArray(ingredients) ? ingredients.join('、') : String(ingredients);
-  const diffMap = { easy: '简单', medium: '中等', hard: '困难', 简单: '简单', 中等: '中等', 困难: '困难' };
+  const diffMap = {
+    easy: '简单',
+    medium: '中等',
+    hard: '困难',
+    简单: '简单',
+    中等: '中等',
+    困难: '困难'
+  };
   const diffText = diffMap[difficulty] || '简单';
 
   const userPrompt = `我有以下食材：${ingStr}
@@ -199,9 +223,14 @@ const generateCuisineRecipe = async (ingredients, cookTime, difficulty, cuisineN
   const requestPromise = async () => {
     const res = await model.streamText({
       model: HUNYUAN_MODEL,
-      messages: [
-        { role: 'system', content: buildCuisineSystemPrompt(cuisineName, cuisineDesc) },
-        { role: 'user', content: userPrompt },
+      messages: [{
+          role: 'system',
+          content: buildCuisineSystemPrompt(cuisineName, cuisineDesc)
+        },
+        {
+          role: 'user',
+          content: userPrompt
+        },
       ],
       temperature: 0.75,
       max_tokens: 1200,
@@ -264,7 +293,9 @@ const generateCuisineRecipe = async (ingredients, cookTime, difficulty, cuisineN
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
-  const { action } = event;
+  const {
+    action
+  } = event;
 
   console.log(`[cuisine-service] action=${action}, openid=${openid}`);
 
@@ -273,49 +304,102 @@ exports.main = async (event, context) => {
 
       // 保存生成的菜谱
       case 'saveRecipe': {
-        const { recipe, cuisineId, ingredients } = event;
+        const {
+          recipe,
+          cuisineId,
+          ingredients
+        } = event;
         if (!recipe) {
-          return { code: ERROR_CODES.PARAM_ERROR, message: '菜谱数据不能为空', data: null };
+          return {
+            code: ERROR_CODES.PARAM_ERROR,
+            message: '菜谱数据不能为空',
+            data: null
+          };
         }
         const result = await saveRecipe(openid, recipe, cuisineId, ingredients);
-        return { code: ERROR_CODES.SUCCESS, message: 'success', data: result };
+        return {
+          code: ERROR_CODES.SUCCESS,
+          message: 'success',
+          data: result
+        };
       }
 
       // 获取用户历史菜谱
       case 'getUserRecipes': {
-        const { page = 1, pageSize = 10 } = event;
+        const {
+          page = 1, pageSize = 10
+        } = event;
         const result = await getUserRecipes(openid, page, pageSize);
-        return { code: ERROR_CODES.SUCCESS, message: 'success', data: result };
+        return {
+          code: ERROR_CODES.SUCCESS,
+          message: 'success',
+          data: result
+        };
       }
 
       // 点赞菜谱
       case 'likeRecipe': {
-        const { recipeId } = event;
+        const {
+          recipeId
+        } = event;
         if (!recipeId) {
-          return { code: ERROR_CODES.PARAM_ERROR, message: 'recipeId不能为空', data: null };
+          return {
+            code: ERROR_CODES.PARAM_ERROR,
+            message: 'recipeId不能为空',
+            data: null
+          };
         }
         const result = await likeRecipe(openid, recipeId);
-        return { code: ERROR_CODES.SUCCESS, message: 'success', data: result };
+        return {
+          code: ERROR_CODES.SUCCESS,
+          message: 'success',
+          data: result
+        };
       }
 
       // 用菜系风格生成菜谱
       case 'generateCuisineRecipe': {
-        const { ingredients, cookTime = 30, difficulty = 'easy', cuisineName, cuisineDesc, extraReq } = event;
+        const {
+          ingredients,
+          cookTime = 30,
+          difficulty = 'easy',
+          cuisineName,
+          cuisineDesc,
+          extraReq
+        } = event;
         if (!ingredients || ingredients.length === 0) {
-          return { code: ERROR_CODES.PARAM_ERROR, message: '食材不能为空', data: null };
+          return {
+            code: ERROR_CODES.PARAM_ERROR,
+            message: '食材不能为空',
+            data: null
+          };
         }
         if (!cuisineName) {
-          return { code: ERROR_CODES.PARAM_ERROR, message: '菜系名称不能为空', data: null };
+          return {
+            code: ERROR_CODES.PARAM_ERROR,
+            message: '菜系名称不能为空',
+            data: null
+          };
         }
         const recipe = await generateCuisineRecipe(
           ingredients, cookTime, difficulty, cuisineName, cuisineDesc, extraReq
         );
-        return { code: ERROR_CODES.SUCCESS, message: 'success', data: { recipe } };
+        return {
+          code: ERROR_CODES.SUCCESS,
+          message: 'success',
+          data: {
+            recipe
+          }
+        };
       }
 
       // 获取减脂餐列表（从云数据库读取）
       case 'getFatLossMeals': {
-        const { maxCalories, limit = 30, page = 1 } = event;
+        const {
+          maxCalories,
+          limit = 30,
+          page = 1
+        } = event;
         const db = cloud.database();
         const _ = db.command;
         const skip = (page - 1) * limit;
@@ -323,7 +407,9 @@ exports.main = async (event, context) => {
         try {
           let query = db.collection(COLLECTIONS.FAT_LOSS_MEALS);
           if (maxCalories && maxCalories > 0) {
-            query = query.where({ calories: _.lte(maxCalories) });
+            query = query.where({
+              calories: _.lte(maxCalories)
+            });
           }
 
           const countResult = await query.count();
@@ -341,13 +427,22 @@ exports.main = async (event, context) => {
           };
         } catch (dbErr) {
           console.error('[cuisine-service] 获取减脂餐失败:', dbErr);
-          return { code: ERROR_CODES.DB_ERROR, message: '获取减脂餐数据失败', data: null };
+          return {
+            code: ERROR_CODES.DB_ERROR,
+            message: '获取减脂餐数据失败',
+            data: null
+          };
         }
       }
 
       // 获取孕妇营养餐列表（从云数据库读取）
       case 'getPregnancyMeals': {
-        const { trimester, nutrient, limit = 30, page = 1 } = event;
+        const {
+          trimester,
+          nutrient,
+          limit = 30,
+          page = 1
+        } = event;
         const db = cloud.database();
         const _ = db.command;
         const skip = (page - 1) * limit;
@@ -387,13 +482,19 @@ exports.main = async (event, context) => {
           };
         } catch (dbErr) {
           console.error('[cuisine-service] 获取孕妇营养餐失败:', dbErr);
-          return { code: ERROR_CODES.DB_ERROR, message: '获取孕妇营养餐数据失败', data: null };
+          return {
+            code: ERROR_CODES.DB_ERROR,
+            message: '获取孕妇营养餐数据失败',
+            data: null
+          };
         }
       }
 
       // 获取菜系列表（从云数据库读取）
       case 'getCuisines': {
-        const { limit = 30, page = 1 } = event;
+        const {
+          limit = 30, page = 1
+        } = event;
         const db = cloud.database();
         const skip = (page - 1) * limit;
 
@@ -417,12 +518,65 @@ exports.main = async (event, context) => {
           };
         } catch (dbErr) {
           console.error('[cuisine-service] 获取菜系列表失败:', dbErr);
-          return { code: ERROR_CODES.DB_ERROR, message: '获取菜系数据失败', data: null };
+          return {
+            code: ERROR_CODES.DB_ERROR,
+            message: '获取菜系数据失败',
+            data: null
+          };
+        }
+      }
+      // 获取单个菜系详情（根据 id）
+      case 'getCuisineById': {
+        const {
+          id
+        } = event;
+
+        if (!id) {
+          return {
+            code: ERROR_CODES.PARAM_ERROR,
+            message: 'id不能为空',
+            data: null
+          };
+        }
+
+        const db = cloud.database();
+
+        try {
+          const result = await db.collection(COLLECTIONS.CUISINES)
+            .where({
+              id
+            }) // 👈 用你定义的 id 字段
+            .limit(1)
+            .get();
+
+          if (!result.data || result.data.length === 0) {
+            return {
+              code: ERROR_CODES.NOT_FOUND,
+              message: '未找到该菜系',
+              data: null
+            };
+          }
+
+          return {
+            code: ERROR_CODES.SUCCESS,
+            message: 'success',
+            data: result.data[0]
+          };
+
+        } catch (err) {
+          console.error('[cuisine-service] 获取菜系详情失败:', err);
+          return {
+            code: ERROR_CODES.DB_ERROR,
+            message: '获取菜系失败',
+            data: null
+          };
         }
       }
 
       default:
-        return { code: ERROR_CODES.PARAM_ERROR, message: `未知操作：${action}`, data: null };
+        return {
+          code: ERROR_CODES.PARAM_ERROR, message: `未知操作：${action}`, data: null
+        };
     }
   } catch (err) {
     console.error(`[cuisine-service] 操作失败：`, err);
