@@ -65,6 +65,7 @@ Page({
       tags: (c.tags || []).slice(0, 2),
       dishCount: (c.representativeDishes || []).length,
       recipeCount: 0,          // 数据库中已有数量（查询后更新）
+      recipePercent: 0,        // 进度百分比（预计算，WXML不支持除法运算）
       status: 'idle',          // idle / running / done / error / skip
       successCount: 0,
       failedCount: 0,
@@ -93,17 +94,28 @@ Page({
 
       if (res.result && res.result.code === 0) {
         const { statusList, summary } = res.result.data;
-        // 更新每个菜系的已有菜谱数量
+        // 更新每个菜系的已有菜谱数量，并预计算百分比（WXML不支持运算方法）
         const cuisineList = this.data.cuisineList.map(c => {
           const info = statusList.find(s => s.id === c.id);
           const recipeCount = info ? info.recipesInDB : 0;
           const status = recipeCount >= c.dishCount ? 'done' :
                          recipeCount > 0 ? 'partial' : 'idle';
-          return { ...c, recipeCount, status };
+          const recipePercent = c.dishCount > 0
+            ? Math.min(100, Math.round(recipeCount / c.dishCount * 100))
+            : 0;
+          return { ...c, recipeCount, status, recipePercent };
         });
+        // 预计算总进度（WXML不支持 toFixed 等方法调用）
+        const overallPercent = summary.totalDishes > 0
+          ? Math.min(100, Math.round(summary.totalInDB / summary.totalDishes * 100))
+          : 0;
+        const overallPctText = summary.totalDishes > 0
+          ? (summary.totalInDB / summary.totalDishes * 100).toFixed(1)
+          : '0.0';
+        const dbSummary = { ...summary, overallPercent, overallPctText };
         this.setData({
           cuisineList,
-          dbSummary: summary,
+          dbSummary,
           isQuerying: false,
           globalStatus: 'idle',
         });
@@ -327,9 +339,15 @@ Page({
   // ==================== 辅助方法 ====================
 
   _updateCuisineStatus(cuisineId, status, extraData = {}) {
-    const cuisineList = this.data.cuisineList.map(c =>
-      c.id === cuisineId ? { ...c, status, ...extraData } : c
-    );
+    const cuisineList = this.data.cuisineList.map(c => {
+      if (c.id !== cuisineId) return c;
+      const updated = { ...c, status, ...extraData };
+      // 重新计算百分比（WXML 不支持小数运算）
+      updated.recipePercent = updated.dishCount > 0
+        ? Math.min(100, Math.round(updated.recipeCount / updated.dishCount * 100))
+        : 0;
+      return updated;
+    });
     this.setData({ cuisineList });
   },
 

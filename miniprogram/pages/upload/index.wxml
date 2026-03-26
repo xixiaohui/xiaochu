@@ -36,9 +36,9 @@
     <!-- 总进度条 -->
     <view class="progress-wrap">
       <view class="progress-bar">
-        <view class="progress-fill" style="width:{{dbSummary.totalDishes > 0 ? (dbSummary.totalInDB / dbSummary.totalDishes * 100) : 0}}%"></view>
+        <view class="progress-fill" style="width:{{dbSummary.overallPercent}}%"></view>
       </view>
-      <text class="progress-pct">{{dbSummary.totalDishes > 0 ? (dbSummary.totalInDB / dbSummary.totalDishes * 100).toFixed(1) : 0}}%</text>
+      <text class="progress-pct">{{dbSummary.overallPctText}}%</text>
     </view>
   </view>
 
@@ -140,7 +140,7 @@
           <view class="mini-bar">
             <view
               class="mini-fill"
-              style="width:{{(item.recipeCount / item.dishCount * 100)}}%; background:{{item.color}}"
+              style="width:{{item.recipePercent}}%; background:{{item.color}}"
             ></view>
           </view>
         </view>
