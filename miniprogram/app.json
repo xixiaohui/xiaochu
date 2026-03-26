@@ -1,12 +1,12 @@
 {
   "pages": [
-    
+    "pages/upload/index",
     "pages/index/index",
     "pages/recipe/recipe",
     "pages/cuisine/index",
     "pages/cuisine-detail/index",
-    "pages/example/index",
-    "pages/upload/index"
+    "pages/example/index"
+    
 
     
   ],

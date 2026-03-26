@@ -1,42 +1,9 @@
-// pages/upload/index.js
-Page({
+/**
+ * batch-recipe-generate/cuisines-data.js
+ * 菜系数据集合
+ */
 
-    /**
-     * 页面的初始数据
-     */
-    data: {
-        generating: false,
-        progress: 0,
-      },
-
-    initRecipeDB() {
-        console.log("开始initRecipeDB")
-        wx.cloud.callFunction({
-            name: 'initRecipeDB',
-
-            success: res => {
-                wx.showToast({
-                    title: '初始化RecipeDB完成'
-                })
-                console.log(res)
-            },
-            fail: err => {
-                console.error("失败", err)
-                wx.showToast({
-                    title: '失败',
-                    icon: 'error'
-                })
-            }
-        })
-    },
-
-    // 调用批量生成菜谱
-  async generateAllRecipes() {
-    this.setData({ generating: true, progress: 0 });
-
-    try {
-      // 你提供的完整菜系数据
-      const CUISINES_DATA = [{
+const CUISINES_DATA = [{
         id: 'sichuan',
         name: '川菜',
         fullName: '四川菜系',
@@ -259,156 +226,10 @@ Page({
                 ingredients: ['猪里脊', '淀粉', '番茄酱', '白醋']
             },
         ],
-    }, ];
-
-      // 调用云函数
-      const result = await wx.cloud.callFunction({
-        name: 'batch-recipe-generate',
-        data: {
-          cuisinesData: CUISINES_DATA,
-        },
-      });
-
-      console.log('生成结果：', result.result);
-
-      if (result.result.code === 0) {
-        wx.showToast({
-          title: '生成完成！',
-          icon: 'success',
-        });
-        console.log(`✓ 成功：${result.result.data.statistics.successCount}`);
-        console.log(`✗ 失败：${result.result.data.statistics.failedCount}`);
-      } else {
-        wx.showToast({
-          title: '生成失败：' + result.result.message,
-          icon: 'none',
-        });
-      }
-    } catch (err) {
-      console.error('调用失败：', err);
-      wx.showToast({
-        title: '调用出错',
-        icon: 'none',
-      });
-    } finally {
-      this.setData({ generating: false });
-    }
-  },
-
-    
-
-    initData() {
-        wx.cloud.callFunction({
-            name: 'data-init',
-            data: {
-                action: 'init_all'
-            },
-            success: res => {
-                wx.showToast({
-                    title: '初始化完成'
-                })
-                console.log(res)
-            }
-        })
     },
-    initCuisines() {
-        console.log("开始initCuisines")
-        wx.cloud.callFunction({
-            name: 'data-init',
-            data: {
-                action: 'init_cuisines'
-            },
-            success: res => {
-                wx.showToast({
-                    title: '初始化完成'
-                })
-                console.log(res)
-            }
-        })
-    },
+    // ... 其他菜系 ...
+];
 
-    loadCuisinesById() {
-        console.log("开始")
-        wx.cloud.callFunction({
-            name: 'cuisine-service',
-            data: {
-                action: 'getCuisineById',
-                id: 'anhui'
-            },
-            success: res => {
-                wx.showToast({
-                    title: '获取菜系数据成功'
-                })
-                console.log(res.result.data)
-            }
-        })
-    },
-
-    checkStatus() {
-        wx.cloud.callFunction({
-            name: 'data-init',
-            data: {
-                action: 'status'
-            },
-            success: res => {
-                console.log('当前数据：', res)
-            }
-        })
-    },
-
-    /**
-     * 生命周期函数--监听页面加载
-     */
-    onLoad(options) {
-        this.generateAllRecipes(); // 如果想自动生成，取消注释
-    },
-
-    /**
-     * 生命周期函数--监听页面初次渲染完成
-     */
-    onReady() {
-
-    },
-
-    /**
-     * 生命周期函数--监听页面显示
-     */
-    onShow() {
-
-    },
-
-    /**
-     * 生命周期函数--监听页面隐藏
-     */
-    onHide() {
-
-    },
-
-    /**
-     * 生命周期函数--监听页面卸载
-     */
-    onUnload() {
-
-    },
-
-    /**
-     * 页面相关事件处理函数--监听用户下拉动作
-     */
-    onPullDownRefresh() {
-
-    },
-
-    /**
-     * 页面上拉触底事件的处理函数
-     */
-    onReachBottom() {
-
-    },
-
-    /**
-     * 用户点击右上角分享
-     */
-    onShareAppMessage() {
-
-    }
-})
+module.exports = {
+    CUISINES_DATA
+};

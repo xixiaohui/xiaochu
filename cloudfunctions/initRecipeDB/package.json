@@ -1,0 +1,9 @@
+{
+  "name": "initRecipeDB",
+  "version": "2.0.0",
+  "description": "小厨AI菜系服务云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
