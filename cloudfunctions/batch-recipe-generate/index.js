@@ -1,45 +1,57 @@
 /**
  * 批量菜谱生成云函数 - batch-recipe-generate
- * 
- * 关键：直接集成 recipe-generate 的所有逻辑（包括 cloud.ai 初始化）
- * 这样确保 cloud.ai 在完全相同的上下文中被调用
- * 
- * 版本：3.0.0
+ * 功能：批量为指定菜系下的所有代表菜生成完整AI菜谱并存入云数据库 recipes
+ *
+ * 支持操作（event.action）：
+ *   generate     - 批量生成（默认），支持单菜系或全部菜系
+ *   status       - 查询各菜系在 recipes 表中已有的菜谱数量
+ *   check_dish   - 检查某道菜是否已存在
+ *   clear_cuisine - 清空某个菜系的所有菜谱（危险操作，需传 confirm:true）
+ *
+ * event 参数说明：
+ *   action       - 操作类型，默认 'generate'
+ *   cuisinesData - 菜系数据数组（generate时必传，或后端从cuisines-data.js读取）
+ *   cuisineId    - 仅生成指定菜系（generate时可选）
+ *   skipExisting - 是否跳过已存在的菜谱，默认 true
+ *   maxDishes    - 每个菜系最多生成菜数，默认不限
+ *   confirm      - clear_cuisine 操作时必须为 true
+ *
+ * 版本：4.0.0
  */
 
 'use strict';
 
 const cloud = require('wx-server-sdk');
 
-// ✅ 在模块加载时立即初始化（与 recipe-generate 完全相同）
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV,
-});
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 
 const db = cloud.database();
+const _ = db.command;
 
 // ==================== 常量配置 ====================
 
 const AI_PROVIDER = 'hunyuan-exp';
 const HUNYUAN_MODEL = 'hunyuan-turbos-latest';
-const CALL_TIMEOUT = 30000;
-const CONCURRENT_LIMIT = 1; // 降低为 1 以降低并发风险
-const RECIPE_TIMEOUT = 28;
+const CALL_TIMEOUT = 30000;       // 单次AI调用超时
+const DISH_DELAY_MS = 2000;       // 每道菜之间间隔（ms）
+const CUISINE_DELAY_MS = 3000;    // 菜系之间间隔（ms）
 
-// ==================== 错误码定义 ====================
+const COLLECTION_RECIPES = 'recipes';
 
-const ERROR_CODES = {
+// ==================== 错误码 ====================
+
+const ERR = {
   SUCCESS: 0,
   PARAM_ERROR: 1,
   AI_CALL_FAILED: 2,
   PARSE_FAILED: 3,
   TIMEOUT: 4,
+  DB_ERROR: 5,
 };
 
-// ==================== Prompt 构建（完全相同）====================
+// ==================== System Prompt ====================
 
-const buildSystemPrompt = () => {
-  return `你是一位专业的中餐厨师助手，名叫"小厨AI"。你的任务是根据用户提供的食材，快速生成一道美味可口的家常菜食谱。
+const buildSystemPrompt = () => `你是一位专业的中餐厨师助手，名叫"小厨AI"。你的任务是根据用户提供的食材和菜名，生成一道完整的家常菜食谱。
 
 输出要求：
 1. 必须严格以 JSON 格式输出，不要包含任何 Markdown 代码块标记
@@ -66,329 +78,405 @@ const buildSystemPrompt = () => {
 }
 3. 根据用户指定的烹饪时间和难度生成合适的食谱
 4. 食谱必须使用用户提供的主要食材，可以补充常见调料
-5. 步骤简洁清晰，适合家庭烹饪
+5. 步骤简洁清晰，5-8步，适合家庭烹饪
 6. 仅输出一个可被 JSON.parse 直接解析的 JSON 对象，不要输出任何解释、前缀、后缀或 Markdown 代码块`;
-};
 
-const buildUserPrompt = (ingredients, cookTime, difficulty, extraRequirements) => {
-  const ingredientsStr = Array.isArray(ingredients)
-    ? ingredients.join('、')
-    : String(ingredients);
-
+const buildUserPrompt = (dishName, ingredients, cookTime, difficulty) => {
+  const ingredientsStr = Array.isArray(ingredients) ? ingredients.join('、') : String(ingredients);
   const difficultyMap = {
-    easy: '简单',
-    medium: '中等',
-    hard: '困难',
-    简单: '简单',
-    中等: '中等',
-    困难: '困难',
+    easy: '简单', medium: '中等', hard: '困难',
+    简单: '简单', 中等: '中等', 困难: '困难',
   };
   const difficultyText = difficultyMap[difficulty] || '简单';
 
-  return `我有以下食材：${ingredientsStr}
+  return `菜名：${dishName}
+主要食材：${ingredientsStr}
+烹饪时间：${cookTime}分钟以内
+难度：${difficultyText}
 
-请帮我生成一道菜的食谱。
-- 烹饪时间要求：${cookTime}分钟以内
-- 难度要求：${difficultyText}
-- 其他要求：${extraRequirements || '无'}
-
-请仅输出一个可被 JSON.parse 直接解析的 JSON 对象，不要输出任何解释、前缀、后缀或 Markdown 代码块。`;
+请为这道菜生成完整的食谱。仅输出一个可被 JSON.parse 直接解析的 JSON 对象，不要输出任何解释、前缀、后缀或 Markdown 代码块。`;
 };
 
-// ==================== JSON 解析（完全相同）====================
+// ==================== JSON 解析与校验 ====================
 
-const parseRecipeJSON = (rawText) => {
-  try {
-    return validateRecipeStructure(JSON.parse(rawText.trim()));
-  } catch (e) {
-    console.warn('[batch-recipe-generate] 直接JSON解析失败');
-  }
-
-  const jsonMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (jsonMatch && jsonMatch[1]) {
-    try {
-      return validateRecipeStructure(JSON.parse(jsonMatch[1].trim()));
-    } catch (e) {
-      console.warn('[batch-recipe-generate] Markdown代码块提取失败');
-    }
-  }
-
-  const firstBrace = rawText.indexOf('{');
-  const lastBrace = rawText.lastIndexOf('}');
-  if (firstBrace !== -1 && lastBrace > firstBrace) {
-    try {
-      return validateRecipeStructure(JSON.parse(rawText.substring(firstBrace, lastBrace + 1)));
-    } catch (e) {
-      console.error('[batch-recipe-generate] 三层解析均失败');
-    }
-  }
-
-  throw Object.assign(new Error('无法从AI返回内容中解析出有效的食谱JSON'), {
-    code: ERROR_CODES.PARSE_FAILED,
-  });
-};
-
-const validateRecipeStructure = (recipe) => {
-  if (!recipe || typeof recipe !== 'object') {
-    throw new Error('食谱数据格式错误');
-  }
+const validateRecipe = (r) => {
+  if (!r || typeof r !== 'object') throw new Error('食谱格式错误');
   return {
-    name: recipe.name || '未命名食谱',
-    description: recipe.description || '',
-    cookTime: Number(recipe.cookTime) || 30,
-    difficulty: recipe.difficulty || '简单',
-    servings: Number(recipe.servings) || 2,
-    ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
-    steps: Array.isArray(recipe.steps) ? recipe.steps : [],
+    name: r.name || '未命名食谱',
+    description: r.description || '',
+    cookTime: Number(r.cookTime) || 30,
+    difficulty: r.difficulty || '简单',
+    servings: Number(r.servings) || 2,
+    ingredients: Array.isArray(r.ingredients) ? r.ingredients : [],
+    steps: Array.isArray(r.steps) ? r.steps : [],
     nutrition: {
-      calories: Number((recipe.nutrition || {}).calories) || 0,
-      protein: Number((recipe.nutrition || {}).protein) || 0,
-      carbs: Number((recipe.nutrition || {}).carbs) || 0,
-      fat: Number((recipe.nutrition || {}).fat) || 0,
+      calories: Number((r.nutrition || {}).calories) || 0,
+      protein: Number((r.nutrition || {}).protein) || 0,
+      carbs: Number((r.nutrition || {}).carbs) || 0,
+      fat: Number((r.nutrition || {}).fat) || 0,
     },
-    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
+    tags: Array.isArray(r.tags) ? r.tags : [],
   };
 };
 
-// ==================== 核心：调用云开发原生 AI（完全相同）====================
+const parseRecipeJSON = (rawText) => {
+  // 方式1：直接解析
+  try { return validateRecipe(JSON.parse(rawText.trim())); } catch (e) { /* ignore */ }
 
-const callCloudAI = async (ingredients, cookTime, difficulty, extraRequirements) => {
-  // ✅ 在每次调用时创建新的 model 实例
+  // 方式2：Markdown 代码块
+  const mdMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (mdMatch) {
+    try { return validateRecipe(JSON.parse(mdMatch[1].trim())); } catch (e) { /* ignore */ }
+  }
+
+  // 方式3：提取首个 JSON 对象
+  const first = rawText.indexOf('{');
+  const last = rawText.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    try { return validateRecipe(JSON.parse(rawText.substring(first, last + 1))); } catch (e) { /* ignore */ }
+  }
+
+  throw Object.assign(new Error('无法从AI返回内容中解析有效JSON'), { code: ERR.PARSE_FAILED });
+};
+
+// ==================== AI 调用 ====================
+
+const callCloudAI = async (dishName, ingredients, cookTime, difficulty) => {
   const model = cloud.ai.createModel(AI_PROVIDER);
+  console.log(`[AI] 生成：${dishName}`);
+  const t0 = Date.now();
 
-  console.log('[callCloudAI] 调用AI，食材：', ingredients.join('、'));
-  const startTime = Date.now();
-
-  const requestPromise = (async () => {
+  const main = (async () => {
     const res = await model.streamText({
       model: HUNYUAN_MODEL,
       messages: [
-        {
-          role: 'system',
-          content: buildSystemPrompt(),
-        },
-        {
-          role: 'user',
-          content: buildUserPrompt(ingredients, cookTime, difficulty, extraRequirements),
-        },
+        { role: 'system', content: buildSystemPrompt() },
+        { role: 'user', content: buildUserPrompt(dishName, ingredients, cookTime, difficulty) },
       ],
       temperature: 0.7,
       max_tokens: 1024,
     });
 
-    let rawText = '';
+    let raw = '';
+    for await (const chunk of res.textStream) raw += chunk;
 
-    for await (const chunk of res.textStream) {
-      rawText += chunk;
-    }
+    console.log(`[AI] 完成：${dishName}，耗时${Date.now() - t0}ms`);
+    if (!raw.trim()) throw Object.assign(new Error('AI返回内容为空'), { code: ERR.AI_CALL_FAILED });
 
-    const elapsed = Date.now() - startTime;
-    console.log(`[callCloudAI] AI调用完成，耗时：${elapsed}ms`);
-
-    if (!rawText || rawText.trim().length === 0) {
-      throw Object.assign(new Error('AI返回内容为空'), {
-        code: ERROR_CODES.AI_CALL_FAILED,
-      });
-    }
-
-    const recipe = parseRecipeJSON(rawText);
+    const recipe = parseRecipeJSON(raw);
 
     let tokensUsed = 0;
     try {
       const usage = await res.usage;
-      if (usage && typeof usage.total_tokens === 'number') {
-        tokensUsed = usage.total_tokens;
-      } else {
-        tokensUsed = Math.ceil(rawText.length / 1.5) + 60;
-      }
-    } catch (e) {
-      tokensUsed = Math.ceil(rawText.length / 1.5) + 60;
+      tokensUsed = (usage && usage.total_tokens) ? usage.total_tokens : Math.ceil(raw.length / 1.5) + 60;
+    } catch (_) {
+      tokensUsed = Math.ceil(raw.length / 1.5) + 60;
     }
-
-    return { recipe, rawText, tokensUsed };
+    return { recipe, tokensUsed };
   })();
 
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(Object.assign(new Error('AI调用超时'), {
-        code: ERROR_CODES.TIMEOUT,
-      }));
-    }, CALL_TIMEOUT);
-  });
+  const timeout = new Promise((_, rej) =>
+    setTimeout(() => rej(Object.assign(new Error('AI调用超时'), { code: ERR.TIMEOUT })), CALL_TIMEOUT)
+  );
 
-  return Promise.race([requestPromise, timeoutPromise]);
+  return Promise.race([main, timeout]);
 };
 
-// ==================== 生成并保存单个菜谱 ====================
+// ==================== 辅助：检查菜谱是否已存在 ====================
 
-const generateAndSaveDish = async (dish, cuisineInfo) => {
+const checkDishExists = async (cuisineId, dishName) => {
   try {
-    console.log(`[generateAndSaveDish] 开始生成：${dish.name}（${cuisineInfo.name}）`);
+    const res = await db.collection(COLLECTION_RECIPES)
+      .where({ cuisineId, sourceDishName: dishName })
+      .count();
+    return res.total > 0;
+  } catch (e) {
+    console.warn(`[checkDishExists] 查询失败：${e.message}`);
+    return false;
+  }
+};
 
-    let difficulty = dish.difficulty;
-    if (!['easy', 'medium', 'hard'].includes(difficulty)) {
-      difficulty = 'easy';
+// ==================== 辅助：查询各菜系已有菜谱数量 ====================
+
+const getCuisineRecipeCounts = async (cuisineIds) => {
+  const counts = {};
+  for (const id of cuisineIds) {
+    try {
+      const res = await db.collection(COLLECTION_RECIPES)
+        .where({ cuisineId: id })
+        .count();
+      counts[id] = res.total;
+    } catch (e) {
+      counts[id] = -1; // 查询出错
+    }
+  }
+  return counts;
+};
+
+// ==================== 生成并保存单道菜谱 ====================
+
+const generateAndSaveDish = async (dish, cuisineInfo, skipExisting = true) => {
+  const { name: dishName, ingredients, cookTime, difficulty, desc } = dish;
+
+  try {
+    // 跳过已存在的菜谱
+    if (skipExisting) {
+      const exists = await checkDishExists(cuisineInfo.id, dishName);
+      if (exists) {
+        console.log(`[skip] ${dishName} 已存在，跳过`);
+        return { success: true, skipped: true, dishName, cuisineName: cuisineInfo.name };
+      }
     }
 
-    // 调用 AI 生成菜谱
-    const { recipe, tokensUsed } = await callCloudAI(
-      dish.ingredients,
-      Number(dish.cookTime),
-      difficulty,
-      ''
-    );
+    const normDifficulty = ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'easy';
+    const { recipe, tokensUsed } = await callCloudAI(dishName, ingredients, Number(cookTime), normDifficulty);
 
-    // 构建数据库记录
-    const dbRecord = {
+    const record = {
       ...recipe,
+      // 菜系信息
       cuisineId: cuisineInfo.id,
       cuisineName: cuisineInfo.name,
-      cuisineFullName: cuisineInfo.fullName,
-      cuisineEmoji: cuisineInfo.emoji,
-      cuisineColor: cuisineInfo.color,
+      cuisineFullName: cuisineInfo.fullName || cuisineInfo.name,
+      cuisineEmoji: cuisineInfo.emoji || '',
+      cuisineColor: cuisineInfo.color || '#333333',
+      cuisineLightColor: cuisineInfo.lightColor || '#f5f5f5',
+      cuisineTags: cuisineInfo.tags || [],
       category: cuisineInfo.name,
+      // 来源信息
       sourceType: 'batch_generated',
-      sourceDishName: dish.name,
-      sourceDescription: dish.desc,
-      sourceIngredients: dish.ingredients,
-      version: '2.1.0',
+      sourceDishName: dishName,
+      sourceDescription: desc || '',
+      sourceIngredients: ingredients || [],
+      sourceCookTime: Number(cookTime) || 30,
+      sourceDifficulty: normDifficulty,
+      // 系统字段
+      version: '4.0.0',
       status: 'active',
       isPublic: true,
       author: 'system_batch',
+      aiProvider: AI_PROVIDER,
       aiModel: HUNYUAN_MODEL,
-      tokensUsed: tokensUsed,
+      tokensUsed,
+      // 用户互动字段
       rating: 0,
       ratingCount: 0,
-      liked: false,
       likeCount: 0,
+      viewCount: 0,
       userComments: [],
+      // 时间戳
       createdAt: db.serverDate(),
       updatedAt: db.serverDate(),
     };
 
-    // 保存到数据库
-    const addResult = await db.collection('recipes').add({
-      data: dbRecord,
-    });
-
-    console.log(`[generateAndSaveDish] ✓ 成功：${dish.name}，ID：${addResult._id}`);
+    const addResult = await db.collection(COLLECTION_RECIPES).add({ data: record });
+    console.log(`[save] ✓ ${dishName} -> ${addResult._id}`);
 
     return {
       success: true,
-      dishName: dish.name,
+      skipped: false,
+      dishName,
       cuisineName: cuisineInfo.name,
       docId: addResult._id,
     };
 
   } catch (err) {
-    console.error(`[generateAndSaveDish] ✗ 失败：${dish.name}，错误：${err.message}`);
+    console.error(`[generateAndSaveDish] ✗ ${dishName}：${err.message}`);
     return {
       success: false,
-      dishName: dish.name,
+      skipped: false,
+      dishName,
       cuisineName: cuisineInfo.name,
       error: err.message,
+      errorCode: err.code,
     };
   }
 };
 
-// ==================== 批量生成主函数 ====================
+// ==================== 批量生成主流程 ====================
 
-const batchGenerateRecipes = async (cuisinesData) => {
-  console.log('[batchGenerateRecipes] 开始批量生成，菜系数量：', cuisinesData.length);
+const batchGenerate = async (event) => {
+  const {
+    cuisinesData,
+    cuisineId,
+    skipExisting = true,
+    maxDishes,
+  } = event;
 
-  const startTime = Date.now();
+  if (!cuisinesData || !Array.isArray(cuisinesData) || cuisinesData.length === 0) {
+    return { code: ERR.PARAM_ERROR, message: '请提供 cuisinesData 数组', data: null };
+  }
 
+  // 如果指定了 cuisineId，只处理该菜系
+  let targets = cuisinesData;
+  if (cuisineId) {
+    targets = cuisinesData.filter(c => c.id === cuisineId);
+    if (targets.length === 0) {
+      return { code: ERR.PARAM_ERROR, message: `未找到菜系：${cuisineId}`, data: null };
+    }
+  }
+
+  const t0 = Date.now();
   const results = {
     success: [],
     failed: [],
+    skipped: [],
     statistics: {
+      totalCuisines: targets.length,
       totalDishes: 0,
       successCount: 0,
       failedCount: 0,
-      totalCuisines: cuisinesData.length,
+      skippedCount: 0,
       startTime: new Date().toISOString(),
     },
   };
 
-  try {
-    // 顺序处理（不使用并发，避免问题）
-    for (let cuisineIndex = 0; cuisineIndex < cuisinesData.length; cuisineIndex++) {
-      const cuisineInfo = cuisinesData[cuisineIndex];
+  for (let ci = 0; ci < targets.length; ci++) {
+    const cuisine = targets[ci];
+    const dishes = cuisine.representativeDishes || [];
+    const dishesToProcess = maxDishes ? dishes.slice(0, maxDishes) : dishes;
 
-      console.log(`\n处理菜系 ${cuisineIndex + 1}/${cuisinesData.length}：${cuisineInfo.name}`);
+    console.log(`\n[菜系 ${ci + 1}/${targets.length}] ${cuisine.name}，共 ${dishesToProcess.length} 道菜`);
 
-      const representativeDishes = cuisineInfo.representativeDishes || [];
+    for (let di = 0; di < dishesToProcess.length; di++) {
+      const dish = dishesToProcess[di];
+      const res = await generateAndSaveDish(dish, cuisine, skipExisting);
 
-      // 顺序处理每道菜
-      for (let dishIndex = 0; dishIndex < representativeDishes.length; dishIndex++) {
-        const dish = representativeDishes[dishIndex];
-        
-        const result = await generateAndSaveDish(dish, cuisineInfo);
-        
-        results.statistics.totalDishes++;
-        if (result.success) {
-          results.success.push(result);
-          results.statistics.successCount++;
-        } else {
-          results.failed.push(result);
-          results.statistics.failedCount++;
-        }
-
-        // 每道菜之间延迟 2 秒，避免过载
-        if (dishIndex < representativeDishes.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
+      results.statistics.totalDishes++;
+      if (res.skipped) {
+        results.skipped.push(res);
+        results.statistics.skippedCount++;
+      } else if (res.success) {
+        results.success.push(res);
+        results.statistics.successCount++;
+      } else {
+        results.failed.push(res);
+        results.statistics.failedCount++;
       }
 
-      // 菜系之间延迟 3 秒
-      if (cuisineIndex < cuisinesData.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+      // 不是最后一道菜则等待
+      if (di < dishesToProcess.length - 1) {
+        await new Promise(r => setTimeout(r, DISH_DELAY_MS));
       }
     }
 
-    const duration = Date.now() - startTime;
-    results.statistics.endTime = new Date().toISOString();
-    results.statistics.duration = `${(duration / 1000).toFixed(2)}秒`;
+    // 不是最后一个菜系则等待
+    if (ci < targets.length - 1) {
+      await new Promise(r => setTimeout(r, CUISINE_DELAY_MS));
+    }
+  }
 
-    console.log('\n✓ 批量生成完成！');
-    console.log(`总菜数：${results.statistics.totalDishes}`);
-    console.log(`成功：${results.statistics.successCount}`);
-    console.log(`失败：${results.statistics.failedCount}`);
-    console.log(`耗时：${results.statistics.duration}`);
+  const duration = Date.now() - t0;
+  results.statistics.endTime = new Date().toISOString();
+  results.statistics.durationSeconds = (duration / 1000).toFixed(1);
+
+  console.log('\n[完成] 批量生成结束');
+  console.log(`  成功: ${results.statistics.successCount}`);
+  console.log(`  失败: ${results.statistics.failedCount}`);
+  console.log(`  跳过: ${results.statistics.skippedCount}`);
+  console.log(`  耗时: ${results.statistics.durationSeconds}s`);
+
+  return {
+    code: ERR.SUCCESS,
+    message: `批量生成完成：成功${results.statistics.successCount}，失败${results.statistics.failedCount}，跳过${results.statistics.skippedCount}`,
+    data: results,
+  };
+};
+
+// ==================== 查询状态 ====================
+
+const queryStatus = async (event) => {
+  const { cuisinesData } = event;
+  if (!cuisinesData || !Array.isArray(cuisinesData)) {
+    return { code: ERR.PARAM_ERROR, message: '请提供 cuisinesData 数组', data: null };
+  }
+
+  const cuisineIds = cuisinesData.map(c => c.id);
+  const counts = await getCuisineRecipeCounts(cuisineIds);
+
+  // 汇总信息
+  const statusList = cuisinesData.map(c => ({
+    id: c.id,
+    name: c.name,
+    emoji: c.emoji,
+    totalDishes: (c.representativeDishes || []).length,
+    recipesInDB: counts[c.id] || 0,
+  }));
+
+  const totalDishes = statusList.reduce((s, c) => s + c.totalDishes, 0);
+  const totalInDB = statusList.reduce((s, c) => s + c.recipesInDB, 0);
+
+  return {
+    code: ERR.SUCCESS,
+    message: 'ok',
+    data: {
+      statusList,
+      summary: {
+        totalCuisines: statusList.length,
+        totalDishes,
+        totalInDB,
+        pendingCount: totalDishes - totalInDB,
+      },
+    },
+  };
+};
+
+// ==================== 清空菜系菜谱 ====================
+
+const clearCuisineRecipes = async (event) => {
+  const { cuisineId, confirm } = event;
+  if (!cuisineId) return { code: ERR.PARAM_ERROR, message: '请提供 cuisineId', data: null };
+  if (!confirm) return { code: ERR.PARAM_ERROR, message: '危险操作，请传入 confirm: true', data: null };
+
+  try {
+    // 云开发数据库每次最多删除 20 条，需循环
+    let total = 0;
+    let round = 0;
+    while (true) {
+      round++;
+      const res = await db.collection(COLLECTION_RECIPES)
+        .where({ cuisineId })
+        .limit(20)
+        .get();
+      if (!res.data || res.data.length === 0) break;
+
+      const deletePromises = res.data.map(r =>
+        db.collection(COLLECTION_RECIPES).doc(r._id).remove()
+      );
+      await Promise.all(deletePromises);
+      total += res.data.length;
+      console.log(`[clearCuisine] 第${round}批，已删除${total}条`);
+      if (res.data.length < 20) break;
+    }
 
     return {
-      code: 0,
-      message: '批量菜谱生成完成',
-      data: results,
+      code: ERR.SUCCESS,
+      message: `已清空菜系 ${cuisineId} 的 ${total} 条菜谱`,
+      data: { cuisineId, deletedCount: total },
     };
-
   } catch (err) {
-    console.error('[batchGenerateRecipes] 批量生成失败：', err);
-    results.statistics.endTime = new Date().toISOString();
-    results.statistics.duration = `${((Date.now() - startTime) / 1000).toFixed(2)}秒`;
-
-    return {
-      code: 1,
-      message: '批量生成过程中出错：' + err.message,
-      data: results,
-    };
+    return { code: ERR.DB_ERROR, message: err.message, data: null };
   }
 };
 
-// ==================== 云函数主入口 ====================
+// ==================== 云函数入口 ====================
 
-exports.main = async (event, context) => {
-  console.log('[batch-recipe-generate] 收到请求');
+exports.main = async (event = {}) => {
+  const action = event.action || 'generate';
+  console.log(`[batch-recipe-generate] action=${action}`);
 
-  const cuisinesData = event.cuisinesData;
-
-  if (!cuisinesData || !Array.isArray(cuisinesData) || cuisinesData.length === 0) {
-    return {
-      code: ERROR_CODES.PARAM_ERROR,
-      message: '请在 event.cuisinesData 中提供菜系数据数组',
-      data: null,
-    };
+  try {
+    switch (action) {
+      case 'generate':
+        return await batchGenerate(event);
+      case 'status':
+        return await queryStatus(event);
+      case 'clear_cuisine':
+        return await clearCuisineRecipes(event);
+      default:
+        return { code: ERR.PARAM_ERROR, message: `未知操作：${action}`, data: null };
+    }
+  } catch (err) {
+    console.error('[batch-recipe-generate] 未捕获异常：', err);
+    return { code: 500, message: err.message, data: null };
   }
-
-  return batchGenerateRecipes(cuisinesData);
 };
