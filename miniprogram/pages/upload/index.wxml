@@ -1,31 +1,200 @@
-<view>
-    <view class="page-container">
+<!-- pages/upload/index.wxml -->
+<!-- 菜谱批量生成管理页面 -->
 
-        <button class="btn primary" bindtap="initData">
-            初始化全部数据
-        </button>
-        <button class="btn primary" bindtap="initCuisines">
-            初始化菜系数据
-        </button>
+<view class="page">
 
-        <button class="btn primary" bindtap="loadCuisinesById">
-            获取菜系数据
-        </button>
-
-        <button class="btn secondary" bindtap="checkStatus">
-            查看状态
-        </button>
-
+  <!-- ====== 页头 ====== -->
+  <view class="page-header">
+    <view class="header-title">
+      <text class="header-icon">🍳</text>
+      <text class="header-text">小厨AI · 菜谱批量生成</text>
     </view>
+    <view class="header-sub">管理员工具 · 批量生成并存储AI菜谱</view>
+  </view>
 
-    <view class="page-container">
-
-        <button class="btn primary" bindtap="initRecipeDB">
-            初始化c菜谱数据
-        </button>
-        
-        <button class="btn primary" bindtap="initSichuanRecipes">
-            初始化川菜菜谱
-        </button>
+  <!-- ====== 数据库总览 ====== -->
+  <view class="card summary-card" wx:if="{{dbSummary}}">
+    <view class="card-title">📊 数据库状态</view>
+    <view class="summary-row">
+      <view class="summary-item">
+        <text class="summary-num">{{dbSummary.totalCuisines}}</text>
+        <text class="summary-label">个菜系</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-num">{{dbSummary.totalInDB}}</text>
+        <text class="summary-label">已生成</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-num pending-num">{{dbSummary.pendingCount}}</text>
+        <text class="summary-label">待生成</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-num total-num">{{dbSummary.totalDishes}}</text>
+        <text class="summary-label">总菜数</text>
+      </view>
     </view>
+    <!-- 总进度条 -->
+    <view class="progress-wrap">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width:{{dbSummary.totalDishes > 0 ? (dbSummary.totalInDB / dbSummary.totalDishes * 100) : 0}}%"></view>
+      </view>
+      <text class="progress-pct">{{dbSummary.totalDishes > 0 ? (dbSummary.totalInDB / dbSummary.totalDishes * 100).toFixed(1) : 0}}%</text>
+    </view>
+  </view>
+
+  <!-- ====== 生成进度（运行中显示） ====== -->
+  <view class="card progress-card" wx:if="{{isGenerating}}">
+    <view class="card-title">⏳ 正在生成...</view>
+    <view class="progress-info">
+      <text class="cuisine-name">{{currentCuisineName}}</text>
+    </view>
+    <view class="progress-wrap">
+      <view class="progress-bar">
+        <view class="progress-fill running" style="width:{{progressPercent}}%"></view>
+      </view>
+      <text class="progress-pct">{{progressPercent}}%</text>
+    </view>
+    <view class="progress-text">{{progressText}}</view>
+    <view class="running-stats">
+      <view class="stat-item success">✅ {{totalSuccess}}</view>
+      <view class="stat-item skip">⏭️ {{totalSkipped}}</view>
+      <view class="stat-item fail">❌ {{totalFailed}}</view>
+    </view>
+  </view>
+
+  <!-- ====== 操作按钮区 ====== -->
+  <view class="card action-card">
+    <view class="card-title">🚀 操作</view>
+    <view class="btn-group">
+      <button
+        class="btn btn-primary"
+        bindtap="onGenerateAll"
+        disabled="{{isGenerating || isQuerying}}"
+        loading="{{isGenerating}}"
+      >
+        {{isGenerating ? '生成中...' : '批量生成全部菜系'}}
+      </button>
+      <button
+        class="btn btn-secondary"
+        bindtap="onRefreshStatus"
+        disabled="{{isGenerating || isQuerying}}"
+        loading="{{isQuerying}}"
+      >
+        {{isQuerying ? '查询中...' : '刷新状态'}}
+      </button>
+    </view>
+    <view class="btn-group">
+      <button class="btn btn-outline" bindtap="onInitCuisinesData" disabled="{{isGenerating}}">
+        初始化菜系数据
+      </button>
+      <button class="btn btn-outline" bindtap="onInitSpecialData" disabled="{{isGenerating}}">
+        初始化特色餐数据
+      </button>
+    </view>
+  </view>
+
+  <!-- ====== 菜系列表 ====== -->
+  <view class="card">
+    <view class="card-title">🗂️ 菜系列表（{{cuisineList.length}}个菜系）</view>
+
+    <view class="cuisine-list">
+      <view
+        class="cuisine-item {{item.status}}"
+        wx:for="{{cuisineList}}"
+        wx:key="id"
+      >
+        <!-- 菜系基本信息 -->
+        <view class="cuisine-info">
+          <view class="cuisine-left">
+            <text class="cuisine-emoji">{{item.emoji}}</text>
+            <view class="cuisine-text">
+              <view class="cuisine-name-row">
+                <text class="cuisine-name">{{item.name}}</text>
+                <view class="cuisine-badge {{item.status}}" wx:if="{{item.status !== 'idle'}}">
+                  <text wx:if="{{item.status === 'running'}}">生成中</text>
+                  <text wx:elif="{{item.status === 'done'}}">完成</text>
+                  <text wx:elif="{{item.status === 'partial'}}">部分完成</text>
+                  <text wx:elif="{{item.status === 'pending'}}">待处理</text>
+                  <text wx:elif="{{item.status === 'error'}}">失败</text>
+                </view>
+              </view>
+              <view class="cuisine-tags">
+                <text class="tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 进度数字 -->
+          <view class="cuisine-right">
+            <view class="recipe-count">
+              <text class="count-done">{{item.recipeCount}}</text>
+              <text class="count-sep">/</text>
+              <text class="count-total">{{item.dishCount}}</text>
+            </view>
+            <text class="count-label">道菜谱</text>
+          </view>
+        </view>
+
+        <!-- 小进度条 -->
+        <view class="mini-progress" wx:if="{{item.dishCount > 0}}">
+          <view class="mini-bar">
+            <view
+              class="mini-fill"
+              style="width:{{(item.recipeCount / item.dishCount * 100)}}%; background:{{item.color}}"
+            ></view>
+          </view>
+        </view>
+
+        <!-- 按钮区 -->
+        <view class="cuisine-actions" wx:if="{{!isGenerating}}">
+          <button
+            class="btn-small btn-gen"
+            data-cuisine-id="{{item.id}}"
+            bindtap="onGenerateSingle"
+            wx:if="{{item.recipeCount < item.dishCount}}"
+          >
+            生成菜谱
+          </button>
+          <button
+            class="btn-small btn-regen"
+            data-cuisine-id="{{item.id}}"
+            bindtap="onRegenerateSingle"
+          >
+            重新生成
+          </button>
+          <view class="done-badge" wx:if="{{item.recipeCount >= item.dishCount}}">
+            ✅ 已完成
+          </view>
+        </view>
+
+        <!-- 运行时统计 -->
+        <view class="run-stats" wx:if="{{item.status === 'done' || item.status === 'partial' || item.status === 'error'}}">
+          <text wx:if="{{item.successCount > 0}}" class="rs-success">+{{item.successCount}}</text>
+          <text wx:if="{{item.skippedCount > 0}}" class="rs-skip">⏭️{{item.skippedCount}}</text>
+          <text wx:if="{{item.failedCount > 0}}" class="rs-fail">✗{{item.failedCount}}</text>
+        </view>
+
+      </view>
+    </view>
+  </view>
+
+  <!-- ====== 日志区 ====== -->
+  <view class="card log-card">
+    <view class="card-title log-title" bindtap="onToggleLogs">
+      <text>📋 操作日志（{{logs.length}}条）</text>
+      <text class="log-toggle">{{showLogs ? '▲ 收起' : '▼ 展开'}}</text>
+    </view>
+    <view class="log-body" wx:if="{{showLogs}}">
+      <button class="btn-small btn-clear" bindtap="onClearLogs">清空日志</button>
+      <view class="log-list">
+        <view class="log-item" wx:for="{{logs}}" wx:key="index">{{item}}</view>
+        <view class="log-empty" wx:if="{{logs.length === 0}}">暂无日志</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="page-footer">
+    <text>⚠️ 本页面为管理员工具，批量生成会调用AI接口，请勿频繁操作</text>
+  </view>
+
 </view>
