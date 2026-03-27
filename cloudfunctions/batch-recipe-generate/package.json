@@ -1,6 +1,6 @@
 {
     "name": "batch-recipe-generate",
-    "version": "2.0.0",
+    "version": "5.0.0",
     "description": "小厨AI - 食谱生成云函数，接入腾讯混元大模型",
     "main": "index.js",
     "scripts": {

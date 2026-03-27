@@ -92,6 +92,9 @@
       <button class="btn outline" bindtap="onInitCuisinesData" disabled="{{isRunning}}">初始化菜系数据</button>
       <button class="btn outline" bindtap="onInitSpecialData"  disabled="{{isRunning}}">初始化特色餐数据</button>
     </view>
+    <view class="btn-row">
+      <button class="btn diagnose" bindtap="onDiagnose" disabled="{{isRunning}}">🔍 诊断云函数连通性</button>
+    </view>
   </view>
 
   <!-- ====== 菜系列表 ====== -->

@@ -414,6 +414,53 @@ Page({
   onToggleLogs() { this.setData({ showLogs: !this.data.showLogs }); },
   onClearLogs()  { this.setData({ logs: [] }); },
 
+  // ==================== 诊断：测试云函数连通性 ====================
+  // 调用 generate_one 生成第一个菜系的第一道菜，验证云函数是否部署正确
+  async onDiagnose() {
+    if (this.data.isRunning) return;
+    const { CUISINES } = require('../../utils/cuisines.js');
+    const testCuisine = CUISINES.find(c => c.id === 'cantonese') || CUISINES[0];
+    const testDish = (testCuisine.representativeDishes || [])[0];
+    if (!testDish) { this._log('❌ 诊断失败：无测试菜品'); return; }
+
+    this._log(`🔍 诊断开始：调用 generate_one（${testCuisine.name} · ${testDish.name}）`);
+    this.setData({ showLogs: true });
+    wx.showLoading({ title: '诊断中...', mask: true });
+
+    const t0 = Date.now();
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'batch-recipe-generate',
+        data: { action: 'generate_one', dish: testDish, cuisine: testCuisine, skipExisting: true },
+      });
+      wx.hideLoading();
+      const elapsed = Date.now() - t0;
+      const r = res.result || {};
+      this._log(`诊断结果：code=${r.code}, 耗时=${elapsed}ms`);
+      if (r.code === 0) {
+        const d = r.data || {};
+        if (d.skipped) {
+          this._log(`✅ 云函数正常！（${testDish.name} 已存在，已跳过）`);
+        } else {
+          this._log(`✅ 云函数正常！生成成功：${d.dishName}，docId=${d.docId}`);
+        }
+        wx.showToast({ title: '云函数正常 ✅', icon: 'success' });
+      } else {
+        this._log(`❌ 云函数返回错误：${r.message}`);
+        wx.showModal({ title: '诊断失败', content: `code=${r.code}\n${r.message}`, showCancel: false });
+      }
+    } catch (err) {
+      wx.hideLoading();
+      const elapsed = Date.now() - t0;
+      this._log(`❌ 调用异常（${elapsed}ms）：${err.message}`);
+      wx.showModal({
+        title: '云函数调用失败',
+        content: `错误：${err.message}\n\n可能原因：\n1. 云函数未部署（需在开发者工具右键上传）\n2. 超时（需在控制台将超时改为20s）\n3. AI模型未开通权限`,
+        showCancel: false,
+      });
+    }
+  },
+
   // ==================== 辅助 ====================
 
   _log(msg) {
