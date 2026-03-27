@@ -1,6 +1,6 @@
 /**
- * 批量菜谱生成云函数单元测试 - batch-recipe-generate.test.js
- * 架构版本：5.0.0（单菜生成架构）
+ * 批量菜谱生成单元测试 - batch-recipe-generate.test.js
+ * 架构版本：6.0.0（前端直调AI + 前端写入数据库）
  *
  * 覆盖范围：
  *   Suite 1  - validateRecipe 食谱结构校验
@@ -10,8 +10,9 @@
  *   Suite 5  - Prompt 构建逻辑
  *   Suite 6  - 参数校验逻辑（单菜接口）
  *   Suite 7  - cuisines.js 与 upload 页面兼容性
- *   Suite 8  - generate_one 单菜架构验证
+ *   Suite 8  - generate_one 单菜架构验证（云函数 status/check_exists）
  *   Suite 9  - 前端进度计算函数验证
+ *   Suite 10 - 前端直调AI架构验证（v6.0.0 新增）
  */
 
 'use strict';
@@ -432,7 +433,7 @@ describe('Suite 8: generate_one 单菜架构验证', () => {
 
 // ==================== Suite 9: 前端进度计算函数 ====================
 
-describe('Suite 9: 前端 calcPct 进度计算', () => {
+describe('Suite 9: 前端 calcPct 进度计算 (v6.0.0)', () => {
   test('TC9.1: 0/0 应返回 0', ()  => { expect(calcPct(0, 0)).toBe(0); });
   test('TC9.2: 0/10 应返回 0',  () => { expect(calcPct(0, 10)).toBe(0); });
   test('TC9.3: 5/10 应返回 50', () => { expect(calcPct(5, 10)).toBe(50); });
@@ -449,5 +450,100 @@ describe('Suite 9: 前端 calcPct 进度计算', () => {
     const c = CUISINES.find(x => x.id === 'sichuan');
     const total = c.representativeDishes.length;
     expect(calcPct(total, total)).toBe(100);
+  });
+});
+
+// ==================== Suite 10: 前端直调AI架构验证（v6.0.0）====================
+
+describe('Suite 10: 前端直调AI架构验证 (v6.0.0)', () => {
+  const fs   = require('fs');
+  const path = require('path');
+  const uploadSrc = fs.readFileSync(
+    path.join(__dirname, '../../miniprogram/pages/upload/index.js'), 'utf8'
+  );
+
+  test('TC10.1: upload/index.js 应引入 ai-service.js', () => {
+    expect(uploadSrc).toContain("require('../../utils/ai-service.js')");
+  });
+
+  test('TC10.2: upload/index.js 应使用 callCloudAIFrontend（前端直调）', () => {
+    expect(uploadSrc).toContain('callCloudAIFrontend');
+  });
+
+  test('TC10.3: upload/index.js 应有 _generateOneLocal（本地生成）', () => {
+    expect(uploadSrc).toContain('_generateOneLocal');
+  });
+
+  test('TC10.4: upload/index.js 不应再有 generate_one 云函数调用（批量生成路径）', () => {
+    // 批量生成调用路径已切换到前端直调，云函数 action generate_one 不应在 _runQueue 里出现
+    // _generateOneLocal 替代了 _generateOne（云函数版）
+    // 诊断方法可能保留 generate_one 字样，但批量生成核心路径不用
+    expect(uploadSrc).toContain('_generateOneLocal');
+    expect(uploadSrc).not.toContain("action: 'generate_one'");
+  });
+
+  test('TC10.5: upload/index.js 应直接写入数据库（col.add）', () => {
+    expect(uploadSrc).toContain('.add(');
+  });
+
+  test('TC10.6: upload/index.js 应做幂等检查（sourceDishName 查询）', () => {
+    expect(uploadSrc).toContain('sourceDishName');
+    expect(uploadSrc).toContain('.count()');
+  });
+
+  test('TC10.7: upload/index.js 数据库记录应包含标准字段', () => {
+    expect(uploadSrc).toContain("sourceType:        'batch_generated'");
+    expect(uploadSrc).toContain("status:            'active'");
+    expect(uploadSrc).toContain("isPublic:          true");
+    expect(uploadSrc).toContain("author:            'system_batch'");
+  });
+
+  test('TC10.8: upload/index.js 版本号应为 6.0.0', () => {
+    expect(uploadSrc).toContain("VERSION = '6.0.0'");
+  });
+
+  test('TC10.9: upload/index.js 查询状态应前端直查数据库（无云函数 status 调用）', () => {
+    // _queryStatus 直接用 wx.cloud.database() 而非 callFunction batch-recipe-generate
+    expect(uploadSrc).toContain('wx.cloud.database()');
+    // 不再用 batch-recipe-generate action:status 查询
+    expect(uploadSrc).not.toContain("action: 'status'");
+  });
+
+  test('TC10.10: upload/index.js 应包含诊断函数 onDiagnose', () => {
+    expect(uploadSrc).toContain('onDiagnose');
+    expect(uploadSrc).toContain('wx.cloud.extend.AI');
+  });
+
+  // 数据库记录构建测试
+  test('TC10.11: 数据库记录应含 aiProvider 字段', () => {
+    expect(uploadSrc).toContain("aiProvider:        'hunyuan-exp'");
+  });
+
+  test('TC10.12: 数据库记录应含 cuisineId 和 cuisineName', () => {
+    expect(uploadSrc).toContain('cuisineId:');
+    expect(uploadSrc).toContain('cuisineName:');
+  });
+
+  // ai-service.js 验证
+  test('TC10.13: ai-service.js 应导出 callCloudAIFrontend', () => {
+    const aiSrc = fs.readFileSync(
+      path.join(__dirname, '../../miniprogram/utils/ai-service.js'), 'utf8'
+    );
+    expect(aiSrc).toContain('callCloudAIFrontend');
+    expect(aiSrc).toContain('wx.cloud.extend.AI.createModel');
+  });
+
+  test('TC10.14: ai-service.js callCloudAIFrontend 应使用 eventStream', () => {
+    const aiSrc = fs.readFileSync(
+      path.join(__dirname, '../../miniprogram/utils/ai-service.js'), 'utf8'
+    );
+    expect(aiSrc).toContain('eventStream');
+    expect(aiSrc).toContain('streamText');
+  });
+
+  test('TC10.15: 前端写入记录应含 serverDate 时间戳', () => {
+    expect(uploadSrc).toContain('db.serverDate()');
+    expect(uploadSrc).toContain('createdAt:');
+    expect(uploadSrc).toContain('updatedAt:');
   });
 });

@@ -1,5 +1,5 @@
-pages/upload/index.wxml  v5.0.0
-<!-- 菜谱批量生成管理页 - 前端循环 + 单菜云函数架构 -->
+<!-- pages/upload/index.wxml  v6.0.0 -->
+<!-- 菜谱批量生成管理页 - 前端直调AI + 前端写入数据库架构 -->
 
 <view class="page">
 
@@ -9,7 +9,7 @@ pages/upload/index.wxml  v5.0.0
       <text class="header-icon">🍳</text>
       <view>
         <view class="header-title">小厨AI · 菜谱批量生成</view>
-        <view class="header-sub">管理员工具 · 每次生成1道菜，不超时，可暂停</view>
+        <view class="header-sub">管理员工具 · 前端直调AI，无需云函数，可暂停</view>
       </view>
     </view>
   </view>
@@ -93,7 +93,7 @@ pages/upload/index.wxml  v5.0.0
       <button class="btn outline" bindtap="onInitSpecialData"  disabled="{{isRunning}}">初始化特色餐数据</button>
     </view>
     <view class="btn-row">
-      <button class="btn diagnose" bindtap="onDiagnose" disabled="{{isRunning}}">🔍 诊断云函数连通性</button>
+      <button class="btn diagnose" bindtap="onDiagnose" disabled="{{isRunning}}">🔍 诊断前端AI直调</button>
     </view>
   </view>
 
@@ -179,6 +179,6 @@ pages/upload/index.wxml  v5.0.0
     </view>
   </view>
 
-  <view class="footer-tip">⚠️ 管理员工具 · 批量生成耗时较长，可分多次完成</view>
+  <view class="footer-tip">⚠️ 管理员工具 · 前端直调AI，批量生成耗时较长，可分多次完成</view>
 
 </view>

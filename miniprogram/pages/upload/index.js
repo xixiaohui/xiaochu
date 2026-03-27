@@ -1,14 +1,18 @@
-// pages/upload/index.js  v5.0.0
+// pages/upload/index.js  v6.0.0
 // 菜谱批量生成管理页（管理员工具）
 //
-// ✅ 架构：前端循环 + 云函数单菜生成
-//   每次 wx.cloud.callFunction 只生成 1 道菜，立即返回
-//   前端控制间隔（DISH_INTERVAL_MS）和暂停/继续
-//   云函数永远不会超时
+// ✅ 架构：前端直调 AI（wx.cloud.extend.AI） + 前端写入云数据库
+//   1. 前端循环，每道菜调用 ai-service.js 的 callCloudAIFrontend()
+//   2. 生成成功后直接用 wx.cloud.database().collection('recipes').add() 写入数据库
+//   3. 跳过检查：先查 DB 是否已存在，再决定是否调 AI
+//   4. 查询数据库状态：直接前端 DB 查询（无需云函数）
+//   5. 去除对 batch-recipe-generate 的 generate_one 依赖
+//   保留：status 查询、data-init 初始化仍可用云函数
 
 'use strict';
 
 const { CUISINES } = require('../../utils/cuisines.js');
+const aiService = require('../../utils/ai-service.js');
 
 // 30 个正式菜系（去掉减脂/孕妇餐等特殊条目）
 const CUISINE_LIST = CUISINES.filter(c =>
@@ -17,6 +21,12 @@ const CUISINE_LIST = CUISINES.filter(c =>
 
 // 每道菜生成后等待时间（ms）—— 防止 AI 接口限流
 const DISH_INTERVAL_MS = 2000;
+
+// 数据库集合名
+const RECIPES_COLLECTION = 'recipes';
+
+// 架构版本
+const VERSION = '6.0.0';
 
 // ==================== 工具函数 ====================
 
@@ -99,47 +109,63 @@ Page({
     this.setData({ cuisineList, totalDishes });
   },
 
-  // ==================== 查询数据库状态 ====================
+  // ==================== 查询数据库状态（前端直接查询）====================
 
   async _queryStatus() {
     if (this.data.isQuerying || this.data.isRunning) return;
     this.setData({ isQuerying: true });
-    this._log('查询数据库状态...');
+    this._log('查询数据库状态（前端直查）...');
 
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'batch-recipe-generate',
-        data: { action: 'status', cuisinesData: CUISINE_LIST },
+      const db = wx.cloud.database();
+      const col = db.collection(RECIPES_COLLECTION);
+
+      // 逐菜系查询数量
+      const statusList = await Promise.all(
+        CUISINE_LIST.map(async c => {
+          try {
+            const r = await col
+              .where({ cuisineId: c.id })
+              .count();
+            return { id: c.id, recipesInDB: r.total || 0 };
+          } catch (_) {
+            return { id: c.id, recipesInDB: 0 };
+          }
+        })
+      );
+
+      // 汇总
+      const totalInDB = statusList.reduce((s, x) => s + x.recipesInDB, 0);
+      const totalDishes = CUISINE_LIST.reduce((s, c) => s + (c.representativeDishes || []).length, 0);
+      const pendingCount = totalDishes - totalInDB;
+      const summary = {
+        totalCuisines: CUISINE_LIST.length,
+        totalInDB,
+        totalDishes,
+        pendingCount,
+      };
+
+      const cuisineList = this.data.cuisineList.map(c => {
+        const info = statusList.find(s => s.id === c.id) || {};
+        const recipeCount   = info.recipesInDB || 0;
+        const recipePercent = calcPct(recipeCount, c.dishCount);
+        const status = recipeCount >= c.dishCount ? 'done'
+                     : recipeCount > 0            ? 'partial'
+                     :                              'idle';
+        return { ...c, recipeCount, recipePercent, status };
       });
 
-      if (res.result && res.result.code === 0) {
-        const { statusList, summary } = res.result.data;
+      const overallPct     = calcPct(totalInDB, totalDishes);
+      const overallPctText = totalDishes > 0
+        ? (totalInDB / totalDishes * 100).toFixed(1)
+        : '0.0';
+      const dbSummary = { ...summary, overallPct, overallPctText };
 
-        const cuisineList = this.data.cuisineList.map(c => {
-          const info = statusList.find(s => s.id === c.id) || {};
-          const recipeCount  = info.recipesInDB || 0;
-          const recipePercent = calcPct(recipeCount, c.dishCount);
-          const status = recipeCount >= c.dishCount ? 'done'
-                       : recipeCount > 0            ? 'partial'
-                       :                              'idle';
-          return { ...c, recipeCount, recipePercent, status };
-        });
-
-        // 预计算总览百分比（WXML 不支持 toFixed）
-        const overallPct     = calcPct(summary.totalInDB, summary.totalDishes);
-        const overallPctText = summary.totalDishes > 0
-          ? (summary.totalInDB / summary.totalDishes * 100).toFixed(1)
-          : '0.0';
-        const dbSummary = { ...summary, overallPct, overallPctText };
-
-        this.setData({ cuisineList, dbSummary, isQuerying: false });
-        this._log(`已生成 ${summary.totalInDB}/${summary.totalDishes} 道菜谱`);
-      } else {
-        throw new Error((res.result && res.result.message) || '查询失败');
-      }
+      this.setData({ cuisineList, dbSummary, isQuerying: false });
+      this._log(`已生成 ${totalInDB}/${totalDishes} 道菜谱`);
     } catch (err) {
       this.setData({ isQuerying: false });
-      this._log(`❌ 状态查询失败：${err.message}`);
+      this._log(`❌ 状态查询失败：${err.message || err.errMsg}`);
       wx.showToast({ title: '查询失败', icon: 'none' });
     }
   },
@@ -147,7 +173,6 @@ Page({
   onRefreshStatus() { this._queryStatus(); },
 
   // ==================== 批量生成（全部 / 指定菜系） ====================
-  // 架构：前端 for 循环，每次只调云函数生成 1 道菜
 
   async onGenerateAll() {
     if (this.data.isRunning) { wx.showToast({ title: '生成中，请稍候', icon: 'none' }); return; }
@@ -155,12 +180,13 @@ Page({
     // 找出还有未完成菜谱的菜系
     const targets = CUISINE_LIST.filter(c => {
       const info = this.data.cuisineList.find(ci => ci.id === c.id);
-      return !info || info.recipeCount < c.representativeDishes.length;
+      return !info || info.recipeCount < (c.representativeDishes || []).length;
     });
     if (!targets.length) { wx.showToast({ title: '所有菜谱已生成', icon: 'success' }); return; }
 
+    const totalPending = targets.reduce((s, c) => s + c.representativeDishes.length, 0);
     const ok = await this._confirm(
-      `将为 ${targets.length} 个菜系批量生成 AI 菜谱（已有自动跳过）\n\n共约 ${targets.reduce((s,c)=>s+c.representativeDishes.length,0)} 道，每道约 5~10s\n⚠️ 请保持页面开启，可随时暂停`,
+      `将为 ${targets.length} 个菜系批量生成 AI 菜谱（已有自动跳过）\n\n共约 ${totalPending} 道，每道约 5~10s\n⚠️ 请保持页面开启，可随时暂停`,
       '开始'
     );
     if (!ok) return;
@@ -174,8 +200,8 @@ Page({
     const cuisine = CUISINE_LIST.find(c => c.id === cuisineId);
     if (!cuisine) return;
 
-    const info     = this.data.cuisineList.find(c => c.id === cuisineId);
-    const pending  = cuisine.representativeDishes.length - (info ? info.recipeCount : 0);
+    const info    = this.data.cuisineList.find(c => c.id === cuisineId);
+    const pending = (cuisine.representativeDishes || []).length - (info ? info.recipeCount : 0);
     if (pending <= 0) { wx.showToast({ title: `${cuisine.name} 已全部生成`, icon: 'success' }); return; }
 
     const ok = await this._confirm(
@@ -192,7 +218,7 @@ Page({
     const cuisine = CUISINE_LIST.find(c => c.id === cuisineId);
     if (!cuisine) return;
     const ok = await this._confirm(
-      `⚠️ 强制重新生成【${cuisine.name}】所有 ${cuisine.representativeDishes.length} 道菜谱\n（不跳过已有，会产生重复记录）`,
+      `⚠️ 强制重新生成【${cuisine.name}】所有 ${(cuisine.representativeDishes || []).length} 道菜谱\n（不跳过已有，会产生重复记录）`,
       '确认重新生成'
     );
     if (!ok) return;
@@ -203,7 +229,7 @@ Page({
 
   async _runQueue(cuisines, skipExisting) {
     // ---- 初始化运行状态 ----
-    this._runningFlag = true;   // 用于停止控制
+    this._runningFlag = true;
     this._pauseFlag   = false;
 
     this.setData({
@@ -226,11 +252,11 @@ Page({
     this._setCuisinesBulkStatus(targetIds, 'pending');
 
     // 统计本次总菜数
-    const totalThisBatch = cuisines.reduce((s, c) => s + c.representativeDishes.length, 0);
+    const totalThisBatch = cuisines.reduce((s, c) => s + (c.representativeDishes || []).length, 0);
     let doneSoFar = 0;
     let success = 0, skipped = 0, failed = 0;
 
-    this._log(`开始生成，${cuisines.length} 个菜系，共 ${totalThisBatch} 道`);
+    this._log(`开始生成，${cuisines.length} 个菜系，共 ${totalThisBatch} 道（前端直调AI）`);
 
     // ---- 外层：菜系循环 ----
     for (const cuisine of cuisines) {
@@ -242,7 +268,7 @@ Page({
 
       let cSuccess = 0, cSkipped = 0, cFailed = 0;
 
-      // ---- 内层：菜品循环（每次云函数只处理1道）----
+      // ---- 内层：菜品循环 ----
       for (let i = 0; i < dishes.length; i++) {
         // 暂停检查
         while (this._pauseFlag && this._runningFlag) {
@@ -254,11 +280,11 @@ Page({
         this.setData({
           currentCuisineName: cuisine.name,
           currentDishName:    dish.name,
-          progressText: `${cuisine.name} · ${dish.name} (${i+1}/${dishes.length})`,
+          progressText: `${cuisine.name} · ${dish.name} (${i + 1}/${dishes.length})`,
         });
 
-        // 调用云函数：单菜生成
-        const result = await this._generateOne(dish, cuisine, skipExisting);
+        // 前端直接生成并写入数据库
+        const result = await this._generateOneLocal(dish, cuisine, skipExisting);
 
         // 统计
         doneSoFar++;
@@ -280,11 +306,11 @@ Page({
         if (curInfo) {
           const newCount = curInfo.recipeCount + (result.success ? 1 : 0);
           this._updateCuisineField(cuisine.id, {
-            recipeCount:  newCount,
+            recipeCount:   newCount,
             recipePercent: calcPct(newCount, curInfo.dishCount),
-            successCount: cSuccess,
-            skippedCount: cSkipped,
-            failedCount:  cFailed,
+            successCount:  cSuccess,
+            skippedCount:  cSkipped,
+            failedCount:   cFailed,
           });
         }
 
@@ -295,11 +321,11 @@ Page({
       }
 
       // 菜系完成
-      const cuisineStatus = cFailed > 0 ? 'partial'
+      const cuisineStatus = cFailed > 0         ? 'partial'
                           : cSuccess + cSkipped > 0 ? 'done'
                           : 'error';
       this._updateCuisineField(cuisine.id, {
-        status: cuisineStatus,
+        status:       cuisineStatus,
         successCount: cSuccess,
         skippedCount: cSkipped,
         failedCount:  cFailed,
@@ -334,35 +360,80 @@ Page({
     setTimeout(() => this._queryStatus(), 800);
   },
 
-  // ==================== 单菜调用（封装错误处理）====================
+  // ==================== 单菜：前端直调 AI + 写入数据库 ====================
 
-  async _generateOne(dish, cuisine, skipExisting) {
+  /**
+   * 前端直接生成一道菜并存入云数据库
+   * @param {Object} dish - 菜品信息 { name, description, cookTime, difficulty, ingredients }
+   * @param {Object} cuisine - 菜系信息 { id, name, fullName, emoji, color, ... }
+   * @param {boolean} skipExisting - 是否跳过已有
+   * @returns {{ success: boolean, skipped: boolean }}
+   */
+  async _generateOneLocal(dish, cuisine, skipExisting) {
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'batch-recipe-generate',
-        data: {
-          action:       'generate_one',
-          dish,
-          cuisine,
-          skipExisting,
-        },
-      });
+      const db  = wx.cloud.database();
+      const col = db.collection(RECIPES_COLLECTION);
 
-      const r = res.result || {};
-      if (r.code === 0) {
-        const data = r.data || {};
-        if (data.skipped) {
-          this._log(`  ⏭ 跳过：${dish.name}`);
-          return { success: false, skipped: true };
+      // 1. 幂等检查：已存在则跳过
+      if (skipExisting) {
+        try {
+          const checkRes = await col
+            .where({ cuisineId: cuisine.id, sourceDishName: dish.name })
+            .count();
+          if (checkRes.total > 0) {
+            this._log(`  ⏭ 跳过（已存在）：${dish.name}`);
+            return { success: false, skipped: true };
+          }
+        } catch (checkErr) {
+          // 查询失败不阻止生成
+          this._log(`  ⚠️ 幂等检查失败，继续生成：${dish.name}`);
         }
-        this._log(`  ✅ ${dish.name}`);
-        return { success: true, skipped: false };
-      } else {
-        this._log(`  ❌ ${dish.name}：${r.message}`);
-        return { success: false, skipped: false };
       }
+
+      // 2. 前端直调 AI（使用 ai-service.js 的 callCloudAIFrontend）
+      const ingredients = Array.isArray(dish.ingredients)
+        ? dish.ingredients
+        : [dish.name];
+
+      const aiResult = await aiService.callCloudAIFrontend(
+        ingredients,
+        dish.cookTime  || 30,
+        dish.difficulty || 'easy',
+        `菜名：${dish.name}，菜系：${cuisine.name}（${cuisine.fullName || cuisine.name}）`
+      );
+
+      const recipe = aiResult.recipe;
+
+      // 3. 构建数据库记录（与原云函数保持一致）
+      const record = {
+        ...recipe,
+        cuisineId:         cuisine.id,
+        cuisineName:       cuisine.name,
+        cuisineFullName:   cuisine.fullName   || cuisine.name,
+        cuisineEmoji:      cuisine.emoji      || '',
+        cuisineColor:      cuisine.color      || '',
+        category:          cuisine.name,
+        sourceType:        'batch_generated',
+        sourceDishName:    dish.name,
+        sourceIngredients: dish.ingredients   || [],
+        aiProvider:        'hunyuan-exp',
+        tokensUsed:        aiResult.tokensUsed || 0,
+        version:           VERSION,
+        status:            'active',
+        isPublic:          true,
+        author:            'system_batch',
+        createdAt:         db.serverDate(),
+        updatedAt:         db.serverDate(),
+      };
+
+      // 4. 写入数据库
+      const addRes = await col.add({ data: record });
+      this._log(`  ✅ ${dish.name} → docId=${addRes._id}`);
+      return { success: true, skipped: false };
+
     } catch (err) {
-      this._log(`  ❌ ${dish.name}（网络异常）：${err.message}`);
+      const msg = err.message || err.errMsg || '未知错误';
+      this._log(`  ❌ ${dish.name}：${msg}`);
       return { success: false, skipped: false };
     }
   },
@@ -397,8 +468,16 @@ Page({
     wx.showLoading({ title: '初始化菜系...' });
     wx.cloud.callFunction({
       name: 'data-init', data: { action: 'init_cuisines' },
-      success: () => { wx.hideLoading(); wx.showToast({ title: '菜系数据完成', icon: 'success' }); this._log('菜系数据初始化完成'); },
-      fail: err => { wx.hideLoading(); wx.showToast({ title: '失败', icon: 'error' }); this._log(`菜系初始化失败: ${err.errMsg}`); },
+      success: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '菜系数据完成', icon: 'success' });
+        this._log('菜系数据初始化完成');
+      },
+      fail: err => {
+        wx.hideLoading();
+        wx.showToast({ title: '失败', icon: 'error' });
+        this._log(`菜系初始化失败: ${err.errMsg}`);
+      },
     });
   },
 
@@ -406,56 +485,72 @@ Page({
     wx.showLoading({ title: '初始化中...' });
     wx.cloud.callFunction({
       name: 'data-init', data: { action: 'init_all' },
-      success: () => { wx.hideLoading(); wx.showToast({ title: '特色餐数据完成', icon: 'success' }); this._log('特色餐数据初始化完成'); },
-      fail: err => { wx.hideLoading(); wx.showToast({ title: '失败', icon: 'error' }); this._log(`特色餐初始化失败: ${err.errMsg}`); },
+      success: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '特色餐数据完成', icon: 'success' });
+        this._log('特色餐数据初始化完成');
+      },
+      fail: err => {
+        wx.hideLoading();
+        wx.showToast({ title: '失败', icon: 'error' });
+        this._log(`特色餐初始化失败: ${err.errMsg}`);
+      },
     });
   },
 
   onToggleLogs() { this.setData({ showLogs: !this.data.showLogs }); },
   onClearLogs()  { this.setData({ logs: [] }); },
 
-  // ==================== 诊断：测试云函数连通性 ====================
-  // 调用 generate_one 生成第一个菜系的第一道菜，验证云函数是否部署正确
+  // ==================== 诊断：测试前端AI直调 ====================
+
   async onDiagnose() {
     if (this.data.isRunning) return;
-    const { CUISINES } = require('../../utils/cuisines.js');
-    const testCuisine = CUISINES.find(c => c.id === 'cantonese') || CUISINES[0];
-    const testDish = (testCuisine.representativeDishes || [])[0];
+
+    const testCuisine = CUISINE_LIST.find(c => c.id === 'cantonese') || CUISINE_LIST[0];
+    const testDish    = (testCuisine && testCuisine.representativeDishes || [])[0];
     if (!testDish) { this._log('❌ 诊断失败：无测试菜品'); return; }
 
-    this._log(`🔍 诊断开始：调用 generate_one（${testCuisine.name} · ${testDish.name}）`);
+    this._log(`🔍 诊断开始：前端直调 AI（${testCuisine.name} · ${testDish.name}）`);
     this.setData({ showLogs: true });
     wx.showLoading({ title: '诊断中...', mask: true });
 
     const t0 = Date.now();
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'batch-recipe-generate',
-        data: { action: 'generate_one', dish: testDish, cuisine: testCuisine, skipExisting: true },
-      });
+      // 检查 wx.cloud.extend.AI 是否可用
+      if (
+        typeof wx === 'undefined' ||
+        !wx.cloud ||
+        !wx.cloud.extend ||
+        !wx.cloud.extend.AI ||
+        !wx.cloud.extend.AI.createModel
+      ) {
+        throw new Error('wx.cloud.extend.AI 不可用，请确认：①基础库≥3.7.1 ②已在云开发控制台开启AI功能');
+      }
+
+      const ingredients = Array.isArray(testDish.ingredients)
+        ? testDish.ingredients
+        : [testDish.name];
+
+      const aiResult = await aiService.callCloudAIFrontend(
+        ingredients,
+        testDish.cookTime   || 30,
+        testDish.difficulty || 'easy',
+        `菜名：${testDish.name}，菜系：${testCuisine.name}`
+      );
+
       wx.hideLoading();
       const elapsed = Date.now() - t0;
-      const r = res.result || {};
-      this._log(`诊断结果：code=${r.code}, 耗时=${elapsed}ms`);
-      if (r.code === 0) {
-        const d = r.data || {};
-        if (d.skipped) {
-          this._log(`✅ 云函数正常！（${testDish.name} 已存在，已跳过）`);
-        } else {
-          this._log(`✅ 云函数正常！生成成功：${d.dishName}，docId=${d.docId}`);
-        }
-        wx.showToast({ title: '云函数正常 ✅', icon: 'success' });
-      } else {
-        this._log(`❌ 云函数返回错误：${r.message}`);
-        wx.showModal({ title: '诊断失败', content: `code=${r.code}\n${r.message}`, showCancel: false });
-      }
+      this._log(`✅ 前端AI直调成功！耗时=${elapsed}ms`);
+      this._log(`   菜谱名：${aiResult.recipe.name}，Token=${aiResult.tokensUsed}`);
+      wx.showToast({ title: 'AI直调正常 ✅', icon: 'success' });
+
     } catch (err) {
       wx.hideLoading();
       const elapsed = Date.now() - t0;
-      this._log(`❌ 调用异常（${elapsed}ms）：${err.message}`);
+      this._log(`❌ 前端AI调用失败（${elapsed}ms）：${err.message}`);
       wx.showModal({
-        title: '云函数调用失败',
-        content: `错误：${err.message}\n\n可能原因：\n1. 云函数未部署（需在开发者工具右键上传）\n2. 超时（需在控制台将超时改为20s）\n3. AI模型未开通权限`,
+        title: 'AI直调失败',
+        content: `错误：${err.message}\n\n可能原因：\n1. 基础库版本 <3.7.1\n2. 云开发控制台未开启AI功能\n3. 未绑定AI资源包（Token用尽）`,
         showCancel: false,
       });
     }
@@ -464,7 +559,7 @@ Page({
   // ==================== 辅助 ====================
 
   _log(msg) {
-    const t = new Date().toLocaleTimeString('zh-CN', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    const t = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const logs = [`[${t}] ${msg}`, ...this.data.logs].slice(0, 50);
     this.setData({ logs });
   },
