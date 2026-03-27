@@ -1,4 +1,4 @@
-<!-- pages/upload/index.wxml  v5.0.0 -->
+pages/upload/index.wxml  v5.0.0
 <!-- 菜谱批量生成管理页 - 前端循环 + 单菜云函数架构 -->
 
 <view class="page">

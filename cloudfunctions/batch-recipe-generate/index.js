@@ -107,6 +107,7 @@ const parseRecipeJSON = (raw) => {
 
 const callAI = async (dishName, ingredients, cookTime, difficulty) => {
   // cloud.ai 在云端运行时由 wx-server-sdk 注入，本地无法使用
+
   const model = cloud.ai.createModel(AI_PROVIDER);
   const t0 = Date.now();
 
@@ -333,6 +334,9 @@ const actionClearCuisine = async (event) => {
 // ==================== 云函数入口 ====================
 
 exports.main = async (event = {}) => {
+
+  console.log('[batch-recipe-generate] 收到请求：', JSON.stringify(event));
+
   const action = event.action || 'generate_one';
   console.log(`[batch-recipe-generate v5] action=${action}`);
 
