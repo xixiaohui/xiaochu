@@ -1,319 +1,174 @@
-/* pages/upload/index.wxss */
+/* pages/upload/index.wxss  v5.0.0 */
 
-page {
-  background: #f0f2f5;
-  min-height: 100vh;
-}
+page { background: #f0f2f5; }
 
-.page {
-  padding: 20rpx 20rpx 60rpx;
-}
+.page { padding: 20rpx 20rpx 80rpx; }
 
 /* ====== 页头 ====== */
 .page-header {
-  padding: 40rpx 30rpx 30rpx;
-  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
   border-radius: 20rpx;
+  padding: 36rpx 30rpx;
   margin-bottom: 20rpx;
   color: #fff;
 }
-.header-title {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
-}
-.header-icon {
-  font-size: 48rpx;
-}
-.header-text {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #fff;
-}
-.header-sub {
-  font-size: 24rpx;
-  color: rgba(255,255,255,0.7);
-}
+.header-row    { display: flex; align-items: center; gap: 16rpx; }
+.header-icon   { font-size: 52rpx; }
+.header-title  { font-size: 34rpx; font-weight: bold; }
+.header-sub    { font-size: 22rpx; color: rgba(255,255,255,.65); margin-top: 4rpx; }
 
 /* ====== 通用 Card ====== */
 .card {
   background: #fff;
   border-radius: 20rpx;
-  padding: 30rpx;
+  padding: 28rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,.06);
 }
 .card-title {
   font-size: 28rpx;
   font-weight: bold;
-  color: #333;
+  color: #222;
   margin-bottom: 20rpx;
 }
 
 /* ====== 数据库总览 ====== */
-.summary-card {}
-.summary-row {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20rpx;
-}
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.summary-num {
-  font-size: 48rpx;
-  font-weight: bold;
-  color: #1a73e8;
-}
-.pending-num { color: #f57c00; }
-.total-num   { color: #388e3c; }
-.summary-label {
-  font-size: 22rpx;
-  color: #888;
-  margin-top: 4rpx;
-}
+.summary-row { display: flex; justify-content: space-around; margin-bottom: 20rpx; }
+.summary-item { display: flex; flex-direction: column; align-items: center; }
+.sum-num      { font-size: 52rpx; font-weight: bold; color: #333; }
+.sum-num.blue  { color: #1565c0; }
+.sum-num.orange{ color: #e65100; }
+.sum-num.green { color: #2e7d32; }
+.sum-label { font-size: 22rpx; color: #888; margin-top: 2rpx; }
 
-/* ====== 进度条 ====== */
-.progress-wrap {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-.progress-bar {
+/* ====== 进度条（通用）====== */
+.pbar-row  { display: flex; align-items: center; gap: 14rpx; }
+.pbar-track {
   flex: 1;
   height: 14rpx;
   background: #e8eaf6;
   border-radius: 7rpx;
   overflow: hidden;
 }
-.progress-fill {
+.pbar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #1a73e8, #42a5f5);
+  background: linear-gradient(90deg, #1565c0, #42a5f5);
   border-radius: 7rpx;
-  transition: width 0.3s;
+  transition: width .3s;
 }
-.progress-fill.running {
-  background: linear-gradient(90deg, #f57c00, #ffb300);
-  animation: pulse 1.5s infinite;
+.pbar-fill.running {
+  background: linear-gradient(90deg, #e65100, #ffb300);
+  animation: pulse 1.4s ease-in-out infinite;
 }
-@keyframes pulse {
-  0%   { opacity: 1; }
-  50%  { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-.progress-pct {
-  font-size: 24rpx;
-  color: #666;
-  width: 80rpx;
-  text-align: right;
-}
-.progress-text {
-  font-size: 24rpx;
-  color: #555;
-  margin-top: 12rpx;
-}
+.pbar-fill.paused { background: #90a4ae; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+.pbar-pct { font-size: 24rpx; color: #666; min-width: 76rpx; text-align: right; }
 
-/* ====== 生成进度卡片 ====== */
-.progress-card {
-  border-left: 6rpx solid #f57c00;
+/* ====== 实时进度卡片 ====== */
+.progress-card { border-left: 6rpx solid #e65100; }
+.progress-card.paused { border-left-color: #90a4ae; }
+.pc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14rpx; }
+.pc-title  { font-size: 28rpx; font-weight: bold; color: #333; }
+.pc-pct    { font-size: 32rpx; font-weight: bold; color: #1565c0; }
+.pc-dish   { display: flex; align-items: center; margin: 10rpx 0; }
+.pc-cuisine{ font-size: 26rpx; color: #555; }
+.pc-arrow  { font-size: 24rpx; color: #bbb; margin: 0 6rpx; }
+.pc-dname  { font-size: 26rpx; color: #1565c0; font-weight: 500; }
+.pc-text   { font-size: 24rpx; color: #666; margin: 8rpx 0 14rpx; }
+.pc-stats  { display: flex; gap: 24rpx; }
+.pcs       { font-size: 28rpx; font-weight: bold; }
+.pcs.success{ color: #2e7d32; }
+.pcs.skip  { color: #1565c0; }
+.pcs.fail  { color: #b71c1c; }
+
+/* 控制按钮 */
+.ctrl-row  { display: flex; gap: 16rpx; margin-top: 20rpx; }
+.btn-ctrl  {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  border: none;
+  text-align: center;
 }
-.progress-info {
-  margin-bottom: 12rpx;
-}
-.cuisine-name {
-  font-size: 28rpx;
-  color: #333;
-  font-weight: 500;
-}
-.running-stats {
-  display: flex;
-  gap: 20rpx;
-  margin-top: 16rpx;
-}
-.stat-item {
-  font-size: 28rpx;
-  font-weight: bold;
-}
-.stat-item.success { color: #388e3c; }
-.stat-item.skip    { color: #1565c0; }
-.stat-item.fail    { color: #c62828; }
+.btn-ctrl.pause  { background: #fff3e0; color: #e65100; }
+.btn-ctrl.resume { background: #e8f5e9; color: #2e7d32; }
+.btn-ctrl.stop   { background: #ffebee; color: #b71c1c; }
 
 /* ====== 操作按钮 ====== */
-.action-card {}
-.btn-group {
-  display: flex;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
-}
+.btn-row { display: flex; gap: 16rpx; margin-bottom: 16rpx; }
 .btn {
   flex: 1;
   height: 88rpx;
   line-height: 88rpx;
   border-radius: 16rpx;
   font-size: 28rpx;
-  text-align: center;
   border: none;
+  text-align: center;
   font-weight: 500;
 }
-.btn-primary {
-  background: linear-gradient(135deg, #1a73e8, #0d47a1);
-  color: #fff;
-}
-.btn-secondary {
-  background: #f5f5f5;
-  color: #333;
-}
-.btn-outline {
-  background: #fff;
-  color: #1a73e8;
-  border: 2rpx solid #1a73e8;
-  font-size: 26rpx;
-}
-.btn[disabled] {
-  opacity: 0.5;
-}
+.btn.primary  { background: linear-gradient(135deg,#1565c0,#0d47a1); color:#fff; }
+.btn.secondary{ background: #f5f5f5; color: #333; }
+.btn.outline  { background: #fff; color: #1565c0; border: 2rpx solid #1565c0; font-size: 26rpx; }
+.btn[disabled]{ opacity: .45; }
 
 /* ====== 菜系列表 ====== */
-.cuisine-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-.cuisine-item {
+.cuisine-list { display: flex; flex-direction: column; gap: 16rpx; }
+.citem {
   border: 2rpx solid #eee;
   border-radius: 16rpx;
-  padding: 20rpx;
-  transition: all 0.2s;
+  padding: 18rpx;
+  transition: border-color .2s, background .2s;
 }
-.cuisine-item.running {
-  border-color: #f57c00;
-  background: #fff8f0;
-}
-.cuisine-item.done {
-  border-color: #a5d6a7;
-  background: #f1f8e9;
-}
-.cuisine-item.error {
-  border-color: #ef9a9a;
-  background: #fff5f5;
-}
-.cuisine-item.partial {
-  border-color: #ffe082;
-  background: #fffde7;
-}
+.citem.running { border-color: #e65100; background: #fff8f0; }
+.citem.done    { border-color: #a5d6a7; background: #f1f8e9; }
+.citem.partial { border-color: #ffe082; background: #fffde7; }
+.citem.error   { border-color: #ef9a9a; background: #fff5f5; }
+.citem.pending { border-color: #b0bec5; }
 
-.cuisine-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12rpx;
-}
-.cuisine-left {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  flex: 1;
-}
-.cuisine-emoji {
-  font-size: 44rpx;
-  width: 60rpx;
-  text-align: center;
-}
-.cuisine-text {
-  flex: 1;
-}
-.cuisine-name-row {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
-}
-.cuisine-name {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #222;
-}
-.cuisine-badge {
-  font-size: 20rpx;
-  padding: 2rpx 12rpx;
-  border-radius: 20rpx;
-  color: #fff;
-}
-.cuisine-badge.running { background: #f57c00; }
-.cuisine-badge.done    { background: #388e3c; }
-.cuisine-badge.partial { background: #f9a825; color: #333; }
-.cuisine-badge.pending { background: #90a4ae; }
-.cuisine-badge.error   { background: #c62828; }
+.citem-top  { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10rpx; }
+.citem-left { display: flex; align-items: center; gap: 14rpx; flex: 1; }
+.citem-emoji{ font-size: 42rpx; }
+.citem-info { flex: 1; }
+.citem-name-row { display: flex; align-items: center; gap: 10rpx; margin-bottom: 6rpx; }
+.citem-name { font-size: 28rpx; font-weight: bold; color: #222; }
 
-.cuisine-tags {
-  display: flex;
-  gap: 8rpx;
-  flex-wrap: wrap;
-}
-.tag {
-  font-size: 20rpx;
-  color: #888;
-  background: #f0f0f0;
-  padding: 2rpx 10rpx;
-  border-radius: 10rpx;
-}
+.cbadge { font-size: 20rpx; padding: 2rpx 12rpx; border-radius: 20rpx; color: #fff; }
+.cbadge.running { background: #e65100; }
+.cbadge.done    { background: #2e7d32; }
+.cbadge.partial { background: #f9a825; color: #333; }
+.cbadge.pending { background: #78909c; }
+.cbadge.error   { background: #b71c1c; }
 
-.cuisine-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  min-width: 100rpx;
-}
-.recipe-count {
-  display: flex;
-  align-items: baseline;
-  gap: 2rpx;
-}
-.count-done {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #1a73e8;
-}
-.count-sep {
-  font-size: 24rpx;
-  color: #bbb;
-}
-.count-total {
-  font-size: 24rpx;
-  color: #aaa;
-}
-.count-label {
-  font-size: 20rpx;
-  color: #aaa;
-}
+.ctags { display: flex; gap: 8rpx; flex-wrap: wrap; }
+.ctag  { font-size: 20rpx; color: #888; background: #f0f0f0; padding: 2rpx 10rpx; border-radius: 10rpx; }
 
-/* mini 进度条 */
-.mini-progress {
-  margin: 8rpx 0;
-}
-.mini-bar {
+.citem-right  { display: flex; align-items: baseline; }
+.cnt-done     { font-size: 36rpx; font-weight: bold; color: #1565c0; }
+.cnt-sep      { font-size: 22rpx; color: #bbb; margin: 0 2rpx; }
+.cnt-total    { font-size: 22rpx; color: #aaa; }
+
+/* 菜系进度条 */
+.mini-bar-track {
   height: 6rpx;
   background: #eee;
   border-radius: 3rpx;
   overflow: hidden;
+  margin-bottom: 8rpx;
 }
-.mini-fill {
-  height: 100%;
-  border-radius: 3rpx;
-  transition: width 0.4s;
-}
+.mini-bar-fill { height: 100%; border-radius: 3rpx; transition: width .4s; }
 
-/* 菜系操作按钮 */
-.cuisine-actions {
-  display: flex;
-  gap: 12rpx;
-  margin-top: 12rpx;
-  align-items: center;
-}
-.btn-small {
+/* 本次统计 */
+.citem-stats { display: flex; gap: 14rpx; margin-bottom: 8rpx; }
+.cs           { font-size: 22rpx; font-weight: bold; }
+.cs.success   { color: #2e7d32; }
+.cs.skip      { color: #1565c0; }
+.cs.fail      { color: #b71c1c; }
+
+/* 操作按钮 */
+.citem-btns { display: flex; gap: 12rpx; align-items: center; margin-top: 4rpx; }
+.btn-sm {
   height: 60rpx;
   line-height: 60rpx;
   padding: 0 20rpx;
@@ -321,79 +176,22 @@ page {
   font-size: 24rpx;
   border: none;
 }
-.btn-gen {
-  background: linear-gradient(135deg, #1a73e8, #42a5f5);
-  color: #fff;
-}
-.btn-regen {
-  background: #fff;
-  color: #f57c00;
-  border: 2rpx solid #f57c00;
-}
-.btn-clear {
-  background: #fff;
-  color: #c62828;
-  border: 2rpx solid #c62828;
-  margin-bottom: 12rpx;
-}
-.done-badge {
-  font-size: 24rpx;
-  color: #388e3c;
-  font-weight: 500;
-}
-
-/* 运行时统计小字 */
-.run-stats {
-  display: flex;
-  gap: 12rpx;
-  margin-top: 8rpx;
-  font-size: 22rpx;
-}
-.rs-success { color: #388e3c; }
-.rs-skip    { color: #1565c0; }
-.rs-fail    { color: #c62828; }
+.btn-sm.gen   { background: linear-gradient(135deg,#1565c0,#42a5f5); color: #fff; }
+.btn-sm.regen { background: #fff; color: #e65100; border: 2rpx solid #e65100; }
+.done-tag     { font-size: 24rpx; color: #2e7d32; font-weight: 500; }
 
 /* ====== 日志 ====== */
-.log-card {}
-.log-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0;
-}
-.log-toggle {
-  font-size: 24rpx;
-  color: #888;
-  font-weight: normal;
-}
-.log-body {
-  margin-top: 16rpx;
-}
-.log-list {
+.log-toggle   { display: flex; justify-content: space-between; cursor: pointer; }
+.toggle-icon  { font-size: 24rpx; color: #888; font-weight: normal; }
+.log-box {
   background: #1a1a2e;
   border-radius: 12rpx;
   padding: 16rpx;
-  max-height: 500rpx;
+  max-height: 480rpx;
   overflow-y: auto;
 }
-.log-item {
-  font-size: 22rpx;
-  color: #a0d468;
-  font-family: monospace;
-  line-height: 1.6;
-  word-break: break-all;
-}
-.log-empty {
-  font-size: 24rpx;
-  color: #666;
-  text-align: center;
-  padding: 30rpx;
-}
+.log-item  { font-size: 22rpx; color: #a0d468; font-family: monospace; line-height: 1.7; word-break: break-all; }
+.log-empty { font-size: 24rpx; color: #555; text-align: center; padding: 30rpx; }
 
 /* ====== 页脚 ====== */
-.page-footer {
-  text-align: center;
-  font-size: 22rpx;
-  color: #999;
-  padding: 20rpx;
-}
+.footer-tip { text-align: center; font-size: 22rpx; color: #999; padding: 20rpx; }
