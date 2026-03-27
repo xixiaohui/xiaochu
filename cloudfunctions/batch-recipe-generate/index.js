@@ -32,7 +32,7 @@ const COLLECTION = 'recipes';
 
 const AI_PROVIDER   = 'hunyuan-exp';
 const AI_MODEL      = 'hunyuan-turbos-latest';
-const AI_TIMEOUT_MS = 25000;   // 单次 AI 调用超时 25s（留5s余量）
+const AI_TIMEOUT_MS = 30000;   // 单次 AI 调用超时 30s（与 recipe-generate 保持一致）
 
 // ==================== Prompt ====================
 
@@ -100,45 +100,55 @@ const parseRecipeJSON = (raw) => {
   throw new Error('无法解析 AI 返回的 JSON');
 };
 
-// ==================== AI 调用（非 stream，更稳定）====================
+// ==================== AI 调用（与 recipe-generate 完全一致：streamText only）====================
+// ⚠️ 重要：cloud.ai 由微信云函数运行时注入，仅在云端可用。
+//    不能使用 invoke()（该方法不存在于 wx-server-sdk ~2.4.0）。
+//    必须使用 model.streamText() + for await (const chunk of res.textStream)。
 
 const callAI = async (dishName, ingredients, cookTime, difficulty) => {
+  // cloud.ai 在云端运行时由 wx-server-sdk 注入，本地无法使用
   const model = cloud.ai.createModel(AI_PROVIDER);
   const t0 = Date.now();
 
   const aiCall = (async () => {
-    // 优先使用 invoke（非流式），如不支持则降级到 streamText
+    const res = await model.streamText({
+      model: AI_MODEL,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user',   content: buildUserPrompt(dishName, ingredients, cookTime, difficulty) },
+      ],
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
     let raw = '';
-    try {
-      const res = await model.invoke({
-        model: AI_MODEL,
-        messages: [
-          { role: 'system',  content: SYSTEM_PROMPT },
-          { role: 'user',    content: buildUserPrompt(dishName, ingredients, cookTime, difficulty) },
-        ],
-        temperature: 0.7,
-        max_tokens: 1024,
-      });
-      raw = res?.choices?.[0]?.message?.content || '';
-    } catch (invokeErr) {
-      // 降级：streamText
-      console.warn('[callAI] invoke 失败，降级到 streamText:', invokeErr.message);
-      const res = await model.streamText({
-        model: AI_MODEL,
-        messages: [
-          { role: 'system',  content: SYSTEM_PROMPT },
-          { role: 'user',    content: buildUserPrompt(dishName, ingredients, cookTime, difficulty) },
-        ],
-        temperature: 0.7,
-        max_tokens: 1024,
-      });
-      for await (const chunk of res.textStream) raw += chunk;
+    for await (const chunk of res.textStream) {
+      raw += chunk;
     }
 
-    if (!raw.trim()) throw new Error('AI 返回内容为空');
+    const elapsed = Date.now() - t0;
+    console.log(`[callAI] AI调用完成，菜名：${dishName}，耗时：${elapsed}ms，文本长度：${raw.length}`);
+
+    if (!raw || raw.trim().length === 0) {
+      throw new Error('AI 返回内容为空');
+    }
+
     const recipe = parseRecipeJSON(raw);
-    console.log(`[callAI] OK: ${dishName}，耗时 ${Date.now() - t0}ms`);
-    return { recipe, tokensUsed: Math.ceil(raw.length / 1.5) + 60 };
+
+    // 优先使用 SDK 真实 usage，否则按字符估算
+    let tokensUsed = 0;
+    try {
+      const usage = await res.usage;
+      if (usage && typeof usage.total_tokens === 'number') {
+        tokensUsed = usage.total_tokens;
+      } else {
+        tokensUsed = Math.ceil(raw.length / 1.5) + 60;
+      }
+    } catch (_) {
+      tokensUsed = Math.ceil(raw.length / 1.5) + 60;
+    }
+
+    return { recipe, tokensUsed };
   })();
 
   const timeout = new Promise((_, rej) =>
