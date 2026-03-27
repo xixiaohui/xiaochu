@@ -1,11 +1,12 @@
 {
   "pages": [
-    "pages/upload/index",
+    
     "pages/index/index",
     "pages/recipe/recipe",
     "pages/cuisine/index",
     "pages/cuisine-detail/index",
-    "pages/example/index"
+    "pages/example/index",
+    "pages/upload/index"
     
 
     
@@ -31,6 +32,12 @@
       {
         "pagePath": "pages/cuisine/index",
         "text": "菜系",
+        "iconPath": "images/icons/examples.png",
+        "selectedIconPath": "images/icons/examples-active.png"
+      },
+      {
+        "pagePath": "pages/upload/index",
+        "text": "上传数据",
         "iconPath": "images/icons/examples.png",
         "selectedIconPath": "images/icons/examples-active.png"
       }
