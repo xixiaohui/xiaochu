@@ -1,4 +1,4 @@
-<!-- 菜系详情页面 - cuisine-detail/index.wxml -->
+<!-- 菜系详情页面 - cuisine-detail/index.wxml  v2.0.0 -->
 
 <view class="detail-container" wx:if="{{cuisine}}">
 
@@ -9,14 +9,8 @@
     <view class="hero-name">{{cuisine.name}}</view>
     <view class="hero-full-name">{{cuisine.fullName}}</view>
     <view class="hero-long-desc">{{cuisine.longDesc}}</view>
-
-    <!-- 菜系特点标签 -->
     <view class="hero-tags">
-      <view
-        class="hero-tag"
-        wx:for="{{cuisine.tags}}"
-        wx:key="index"
-      >{{item}}</view>
+      <view class="hero-tag" wx:for="{{cuisine.tags}}" wx:key="index">{{item}}</view>
     </view>
   </view>
 
@@ -33,13 +27,7 @@
         style="border-color: {{cuisine.color}}40; color: {{cuisine.color}}; background: {{cuisine.lightColor}};"
       >{{item}}</view>
     </view>
-
-    <!-- 一键生成按钮 -->
-    <view
-      class="generate-btn"
-      style="background: {{cuisine.color}};"
-      bindtap="goToRecipeWithCuisine"
-    >
+    <view class="generate-btn" style="background: {{cuisine.color}};" bindtap="goToRecipeWithCuisine">
       <text class="generate-btn-icon">✨</text>
       <text class="generate-btn-text">AI生成{{cuisine.name}}菜谱</text>
     </view>
@@ -68,23 +56,19 @@
 
     <!-- 菜品列表 -->
     <view class="dish-list">
-      <view
-        class="dish-item"
-        wx:for="{{displayDishes}}"
-        wx:key="name"
-      >
+      <view class="dish-item" wx:for="{{displayDishes}}" wx:key="name">
+
         <!-- 菜品摘要行 -->
-        <view
-          class="dish-summary"
-          bindtap="toggleDishExpand"
-          data-index="{{index}}"
-        >
+        <view class="dish-summary" bindtap="toggleDishExpand" data-index="{{index}}">
           <view class="dish-info">
             <view class="dish-name-row">
               <text class="dish-name">{{item.name}}</text>
+              <!-- 难度徽章 -->
               <view class="dish-difficulty-badge {{item.difficulty === 'easy' ? 'badge-easy' : item.difficulty === 'medium' ? 'badge-medium' : 'badge-hard'}}">
                 {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
               </view>
+              <!-- 云端已生成标记 -->
+              <view class="dish-cached-badge" wx:if="{{existingDishMap[item.name]}}">✅已生成</view>
             </view>
             <view class="dish-meta">
               <text class="dish-time">⏱ {{item.cookTime}}分钟</text>
@@ -107,14 +91,14 @@
             >{{ing}}</view>
           </view>
 
+          <!-- AI生成完整食谱按钮 -->
           <view
             class="dish-ai-btn"
             style="background: {{cuisine.color}};"
-            bindtap="goToRecipeWithDish"
-            data-name="{{item.name}}"
-            data-ingredients="{{item.ingredients}}"
+            bindtap="onGenerateFullRecipe"
+            data-dish="{{item}}"
           >
-            ✨ AI生成完整食谱
+            <text>{{existingDishMap[item.name] ? '📖 查看完整食谱' : '✨ AI生成完整食谱'}}</text>
           </view>
         </view>
       </view>
@@ -126,11 +110,111 @@
     </view>
   </view>
 
-  <!-- 底部安全区 -->
   <view style="height: 120rpx;"></view>
 </view>
 
 <!-- 加载中 -->
 <view class="loading-wrap" wx:if="{{!cuisine}}">
   <view class="loading-text">加载中...</view>
+</view>
+
+<!-- ========== 菜谱弹窗 ========== -->
+<view class="recipe-modal-mask" wx:if="{{showRecipeModal}}" bindtap="onCloseRecipeModal">
+  <view class="recipe-modal" catchtap="noop">
+
+    <!-- 弹窗头部 -->
+    <view class="rm-header" style="background: {{cuisine.color}};">
+      <text class="rm-title">{{modalDishName}}</text>
+      <view class="rm-close" bindtap="onCloseRecipeModal">✕</view>
+    </view>
+
+    <!-- 来源标签 -->
+    <view class="rm-source-row" wx:if="{{!modalLoading && !modalError}}">
+      <view class="rm-source-badge {{modalSource === 'db' ? 'from-db' : 'from-ai'}}">
+        {{modalSource === 'db' ? '⚡ 云端缓存' : '🤖 AI 新生成'}}
+      </view>
+      <text class="rm-meta">{{modalElapsed}}ms · {{modalSource === 'db' ? '0' : modalTokens}} Token</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="rm-loading" wx:if="{{modalLoading}}">
+      <view class="rm-loading-spinner"></view>
+      <text class="rm-loading-text">{{existingDishMap[modalDishName] ? '读取云端食谱...' : 'AI 生成中，请稍候...'}}</text>
+    </view>
+
+    <!-- 错误 -->
+    <view class="rm-error" wx:elif="{{modalError}}">
+      <text class="rm-error-icon">😢</text>
+      <text class="rm-error-msg">{{modalError}}</text>
+      <view class="rm-retry-btn" bindtap="onGenerateFullRecipe" data-dish="{{modalDishName}}">重试</view>
+    </view>
+
+    <!-- 食谱内容 -->
+    <scroll-view class="rm-body" scroll-y="{{true}}" wx:elif="{{modalRecipe}}">
+
+      <!-- 描述 -->
+      <view class="rm-desc" wx:if="{{modalRecipe.description}}">{{modalRecipe.description}}</view>
+
+      <!-- 基本信息徽章 -->
+      <view class="rm-badges">
+        <view class="rm-badge">⏱ {{modalRecipe.cookTime}}分钟</view>
+        <view class="rm-badge">📊 {{modalRecipe.difficulty}}</view>
+        <view class="rm-badge">👥 {{modalRecipe.servings}}人份</view>
+        <view class="rm-badge">🔥 {{modalRecipe.nutrition.calories}}千卡</view>
+      </view>
+
+      <!-- 食材清单 -->
+      <view class="rm-section">
+        <view class="rm-section-title">🛒 食材清单</view>
+        <view class="rm-ingredient-list">
+          <view class="rm-ingredient" wx:for="{{modalRecipe.ingredients}}" wx:key="name">
+            <text class="rm-ing-name">{{item.name}}</text>
+            <text class="rm-ing-amount">{{item.amount}}{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 烹饪步骤 -->
+      <view class="rm-section">
+        <view class="rm-section-title">👨‍🍳 烹饪步骤</view>
+        <view class="rm-step" wx:for="{{modalRecipe.steps}}" wx:key="step">
+          <view class="rm-step-num" style="background: {{cuisine.color}};">{{item.step}}</view>
+          <view class="rm-step-body">
+            <text class="rm-step-desc">{{item.description}}</text>
+            <text class="rm-step-tip" wx:if="{{item.tip}}">💡 {{item.tip}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 营养信息 -->
+      <view class="rm-section" wx:if="{{modalRecipe.nutrition}}">
+        <view class="rm-section-title">📊 营养参考（每份）</view>
+        <view class="rm-nutrition">
+          <view class="rm-nut-item">
+            <text class="rm-nut-val">{{modalRecipe.nutrition.calories}}</text>
+            <text class="rm-nut-label">千卡</text>
+          </view>
+          <view class="rm-nut-item">
+            <text class="rm-nut-val">{{modalRecipe.nutrition.protein}}g</text>
+            <text class="rm-nut-label">蛋白质</text>
+          </view>
+          <view class="rm-nut-item">
+            <text class="rm-nut-val">{{modalRecipe.nutrition.carbs}}g</text>
+            <text class="rm-nut-label">碳水</text>
+          </view>
+          <view class="rm-nut-item">
+            <text class="rm-nut-val">{{modalRecipe.nutrition.fat}}g</text>
+            <text class="rm-nut-label">脂肪</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 重新生成按钮 -->
+      <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
+        🔄 重新生成（消耗 Token）
+      </view>
+
+    </scroll-view>
+
+  </view>
 </view>
