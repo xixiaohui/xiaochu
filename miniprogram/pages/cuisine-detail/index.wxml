@@ -210,9 +210,9 @@
       </view>
 
       <!-- 重新生成按钮 -->
-      <!-- <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
+      <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
         🔄 重新生成（消耗 Token）
-      </view> -->
+      </view>
       <view class="rm-regen-btn" bindtap="">
         🔄 重新生成（直接AI暂未开放）
       </view>

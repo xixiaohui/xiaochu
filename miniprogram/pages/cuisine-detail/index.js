@@ -75,6 +75,8 @@ Page({
 
     // 异步检查哪些菜已有云端记录（不阻塞渲染）
     this._checkExistingRecipes(id, cuisine.representativeDishes);
+
+    
   },
 
   /** 批量检查云端已有的菜，更新 existingDishMap */
