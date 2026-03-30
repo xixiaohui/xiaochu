@@ -1,1 +1,635 @@
-/* pages/pregnancy-meals/index.wxss */
+/* 孕妇营养餐页面样式 - pregnancy-meals/index.wxss  v1.0.0 */
+
+/* 粉色主题：#E91E63 */
+
+page {
+  background: #FFF0F5;
+}
+
+.page {
+  min-height: 100vh;
+  background: #FFF0F5;
+}
+
+/* ==================== Hero ==================== */
+.hero {
+  position: relative;
+  padding: 48rpx 32rpx 40rpx;
+  background: linear-gradient(135deg, #E91E63 0%, #F06292 50%, #F48FB1 100%);
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  right: -60rpx;
+  top: -60rpx;
+  width: 260rpx;
+  height: 260rpx;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-emoji {
+  font-size: 72rpx;
+  flex-shrink: 0;
+}
+
+.hero-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 2rpx;
+}
+
+.hero-sub {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6rpx;
+}
+
+/* ==================== 筛选栏 ==================== */
+.filter-wrap {
+  background: #FFFFFF;
+  padding: 16rpx 0 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.filter-scroll {
+  white-space: nowrap;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12rpx;
+  padding: 8rpx 24rpx;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #F5F5F5;
+  border: 2rpx solid #E8E8E8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filter-chip-active {
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+.trimester-active {
+  background: #E91E63 !important;
+  border-color: #E91E63 !important;
+}
+
+.nutrient-active {
+  background: #9C27B0 !important;
+  border-color: #9C27B0 !important;
+}
+
+/* ==================== 菜谱列表 ==================== */
+.meal-list {
+  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.meal-card {
+  display: flex;
+  align-items: stretch;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.07);
+}
+
+/* 左侧粉色块 */
+.card-left {
+  width: 88rpx;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #E91E63, #F48FB1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx 0;
+}
+
+.card-emoji {
+  font-size: 34rpx;
+}
+
+.card-cal-badge {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.28);
+  padding: 3rpx 8rpx;
+  border-radius: 16rpx;
+}
+
+/* 主体 */
+.card-body {
+  flex: 1;
+  padding: 18rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+}
+
+.card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-wrap: wrap;
+}
+
+.card-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2D2D2D;
+}
+
+.card-cached {
+  font-size: 20rpx;
+  padding: 3rpx 12rpx;
+  border-radius: 14rpx;
+  background: #FCE4EC;
+  color: #C62828;
+}
+
+.card-diff {
+  font-size: 20rpx;
+  padding: 3rpx 12rpx;
+  border-radius: 14rpx;
+}
+
+.diff-easy   { background: #E8F5E9; color: #388E3C; }
+.diff-medium { background: #FFF8E1; color: #F57F17; }
+.diff-hard   { background: #FCE4EC; color: #C62828; }
+
+.card-desc {
+  font-size: 24rpx;
+  color: #888;
+  line-height: 1.5;
+}
+
+/* 营养素徽章 */
+.card-nutrients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.nutrient-badge {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 14rpx;
+  background: #F3E5F5;
+  color: #7B1FA2;
+  font-weight: 500;
+}
+
+/* 孕期阶段 + 时间 */
+.card-trimester {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-wrap: wrap;
+}
+
+.trimester-badge {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 14rpx;
+}
+
+.trimester-early { background: #E8F5E9; color: #388E3C; }
+.trimester-mid   { background: #FFF9C4; color: #F9A825; }
+.trimester-late  { background: #FCE4EC; color: #C62828; }
+
+.card-time {
+  font-size: 22rpx;
+  color: #AAAAAA;
+}
+
+/* 标签 */
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.tag {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 14rpx;
+}
+
+.pregnancy-tag {
+  color: #E91E63;
+  background: #FCE4EC;
+}
+
+/* 右侧箭头 */
+.card-arrow {
+  width: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #CCCCCC;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+/* 空状态 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 40rpx;
+  gap: 16rpx;
+}
+
+.empty-icon { font-size: 72rpx; }
+.empty-text { font-size: 28rpx; color: #AAAAAA; }
+
+/* ==================== 弹窗 ==================== */
+.modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+}
+
+.modal {
+  width: 100%;
+  max-height: 88vh;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 弹窗头部 */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #E91E63, #F06292);
+  flex-shrink: 0;
+}
+
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+}
+
+.modal-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.modal-cal-badge {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #E91E63;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+.modal-close {
+  font-size: 36rpx;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 8rpx 12rpx;
+}
+
+/* 来源标签行 */
+.modal-source-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 14rpx 32rpx 8rpx;
+  flex-shrink: 0;
+}
+
+.source-badge {
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-weight: 600;
+}
+
+.from-db {
+  background: #FCE4EC;
+  color: #880E4F;
+}
+
+.from-ai {
+  background: #F3E5F5;
+  color: #6A1B9A;
+}
+
+.source-meta {
+  font-size: 22rpx;
+  color: #AAAAAA;
+}
+
+/* 加载中 */
+.modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 40rpx;
+  gap: 24rpx;
+}
+
+.spinner {
+  width: 64rpx;
+  height: 64rpx;
+  border: 6rpx solid #F0F0F0;
+  border-top-color: #E91E63;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 28rpx;
+  color: #888;
+}
+
+/* 错误 */
+.modal-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 40rpx;
+  gap: 16rpx;
+}
+
+.error-icon { font-size: 64rpx; }
+
+.error-msg {
+  font-size: 26rpx;
+  color: #888;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.retry-btn {
+  margin-top: 8rpx;
+  padding: 16rpx 48rpx;
+  background: #E91E63;
+  color: #FFFFFF;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+/* 弹窗内容区 */
+.modal-body {
+  flex: 1;
+  padding: 0 32rpx 48rpx;
+  overflow-y: auto;
+}
+
+.recipe-desc {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+  padding: 16rpx 0 12rpx;
+  border-bottom: 2rpx solid #F5F5F5;
+  margin-bottom: 16rpx;
+}
+
+.recipe-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #F5F5F5;
+  margin-bottom: 20rpx;
+}
+
+.rbadge {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  background: #F8F8F8;
+  border-radius: 24rpx;
+  color: #555;
+}
+
+.pink-badge {
+  background: #FCE4EC;
+  color: #880E4F;
+}
+
+/* 孕期营养信息 */
+.preg-nut-section {
+  margin-bottom: 20rpx;
+}
+
+.preg-nut-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin: 12rpx 0 10rpx;
+}
+
+.preg-nut-badge {
+  font-size: 24rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 20rpx;
+  background: #F3E5F5;
+  color: #7B1FA2;
+  font-weight: 600;
+}
+
+.preg-trimester-row {
+  display: flex;
+  gap: 10rpx;
+  flex-wrap: wrap;
+  margin-bottom: 12rpx;
+}
+
+.preg-tri-badge {
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+}
+
+.trimester-early { background: #E8F5E9; color: #388E3C; }
+.trimester-mid   { background: #FFF9C4; color: #F9A825; }
+.trimester-late  { background: #FCE4EC; color: #C62828; }
+
+.preg-nutrition-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+  background: #FFF0F5;
+  border-radius: 14rpx;
+  padding: 16rpx;
+  border-left: 6rpx solid #E91E63;
+}
+
+/* 注意事项 */
+.caution-section {
+  margin-bottom: 20rpx;
+}
+
+.caution-content {
+  font-size: 24rpx;
+  color: #B71C1C;
+  line-height: 1.6;
+  background: #FFEBEE;
+  border-radius: 14rpx;
+  padding: 16rpx;
+  border-left: 6rpx solid #F44336;
+  margin-top: 10rpx;
+}
+
+/* 通用区块 */
+.recipe-section {
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 14rpx;
+}
+
+/* 食材 */
+.ingredient-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.ingredient-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 16rpx;
+  background: #FFF0F5;
+  border-radius: 12rpx;
+}
+
+.ing-name {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.ing-amount {
+  font-size: 24rpx;
+  color: #888;
+}
+
+/* 步骤 */
+.step-item {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+  align-items: flex-start;
+}
+
+.step-num {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #E91E63;
+  color: #FFFFFF;
+  font-size: 24rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+  padding-top: 8rpx;
+}
+
+.step-desc {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.7;
+  display: block;
+}
+
+.step-tip {
+  display: block;
+  font-size: 24rpx;
+  color: #F57C00;
+  margin-top: 8rpx;
+  line-height: 1.5;
+}
+
+/* 营养数据 */
+.nutrition-row {
+  display: flex;
+  justify-content: space-around;
+  background: #FFF0F5;
+  border-radius: 16rpx;
+  padding: 24rpx 16rpx;
+}
+
+.nut-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.nut-val {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #E91E63;
+}
+
+.nut-label {
+  font-size: 22rpx;
+  color: #AAAAAA;
+}
+
+/* 重新生成 */
+.regen-btn {
+  margin-top: 24rpx;
+  text-align: center;
+  padding: 20rpx;
+  border: 2rpx solid #DDDDDD;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  color: #888;
+}

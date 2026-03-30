@@ -1,3 +1,8 @@
 {
+  "navigationBarTitleText": "孕妇营养餐",
+  "navigationBarBackgroundColor": "#E91E63",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#FFF0F5",
+  "enablePullDownRefresh": false,
   "usingComponents": {}
 }

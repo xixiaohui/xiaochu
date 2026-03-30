@@ -1,3 +1,8 @@
 {
+  "navigationBarTitleText": "减脂菜谱",
+  "navigationBarBackgroundColor": "#4CAF50",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#F0F7F0",
+  "enablePullDownRefresh": false,
   "usingComponents": {}
 }

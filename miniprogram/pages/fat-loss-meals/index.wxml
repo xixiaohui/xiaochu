@@ -1,2 +1,233 @@
-<!--pages/fat-loss-meals/index.wxml-->
-<text>pages/fat-loss-meals/index.wxml</text>
+<!-- 减脂菜谱页面 - fat-loss-meals/index.wxml  v1.0.0 -->
+
+<view class="page">
+
+  <!-- ========== 顶部 Hero ========== -->
+  <view class="hero">
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+      <text class="hero-emoji">🥗</text>
+      <view class="hero-text">
+        <view class="hero-title">减脂菜谱</view>
+        <view class="hero-sub">低卡高蛋白 · 科学减重 · {{allMeals.length}}道精选</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 筛选栏 ========== -->
+  <view class="filter-wrap">
+    <!-- 热量筛选 -->
+    <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeCalories === item.id ? 'filter-chip-active calories-active' : ''}}"
+          wx:for="{{filterCalories}}"
+          wx:key="id"
+          bindtap="onCaloriesFilter"
+          data-id="{{item.id}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+    <!-- 难度筛选 -->
+    <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeDifficulty === item.id ? 'filter-chip-active diff-active' : ''}}"
+          wx:for="{{filterDifficulty}}"
+          wx:key="id"
+          bindtap="onDifficultyFilter"
+          data-id="{{item.id}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ========== 菜谱列表 ========== -->
+  <view class="meal-list">
+
+    <view
+      class="meal-card"
+      wx:for="{{displayMeals}}"
+      wx:key="id"
+      bindtap="onMealTap"
+      data-meal="{{item}}"
+    >
+      <!-- 左侧色块 -->
+      <view class="card-left">
+        <text class="card-emoji">🥗</text>
+        <view class="card-cal-badge">{{item.calories}}卡</view>
+      </view>
+
+      <!-- 主体内容 -->
+      <view class="card-body">
+        <view class="card-name-row">
+          <text class="card-name">{{item.name}}</text>
+          <!-- 已生成标记 -->
+          <view class="card-cached" wx:if="{{existingMap[item.name]}}">✅已生成</view>
+          <!-- 难度 -->
+          <view class="card-diff diff-{{item.difficulty}}">
+            {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+          </view>
+        </view>
+
+        <text class="card-desc">{{item.desc}}</text>
+
+        <!-- 营养数据行 -->
+        <view class="card-nutrition">
+          <view class="nut-item">
+            <text class="nut-val green">{{item.protein}}g</text>
+            <text class="nut-label">蛋白质</text>
+          </view>
+          <view class="nut-divider"></view>
+          <view class="nut-item">
+            <text class="nut-val orange">{{item.carbs}}g</text>
+            <text class="nut-label">碳水</text>
+          </view>
+          <view class="nut-divider"></view>
+          <view class="nut-item">
+            <text class="nut-val blue">{{item.fat}}g</text>
+            <text class="nut-label">脂肪</text>
+          </view>
+          <view class="nut-divider"></view>
+          <view class="nut-item">
+            <text class="nut-val gray">{{item.cookTime}}min</text>
+            <text class="nut-label">时间</text>
+          </view>
+        </view>
+
+        <!-- 标签 -->
+        <view class="card-tags">
+          <text
+            class="tag fat-tag"
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+          >{{tag}}</text>
+        </view>
+      </view>
+
+      <!-- 右侧箭头 -->
+      <view class="card-arrow">›</view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{displayMeals.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">暂无符合条件的减脂餐</text>
+    </view>
+
+  </view>
+
+  <view style="height: 120rpx;"></view>
+</view>
+
+<!-- ========== 菜谱弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="onCloseModal">
+  <view class="modal" catchtap="noop">
+
+    <!-- 弹窗头部 -->
+    <view class="modal-header">
+      <view class="modal-header-left">
+        <text class="modal-title">{{modalMeal.name}}</text>
+        <view class="modal-cal-badge">{{modalMeal.calories}}卡</view>
+      </view>
+      <view class="modal-close" bindtap="onCloseModal">✕</view>
+    </view>
+
+    <!-- 来源标签 -->
+    <view class="modal-source-row" wx:if="{{!modalLoading && !modalError && modalRecipe}}">
+      <view class="source-badge {{modalSource === 'db' ? 'from-db' : 'from-ai'}}">
+        {{modalSource === 'db' ? '⚡ 云端缓存' : '🤖 AI 新生成'}}
+      </view>
+      <text class="source-meta">{{modalElapsed}}ms · {{modalSource === 'db' ? '0' : modalTokens}} Token</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="modal-loading" wx:if="{{modalLoading}}">
+      <view class="spinner"></view>
+      <text class="loading-text">
+        {{existingMap[modalMeal.name] ? '读取云端食谱...' : 'AI 生成减脂食谱中...'}}
+      </text>
+    </view>
+
+    <!-- 错误 -->
+    <view class="modal-error" wx:elif="{{modalError}}">
+      <text class="error-icon">😢</text>
+      <text class="error-msg">{{modalError}}</text>
+      <view class="retry-btn" bindtap="onRetry">重试</view>
+    </view>
+
+    <!-- 食谱内容 -->
+    <scroll-view class="modal-body" scroll-y wx:elif="{{modalRecipe}}">
+
+      <!-- 菜谱基础信息 -->
+      <view class="recipe-desc" wx:if="{{modalRecipe.description}}">{{modalRecipe.description}}</view>
+
+      <view class="recipe-badges">
+        <view class="rbadge">⏱ {{modalRecipe.cookTime}}分钟</view>
+        <view class="rbadge">📊 {{modalRecipe.difficulty}}</view>
+        <view class="rbadge">👥 {{modalRecipe.servings}}人份</view>
+        <view class="rbadge green-badge">🔥 {{modalRecipe.nutrition.calories}}千卡</view>
+      </view>
+
+      <!-- 减脂营养参考（原始数据） -->
+      <view class="fat-nut-section">
+        <view class="section-title">📊 减脂营养数据</view>
+        <view class="fat-nut-row">
+          <view class="fat-nut-item">
+            <text class="fat-nut-val">{{modalMeal.calories}}</text>
+            <text class="fat-nut-label">总卡路里</text>
+          </view>
+          <view class="fat-nut-item">
+            <text class="fat-nut-val green">{{modalMeal.protein}}g</text>
+            <text class="fat-nut-label">蛋白质</text>
+          </view>
+          <view class="fat-nut-item">
+            <text class="fat-nut-val orange">{{modalMeal.carbs}}g</text>
+            <text class="fat-nut-label">碳水化合物</text>
+          </view>
+          <view class="fat-nut-item">
+            <text class="fat-nut-val blue">{{modalMeal.fat}}g</text>
+            <text class="fat-nut-label">脂肪</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 食材清单 -->
+      <view class="recipe-section">
+        <view class="section-title">🛒 食材清单</view>
+        <view class="ingredient-list">
+          <view class="ingredient-row" wx:for="{{modalRecipe.ingredients}}" wx:key="name">
+            <text class="ing-name">{{item.name}}</text>
+            <text class="ing-amount">{{item.amount}}{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 烹饪步骤 -->
+      <view class="recipe-section">
+        <view class="section-title">👨‍🍳 烹饪步骤</view>
+        <view class="step-item" wx:for="{{modalRecipe.steps}}" wx:key="step">
+          <view class="step-num">{{item.step}}</view>
+          <view class="step-content">
+            <text class="step-desc">{{item.description}}</text>
+            <text class="step-tip" wx:if="{{item.tip}}">💡 {{item.tip}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 减脂小贴士 -->
+      <view class="tips-section" wx:if="{{modalMeal.tips}}">
+        <view class="section-title">💪 减脂小贴士</view>
+        <view class="tips-content">{{modalMeal.tips}}</view>
+      </view>
+
+      <!-- 重新生成 -->
+      <view class="regen-btn" bindtap="onRegenerateRecipe">
+        🔄 重新生成（消耗 Token）
+      </view>
+
+    </scroll-view>
+
+  </view>
+</view>

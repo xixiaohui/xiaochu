@@ -1,2 +1,258 @@
-<!--pages/pregnancy-meals/index.wxml-->
-<text>pages/pregnancy-meals/index.wxml</text>
+<!-- 孕妇营养餐页面 - pregnancy-meals/index.wxml  v1.0.0 -->
+
+<view class="page">
+
+  <!-- ========== 顶部 Hero ========== -->
+  <view class="hero">
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+      <text class="hero-emoji">🤰</text>
+      <view class="hero-text">
+        <view class="hero-title">孕妇营养餐</view>
+        <view class="hero-sub">专业营养 · 呵护母婴 · {{allMeals.length}}道精选</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 筛选栏 ========== -->
+  <view class="filter-wrap">
+    <!-- 孕期阶段筛选 -->
+    <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeTrimester === item.id ? 'filter-chip-active trimester-active' : ''}}"
+          wx:for="{{filterTrimester}}"
+          wx:key="id"
+          bindtap="onTrimesterFilter"
+          data-id="{{item.id}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+    <!-- 营养素筛选 -->
+    <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeNutrient === item.id ? 'filter-chip-active nutrient-active' : ''}}"
+          wx:for="{{filterNutrient}}"
+          wx:key="id"
+          bindtap="onNutrientFilter"
+          data-id="{{item.id}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ========== 菜谱列表 ========== -->
+  <view class="meal-list">
+
+    <view
+      class="meal-card"
+      wx:for="{{displayMeals}}"
+      wx:key="id"
+      bindtap="onMealTap"
+      data-meal="{{item}}"
+    >
+      <!-- 左侧粉色块 -->
+      <view class="card-left">
+        <text class="card-emoji">🤰</text>
+        <view class="card-cal-badge">{{item.calories}}卡</view>
+      </view>
+
+      <!-- 主体内容 -->
+      <view class="card-body">
+        <view class="card-name-row">
+          <text class="card-name">{{item.name}}</text>
+          <!-- 已生成标记 -->
+          <view class="card-cached" wx:if="{{existingMap[item.name]}}">✅已生成</view>
+          <!-- 难度 -->
+          <view class="card-diff diff-{{item.difficulty}}">
+            {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+          </view>
+        </view>
+
+        <text class="card-desc">{{item.desc}}</text>
+
+        <!-- 营养素徽章 -->
+        <view class="card-nutrients">
+          <text
+            class="nutrient-badge"
+            wx:for="{{item.nutrients}}"
+            wx:for-item="nut"
+            wx:key="index"
+          >{{nut}}</text>
+        </view>
+
+        <!-- 孕期适合阶段 -->
+        <view class="card-trimester">
+          <view
+            class="trimester-badge trimester-{{tri}}"
+            wx:for="{{item.trimester}}"
+            wx:for-item="tri"
+            wx:key="index"
+          >
+            {{tri === 'early' ? '🌱早期' : tri === 'mid' ? '🌼中期' : '🌸晚期'}}
+          </view>
+          <text class="card-time">⏱ {{item.cookTime}}分钟</text>
+        </view>
+
+        <!-- 标签 -->
+        <view class="card-tags">
+          <text
+            class="tag pregnancy-tag"
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+          >{{tag}}</text>
+        </view>
+      </view>
+
+      <!-- 右侧箭头 -->
+      <view class="card-arrow">›</view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{displayMeals.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">暂无符合条件的孕妇营养餐</text>
+    </view>
+
+  </view>
+
+  <view style="height: 120rpx;"></view>
+</view>
+
+<!-- ========== 菜谱弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="onCloseModal">
+  <view class="modal" catchtap="noop">
+
+    <!-- 弹窗头部 -->
+    <view class="modal-header">
+      <view class="modal-header-left">
+        <text class="modal-title">{{modalMeal.name}}</text>
+        <view class="modal-cal-badge">{{modalMeal.calories}}卡</view>
+      </view>
+      <view class="modal-close" bindtap="onCloseModal">✕</view>
+    </view>
+
+    <!-- 来源标签 -->
+    <view class="modal-source-row" wx:if="{{!modalLoading && !modalError && modalRecipe}}">
+      <view class="source-badge {{modalSource === 'db' ? 'from-db' : 'from-ai'}}">
+        {{modalSource === 'db' ? '⚡ 云端缓存' : '🤖 AI 新生成'}}
+      </view>
+      <text class="source-meta">{{modalElapsed}}ms · {{modalSource === 'db' ? '0' : modalTokens}} Token</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="modal-loading" wx:if="{{modalLoading}}">
+      <view class="spinner"></view>
+      <text class="loading-text">
+        {{existingMap[modalMeal.name] ? '读取云端食谱...' : 'AI 生成孕期食谱中...'}}
+      </text>
+    </view>
+
+    <!-- 错误 -->
+    <view class="modal-error" wx:elif="{{modalError}}">
+      <text class="error-icon">😢</text>
+      <text class="error-msg">{{modalError}}</text>
+      <view class="retry-btn" bindtap="onRetry">重试</view>
+    </view>
+
+    <!-- 食谱内容 -->
+    <scroll-view class="modal-body" scroll-y wx:elif="{{modalRecipe}}">
+
+      <!-- 描述 -->
+      <view class="recipe-desc" wx:if="{{modalRecipe.description}}">{{modalRecipe.description}}</view>
+
+      <!-- 基础信息 -->
+      <view class="recipe-badges">
+        <view class="rbadge">⏱ {{modalRecipe.cookTime}}分钟</view>
+        <view class="rbadge">📊 {{modalRecipe.difficulty}}</view>
+        <view class="rbadge">👥 {{modalRecipe.servings}}人份</view>
+        <view class="rbadge pink-badge">🔥 {{modalRecipe.nutrition.calories}}千卡</view>
+      </view>
+
+      <!-- 孕期营养信息 -->
+      <view class="preg-nut-section">
+        <view class="section-title">🤰 孕期营养说明</view>
+        <!-- 营养素标签 -->
+        <view class="preg-nut-badges">
+          <view class="preg-nut-badge" wx:for="{{modalMeal.nutrients}}" wx:key="index">
+            {{item}}
+          </view>
+        </view>
+        <!-- 适合孕期 -->
+        <view class="preg-trimester-row">
+          <view
+            class="preg-tri-badge trimester-{{tri}}"
+            wx:for="{{modalMeal.trimester}}"
+            wx:for-item="tri"
+            wx:key="index"
+          >{{tri === 'early' ? '🌱 孕早期' : tri === 'mid' ? '🌼 孕中期' : '🌸 孕晚期'}}</view>
+        </view>
+        <!-- 营养说明 -->
+        <view class="preg-nutrition-text" wx:if="{{modalMeal.nutrition}}">
+          {{modalMeal.nutrition}}
+        </view>
+      </view>
+
+      <!-- 注意事项 -->
+      <view class="caution-section" wx:if="{{modalMeal.caution}}">
+        <view class="section-title">⚠️ 注意事项</view>
+        <view class="caution-content">{{modalMeal.caution}}</view>
+      </view>
+
+      <!-- 食材清单 -->
+      <view class="recipe-section">
+        <view class="section-title">🛒 食材清单</view>
+        <view class="ingredient-list">
+          <view class="ingredient-row" wx:for="{{modalRecipe.ingredients}}" wx:key="name">
+            <text class="ing-name">{{item.name}}</text>
+            <text class="ing-amount">{{item.amount}}{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 烹饪步骤 -->
+      <view class="recipe-section">
+        <view class="section-title">👨‍🍳 烹饪步骤</view>
+        <view class="step-item" wx:for="{{modalRecipe.steps}}" wx:key="step">
+          <view class="step-num">{{item.step}}</view>
+          <view class="step-content">
+            <text class="step-desc">{{item.description}}</text>
+            <text class="step-tip" wx:if="{{item.tip}}">💡 {{item.tip}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 营养数据 -->
+      <view class="recipe-section" wx:if="{{modalRecipe.nutrition}}">
+        <view class="section-title">📊 营养参考（每份）</view>
+        <view class="nutrition-row">
+          <view class="nut-item">
+            <text class="nut-val">{{modalRecipe.nutrition.calories}}</text>
+            <text class="nut-label">千卡</text>
+          </view>
+          <view class="nut-item">
+            <text class="nut-val">{{modalRecipe.nutrition.protein}}g</text>
+            <text class="nut-label">蛋白质</text>
+          </view>
+          <view class="nut-item">
+            <text class="nut-val">{{modalRecipe.nutrition.carbs}}g</text>
+            <text class="nut-label">碳水</text>
+          </view>
+          <view class="nut-item">
+            <text class="nut-val">{{modalRecipe.nutrition.fat}}g</text>
+            <text class="nut-label">脂肪</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 重新生成 -->
+      <view class="regen-btn" bindtap="onRegenerateRecipe">
+        🔄 重新生成（消耗 Token）
+      </view>
+
+    </scroll-view>
+
+  </view>
+</view>
