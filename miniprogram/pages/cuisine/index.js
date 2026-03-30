@@ -125,10 +125,21 @@ Page({
     wx.switchTab({ url: '/pages/recipe/recipe' });
   },
 
-  onShareAppMessage() {
+  
+
+   // ==================== 分享配置 ====================
+
+   onShareAppMessage() {
     return {
       title: '小厨AI - 探索中国八大菜系',
       path: '/pages/cuisine/index',
     };
   },
+
+  onShareTimeline() {
+    return {
+      title: '小厨AI 3.0 - 探索中国八大菜系',
+    };
+  },
+
 });

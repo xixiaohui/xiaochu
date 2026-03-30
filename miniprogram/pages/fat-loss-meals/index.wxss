@@ -507,7 +507,7 @@ page {
 
 .ingredient-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   padding: 12rpx 16rpx;
   background: #FAFAFA;
@@ -585,6 +585,7 @@ page {
 /* 重新生成 */
 .regen-btn {
   margin-top: 24rpx;
+  margin-right: 24px;
   text-align: center;
   padding: 20rpx;
   border: 2rpx solid #DDDDDD;

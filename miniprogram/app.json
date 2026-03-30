@@ -37,6 +37,12 @@
         "text": "减脂菜谱",
         "iconPath": "images/icons/goods.png",
         "selectedIconPath": "images/icons/goods-active.png"
+      },
+      {
+        "pagePath": "pages/pregnancy-meals/index",
+        "text": "孕妇营养餐",
+        "iconPath": "images/icons/goods.png",
+        "selectedIconPath": "images/icons/goods-active.png"
       }
 
      

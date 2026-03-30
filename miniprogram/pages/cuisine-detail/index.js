@@ -244,4 +244,11 @@ Page({
       path:  `/pages/cuisine-detail/index?id=${this.data.cuisineId}`,
     };
   },
+  onShareTimeline() {
+    const { cuisine } = this.data;
+    return {
+      title: `小厨AI - ${cuisine ? cuisine.name : '菜系探索'}`,
+      path:  `/pages/cuisine-detail/index?id=${this.data.cuisineId}`,
+    };
+  },
 });

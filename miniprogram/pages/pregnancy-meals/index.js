@@ -69,6 +69,7 @@ Page({
   // ==================== 生命周期 ====================
 
   onLoad() {
+    console.log("load 孕妇营养餐")
     const allMeals = cuisinesUtil.getPregnancyMeals();
     this.setData({ allMeals, displayMeals: allMeals });
     wx.setNavigationBarTitle({ title: '🤰 孕妇营养餐' });
@@ -368,6 +369,14 @@ Page({
   // ==================== 分享 ====================
 
   onShareAppMessage() {
+    return {
+      title: '小厨AI - 孕妇营养餐，专业呵护母婴',
+      path:  '/pages/pregnancy-meals/index',
+    };
+  },
+
+  onShareTimeline() {
+   
     return {
       title: '小厨AI - 孕妇营养餐，专业呵护母婴',
       path:  '/pages/pregnancy-meals/index',

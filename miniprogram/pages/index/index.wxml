@@ -139,7 +139,7 @@
   <view class="section-block">
     <view class="section-title-row">
       <text class="section-title">🥗 减脂菜谱</text>
-      <text class="section-more" bindtap="goToCuisineList">更多 ›</text>
+      <text class="section-more" bindtap="goToFatLossMeals">更多 ›</text>
     </view>
     <!-- 竖向列表，内容显示完全 -->
     <view class="meal-list">
@@ -150,7 +150,7 @@
         bindtap="onFatLossMealTap"
         data-name="{{item.name}}"
         data-ingredients="{{item.ingredients}}"
-        data-cuisineid="{{item.cuisineId}}"
+        data-cuisineid="{{item.id}}"
       >
         <!-- 左侧色块 -->
         <view class="meal-row-left fat-loss-left">
@@ -191,7 +191,7 @@
   <view class="section-block">
     <view class="section-title-row">
       <text class="section-title">🤰 孕妇营养餐</text>
-      <text class="section-more" bindtap="goToCuisineList">更多 ›</text>
+      <text class="section-more" bindtap="goToPregnancyMeals">更多 ›</text>
     </view>
     <!-- 竖向列表，内容显示完全 -->
     <view class="meal-list">
@@ -202,7 +202,7 @@
         bindtap="onPregnancyMealTap"
         data-name="{{item.name}}"
         data-ingredients="{{item.ingredients}}"
-        data-cuisineid="{{item.cuisineId}}"
+        data-cuisineid="{{item.id}}"
       >
         <!-- 左侧色块 -->
         <view class="meal-row-left pregnancy-left">

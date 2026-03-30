@@ -252,6 +252,11 @@
         🔄 重新生成（消耗 Token）
       </view>
 
+      <!-- 海报生成 -->
+      <view class="regen-btn" bindtap="">
+        ⬇️ 菜谱海报，广而告之
+      </view>
+
     </scroll-view>
 
   </view>

@@ -18,14 +18,6 @@ Page({
     bannerList: [
       {
         id: 1,
-        title: '智能生成专属菜谱',
-        subtitle: '输入食材，AI为你烹饪灵感',
-        emoji: '✨',
-        bgColor: '#FF6B35',
-        action: 'recipe',
-      },
-      {
-        id: 2,
         title: '探索八大菜系',
         subtitle: '川粤苏浙，百味中华',
         emoji: '🍜',
@@ -33,7 +25,7 @@ Page({
         action: 'cuisine',
       },
       {
-        id: 3,
+        id: 2,
         title: '减脂健康餐',
         subtitle: '低卡美味，科学减重',
         emoji: '🥗',
@@ -41,7 +33,7 @@ Page({
         action: 'fatLoss',
       },
       {
-        id: 4,
+        id: 3,
         title: '孕妇营养餐',
         subtitle: '专业营养，呵护母婴',
         emoji: '🤰',
@@ -129,7 +121,9 @@ Page({
    * 加载减脂餐数据（展示前6道）
    */
   loadFatLossMeals() {
-    const fatLossMeals = cuisinesUtil.getFatLossMeals(6);
+    const fatLossMeals = cuisinesUtil.getFatLossMeals(2);
+
+    console.log(fatLossMeals)
     this.setData({ fatLossMeals });
   },
 
@@ -137,7 +131,7 @@ Page({
    * 加载孕妇营养餐数据（展示前6道）
    */
   loadPregnancyMeals() {
-    const pregnancyMeals = cuisinesUtil.getPregnancyMeals(null, 6);
+    const pregnancyMeals = cuisinesUtil.getPregnancyMeals(null, 2);
     this.setData({ pregnancyMeals });
   },
 
@@ -156,16 +150,14 @@ Page({
    */
   onBannerTap(e) {
     const { action } = e.currentTarget.dataset;
-    if (action === 'recipe') {
-      wx.switchTab({ url: '/pages/recipe/recipe' });
-    } else if (action === 'cuisine') {
+    if (action === 'cuisine') {
       wx.switchTab({ url: '/pages/cuisine/index' });
     } else if (action === 'fatLoss') {
       // 跳转减脂餐列表页（暂时导航到菜系页）
-      wx.switchTab({ url: '/pages/cuisine/index' });
+      wx.switchTab({ url: '/pages/fat-loss-meals/index' });
     } else if (action === 'pregnancy') {
       // 跳转孕妇营养餐列表页（暂时导航到菜系页）
-      wx.switchTab({ url: '/pages/cuisine/index' });
+      wx.switchTab({ url: '/pages/pregnancy-meals/index' });
     }
   },
 
@@ -196,6 +188,22 @@ Page({
   },
 
   /**
+   * 跳转到减脂列表
+   */
+  goToFatLossMeals() {
+    wx.switchTab({ url: '/pages/fat-loss-meals/index' });
+  },
+
+  /**
+   * 跳转到孕妇营养列表
+   */
+  goToPregnancyMeals() {
+    console.log("goToPregnancyMeals")
+    wx.switchTab({ url: '/pages/pregnancy-meals/index' });
+  },
+
+
+  /**
    * 跳转到菜系详情页
    */
   goToCuisineDetail(e) {
@@ -221,8 +229,10 @@ Page({
    */
   onFatLossMealTap(e) {
     const { name, ingredients, cuisineid } = e.currentTarget.dataset;
+    console.log(cuisineid)
+
     if (cuisineid) {
-      wx.navigateTo({ url: `/pages/cuisine-detail/index?id=${cuisineid}` });
+      wx.switchTab({ url: `/pages/fat-loss-meals/index?id=${cuisineid}` });
       return;
     }
     // 兜底：用食材跳 AI 生成
@@ -241,8 +251,11 @@ Page({
    */
   onPregnancyMealTap(e) {
     const { name, ingredients, cuisineid } = e.currentTarget.dataset;
+
+    console.log(cuisineid)
     if (cuisineid) {
-      wx.navigateTo({ url: `/pages/cuisine-detail/index?id=${cuisineid}` });
+      console.log("跳转到页面")
+      wx.switchTab({ url: `/pages/pregnancy-meals/index` });
       return;
     }
     // 兜底：用食材跳 AI 生成
@@ -345,14 +358,15 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '小厨AI - 输入食材，AI帮你变好菜！',
+      title: '小厨AI - 减脂餐·孕妇营养餐·每日推荐',
       path: '/pages/index/index',
     };
   },
 
   onShareTimeline() {
     return {
-      title: '小厨AI 3.0 - 减脂餐·孕妇营养餐·每日推荐',
+      title: '小厨AI - 减脂餐·孕妇营养餐·每日推荐',
+      path: '/pages/index/index',
     };
   },
 });

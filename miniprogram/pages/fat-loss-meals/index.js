@@ -351,9 +351,17 @@ Page({
     if (modalMeal) this.onMealTap({ currentTarget: { dataset: { meal: modalMeal } } });
   },
 
-  // ==================== 分享 ====================
+  
+  // ==================== 分享配置 ====================
 
   onShareAppMessage() {
+    return {
+      title: '小厨AI - 减脂菜谱，健康生活每一天',
+      path:  '/pages/fat-loss-meals/index',
+    };
+  },
+
+  onShareTimeline() {
     return {
       title: '小厨AI - 减脂菜谱，健康生活每一天',
       path:  '/pages/fat-loss-meals/index',
