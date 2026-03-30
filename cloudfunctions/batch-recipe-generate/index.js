@@ -108,7 +108,8 @@ const parseRecipeJSON = (raw) => {
 const callAI = async (dishName, ingredients, cookTime, difficulty) => {
   // cloud.ai 在云端运行时由 wx-server-sdk 注入，本地无法使用
 
-  const model = cloud.ai.createModel(AI_PROVIDER);
+  
+  const model = wx.cloud.extend.AI.createModel(AI_PROVIDER);
   const t0 = Date.now();
 
   const aiCall = (async () => {
