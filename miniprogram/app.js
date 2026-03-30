@@ -3,6 +3,7 @@
  * 初始化云开发环境，配置全局数据
  */
 
+
 // 引入缓存工具（用于启动时清理）
 const cache = require('./utils/cache');
 
@@ -75,3 +76,16 @@ App({
     console.error("[app] 全局错误：", msg);
   },
 });
+
+// {
+//   "pagePath": "pages/recipe/recipe",
+//   "text": "生成菜谱",
+//   "iconPath": "images/icons/goods.png",
+//   "selectedIconPath": "images/icons/goods-active.png"
+// },
+// {
+//   "pagePath": "pages/upload/index",
+//   "text": "上传数据",
+//   "iconPath": "images/icons/examples.png",
+//   "selectedIconPath": "images/icons/examples-active.png"
+// }

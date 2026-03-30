@@ -27,10 +27,10 @@
         style="border-color: {{cuisine.color}}40; color: {{cuisine.color}}; background: {{cuisine.lightColor}};"
       >{{item}}</view>
     </view>
-    <view class="generate-btn" style="background: {{cuisine.color}};" bindtap="goToRecipeWithCuisine">
+    <!-- <view class="generate-btn" style="background: {{cuisine.color}};" bindtap="goToRecipeWithCuisine">
       <text class="generate-btn-icon">✨</text>
       <text class="generate-btn-text">AI生成{{cuisine.name}}菜谱</text>
-    </view>
+    </view> -->
   </view>
 
   <!-- ========== 代表菜列表 ========== -->
@@ -210,8 +210,11 @@
       </view>
 
       <!-- 重新生成按钮 -->
-      <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
+      <!-- <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
         🔄 重新生成（消耗 Token）
+      </view> -->
+      <view class="rm-regen-btn" bindtap="">
+        🔄 重新生成（直接AI暂未开放）
       </view>
 
     </scroll-view>

@@ -79,7 +79,7 @@
           >
             查看菜谱
           </view>
-          <view
+          <!-- <view
             class="card-btn card-btn-secondary"
             style="color: {{item.color}}; border-color: {{item.color}};"
             bindtap="goToRecipeWithCuisine"
@@ -88,7 +88,7 @@
             catchtap="goToRecipeWithCuisine"
           >
             AI生成
-          </view>
+          </view> -->
         </view>
       </view>
     </view>

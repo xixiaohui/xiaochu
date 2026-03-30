@@ -23,24 +23,14 @@
         "iconPath": "images/icons/home.png",
         "selectedIconPath": "images/icons/home-active.png"
       },
-      {
-        "pagePath": "pages/recipe/recipe",
-        "text": "生成菜谱",
-        "iconPath": "images/icons/goods.png",
-        "selectedIconPath": "images/icons/goods-active.png"
-      },
+      
       {
         "pagePath": "pages/cuisine/index",
         "text": "菜系",
         "iconPath": "images/icons/examples.png",
         "selectedIconPath": "images/icons/examples-active.png"
-      },
-      {
-        "pagePath": "pages/upload/index",
-        "text": "上传数据",
-        "iconPath": "images/icons/examples.png",
-        "selectedIconPath": "images/icons/examples-active.png"
       }
+     
     ]
   },
   "window": {

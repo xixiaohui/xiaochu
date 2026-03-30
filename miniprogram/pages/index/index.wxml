@@ -4,7 +4,7 @@
 <view class="home-container">
 
   <!-- ========== 顶部标题区 ========== -->
-  <view class="home-header">
+  <!-- <view class="home-header">
     <view class="header-left">
       <image class="header-logo" src="/images/icon3.png" mode="aspectFit"></image>
       <view class="header-text">
@@ -12,7 +12,7 @@
         <view class="header-sub">v3.0 · 多菜系智能烹饪</view>
       </view>
     </view>
-  </view>
+  </view> -->
 
   <!-- ========== 轮播 Banner ========== -->
   <swiper
@@ -44,7 +44,7 @@
 
   <!-- ========== 核心功能入口 ========== -->
   <view class="func-grid">
-    <view class="func-item func-item-main" bindtap="goToRecipe">
+    <!-- <view class="func-item func-item-main" bindtap="goToRecipe">
       <view class="func-icon-wrap func-icon-orange">
         <text class="func-icon">✨</text>
       </view>
@@ -53,7 +53,7 @@
         <view class="func-desc">输入食材，一键生成</view>
       </view>
       <view class="func-arrow">›</view>
-    </view>
+    </view> -->
 
     <view class="func-item func-item-sub" bindtap="goToCuisineList">
       <view class="func-icon-wrap func-icon-purple">
@@ -106,7 +106,7 @@
   </view>
 
   <!-- ========== 热门食材快速入口 ========== -->
-  <view class="section-block">
+  <!-- <view class="section-block">
     <view class="section-title-row">
       <text class="section-title">🔥 热门食材直达</text>
       <text class="section-more" bindtap="goToRecipe">自定义 ›</text>
@@ -123,7 +123,7 @@
         <text class="hot-ing-name">{{item.name}}</text>
       </view>
     </view>
-  </view>
+  </view> -->
 
   <!-- ========== 减脂菜谱板块 ========== -->
   <view class="section-block">

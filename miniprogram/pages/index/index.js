@@ -255,7 +255,7 @@ Page({
       ing.replace(/\d+[g|ml|个|只|根|片|朵|颗|块]/g, '').trim()
     ).filter(i => i.length > 0).slice(0, 5);
     app.globalData.presetIngredients = cleanIngredients.length > 0 ? cleanIngredients : [dailyRecommendation.name];
-    wx.switchTab({ url: '/pages/recipe/recipe' });
+    wx.switchTab({ url: '/pages/cuisine/index' });
   },
 
   /**
