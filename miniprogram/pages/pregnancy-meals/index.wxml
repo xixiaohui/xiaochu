@@ -253,11 +253,53 @@
       </view>
 
       <!-- 海报生成 -->
-      <view class="regen-btn" bindtap="">
-        ⬇️ 菜谱海报，广而告之
+      <view class="poster-btn" bindtap="onGeneratePoster">
+        🎨 生成菜谱海报
       </view>
 
     </scroll-view>
+
+  </view>
+</view>
+
+<!-- ========== 海报画布（不可见，仅用于绘图）========== -->
+<canvas type="2d" id="posterCanvas" class="poster-canvas-hidden"></canvas>
+
+<!-- ========== 海报预览弹窗 ========== -->
+<view class="poster-modal-mask" wx:if="{{showPosterModal}}" bindtap="onClosePosterModal">
+  <view class="poster-modal" catchtap="noop">
+
+    <view class="poster-modal-header">
+      <text class="poster-modal-title">📸 孕妇营养餐海报</text>
+      <view class="poster-modal-close" bindtap="onClosePosterModal">✕</view>
+    </view>
+
+    <!-- 生成中 -->
+    <view class="poster-generating" wx:if="{{posterGenerating}}">
+      <view class="poster-spinner"></view>
+      <text class="poster-gen-text">海报生成中，请稍候...</text>
+    </view>
+
+    <!-- 错误 -->
+    <view class="poster-error" wx:elif="{{posterError}}">
+      <text class="poster-error-icon">😢</text>
+      <text class="poster-error-msg">{{posterError}}</text>
+      <view class="poster-retry-btn" bindtap="onGeneratePoster">重新生成</view>
+    </view>
+
+    <!-- 预览 + 操作 -->
+    <view class="poster-preview-wrap" wx:elif="{{posterTempPath}}">
+      <image class="poster-preview-img" src="{{posterTempPath}}" mode="widthFix" bindtap="onPreviewPoster"></image>
+      <text class="poster-preview-hint">点击图片可全屏预览</text>
+      <view class="poster-actions">
+        <view class="poster-save-btn" bindtap="onSavePoster">
+          📥 保存到手机相册
+        </view>
+        <view class="poster-preview-btn" bindtap="onPreviewPoster">
+          👀 全屏预览
+        </view>
+      </view>
+    </view>
 
   </view>
 </view>

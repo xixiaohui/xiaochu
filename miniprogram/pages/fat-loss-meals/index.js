@@ -13,8 +13,9 @@
 
 'use strict';
 
-const cuisinesUtil  = require('../../utils/cuisines');
-const aiService     = require('../../utils/ai-service');
+const cuisinesUtil    = require('../../utils/cuisines');
+const aiService       = require('../../utils/ai-service');
+const posterGenerator = require('../../utils/poster-generator');
 
 // ==================== 常量 ====================
 
@@ -61,6 +62,12 @@ Page({
     modalElapsed: 0,
     modalTokens:  0,
     modalError:   '',
+
+    // ── 海报弹窗 ──────────────────────────────────────
+    showPosterModal:  false,
+    posterTempPath:   '',
+    posterGenerating: false,
+    posterError:      '',
   },
 
   // ==================== 生命周期 ====================
@@ -351,7 +358,68 @@ Page({
     if (modalMeal) this.onMealTap({ currentTarget: { dataset: { meal: modalMeal } } });
   },
 
-  
+  // ==================== 海报生成 ====================
+
+  /**
+   * 点击"🎨 生成菜谱海报"触发
+   */
+  async onGeneratePoster() {
+    const { modalRecipe, modalMeal } = this.data;
+    if (!modalRecipe || !modalMeal) {
+      wx.showToast({ title: '请先生成菜谱', icon: 'none' });
+      return;
+    }
+
+    this.setData({
+      showPosterModal:  true,
+      posterGenerating: true,
+      posterTempPath:   '',
+      posterError:      '',
+    });
+
+    try {
+      const tempPath = await posterGenerator.generatePoster({
+        canvasId:  'posterCanvas',
+        pageCtx:   this,
+        recipe:    modalRecipe,
+        mealInfo:  modalMeal,
+        themeType: 'fat_loss',
+        onProgress(msg) {
+          wx.showLoading({ title: msg, mask: false });
+        },
+      });
+      wx.hideLoading();
+      this.setData({ posterGenerating: false, posterTempPath: tempPath });
+    } catch (err) {
+      wx.hideLoading();
+      console.error('[fat-loss] 海报生成失败：', err.message);
+      this.setData({ posterGenerating: false, posterError: err.message || '海报生成失败，请重试' });
+    }
+  },
+
+  /** 关闭海报弹窗 */
+  onClosePosterModal() {
+    this.setData({ showPosterModal: false, posterTempPath: '', posterError: '' });
+  },
+
+  /** 保存海报到相册 */
+  async onSavePoster() {
+    const { posterTempPath } = this.data;
+    if (!posterTempPath) return;
+    try {
+      await posterGenerator.saveToAlbum(posterTempPath);
+      wx.showToast({ title: '已保存到相册 🎉', icon: 'success', duration: 2000 });
+    } catch (err) {
+      wx.showToast({ title: err.message || '保存失败', icon: 'error' });
+    }
+  },
+
+  /** 预览海报 */
+  onPreviewPoster() {
+    const { posterTempPath } = this.data;
+    if (posterTempPath) wx.previewImage({ current: posterTempPath, urls: [posterTempPath] });
+  },
+
   // ==================== 分享配置 ====================
 
   onShareAppMessage() {
