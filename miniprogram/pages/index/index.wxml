@@ -73,7 +73,13 @@
       <text class="section-title">🌟 今天吃什么</text>
       <text class="section-more" bindtap="refreshDailyRecommendation">换一道</text>
     </view>
-    <view class="daily-card" bindtap="onDailyRecommendationTap">
+    <!-- cuisine 类型：点击跳菜系详情；其余类型：点击跳 AI 生成 -->
+    <view
+      class="daily-card"
+      bindtap="onDailyRecommendationTap"
+      data-source-type="{{dailyRecommendation.sourceType}}"
+      data-cuisine-id="{{dailyRecommendation.cuisineId}}"
+    >
       <view class="daily-left" style="background: {{dailyRecommendation.color}};">
         <text class="daily-emoji">{{dailyRecommendation.emoji}}</text>
       </view>
@@ -99,6 +105,10 @@
             wx:for-item="tag"
             wx:key="index"
           >{{tag}}</text>
+        </view>
+        <!-- 跳转提示 -->
+        <view class="daily-hint">
+          {{dailyRecommendation.sourceType === 'cuisine' ? '👉 点击查看菜系详情' : '👉 点击 AI 生成菜谱'}}
         </view>
       </view>
       <view class="daily-arrow-btn" style="background: {{dailyRecommendation.color}};">›</view>
@@ -131,39 +141,49 @@
       <text class="section-title">🥗 减脂菜谱</text>
       <text class="section-more" bindtap="goToCuisineList">更多 ›</text>
     </view>
-    <view class="special-meal-scroll">
-      <scroll-view scroll-x="{{true}}" class="meal-scroll-view" enable-flex="{{true}}">
-        <view
-          class="meal-card fat-loss-card"
-          wx:for="{{fatLossMeals}}"
-          wx:key="id"
-          bindtap="onFatLossMealTap"
-          data-name="{{item.name}}"
-          data-ingredients="{{item.ingredients}}"
-        >
-          <view class="meal-card-top fat-loss-top">
-            <text class="meal-card-emoji">🥗</text>
-            <view class="meal-card-calories">{{item.calories}}卡</view>
+    <!-- 竖向列表，内容显示完全 -->
+    <view class="meal-list">
+      <view
+        class="meal-row fat-loss-row"
+        wx:for="{{fatLossMeals}}"
+        wx:key="id"
+        bindtap="onFatLossMealTap"
+        data-name="{{item.name}}"
+        data-ingredients="{{item.ingredients}}"
+        data-cuisineid="{{item.cuisineId}}"
+      >
+        <!-- 左侧色块 -->
+        <view class="meal-row-left fat-loss-left">
+          <text class="meal-row-emoji">🥗</text>
+          <text class="meal-row-cal">{{item.calories}}卡</text>
+        </view>
+        <!-- 右侧内容 -->
+        <view class="meal-row-body">
+          <view class="meal-row-name-line">
+            <text class="meal-row-name">{{item.name}}</text>
+            <view class="meal-row-diff diff-{{item.difficulty}}">
+              {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+            </view>
           </view>
-          <view class="meal-card-body">
-            <text class="meal-card-name">{{item.name}}</text>
-            <text class="meal-card-desc">{{item.desc}}</text>
-            <view class="meal-card-meta">
-              <text class="meal-meta-item">⏱ {{item.cookTime}}分钟</text>
-              <text class="meal-meta-sep">·</text>
-              <text class="meal-meta-item">蛋白{{item.protein}}g</text>
-            </view>
-            <view class="meal-card-tags">
-              <text
-                class="meal-tag fat-loss-tag"
-                wx:for="{{item.tags}}"
-                wx:for-item="tag"
-                wx:key="index"
-              >{{tag}}</text>
-            </view>
+          <text class="meal-row-desc">{{item.desc}}</text>
+          <view class="meal-row-meta">
+            <text class="meal-meta-item">⏱ {{item.cookTime}}分钟</text>
+            <text class="meal-meta-sep">·</text>
+            <text class="meal-meta-item">蛋白 {{item.protein}}g</text>
+            <text class="meal-meta-sep">·</text>
+            <text class="meal-meta-item">碳水 {{item.carbs}}g</text>
+          </view>
+          <view class="meal-row-tags">
+            <text
+              class="meal-tag fat-loss-tag"
+              wx:for="{{item.tags}}"
+              wx:for-item="tag"
+              wx:key="index"
+            >{{tag}}</text>
           </view>
         </view>
-      </scroll-view>
+        <view class="meal-row-arrow">›</view>
+      </view>
     </view>
   </view>
 
@@ -173,39 +193,49 @@
       <text class="section-title">🤰 孕妇营养餐</text>
       <text class="section-more" bindtap="goToCuisineList">更多 ›</text>
     </view>
-    <view class="special-meal-scroll">
-      <scroll-view scroll-x="{{true}}" class="meal-scroll-view" enable-flex="{{true}}">
-        <view
-          class="meal-card pregnancy-card"
-          wx:for="{{pregnancyMeals}}"
-          wx:key="id"
-          bindtap="onPregnancyMealTap"
-          data-name="{{item.name}}"
-          data-ingredients="{{item.ingredients}}"
-        >
-          <view class="meal-card-top pregnancy-top">
-            <text class="meal-card-emoji">🤰</text>
-            <view class="meal-card-calories pregnancy-calories">{{item.calories}}卡</view>
+    <!-- 竖向列表，内容显示完全 -->
+    <view class="meal-list">
+      <view
+        class="meal-row pregnancy-row"
+        wx:for="{{pregnancyMeals}}"
+        wx:key="id"
+        bindtap="onPregnancyMealTap"
+        data-name="{{item.name}}"
+        data-ingredients="{{item.ingredients}}"
+        data-cuisineid="{{item.cuisineId}}"
+      >
+        <!-- 左侧色块 -->
+        <view class="meal-row-left pregnancy-left">
+          <text class="meal-row-emoji">🤰</text>
+          <text class="meal-row-cal">{{item.calories}}卡</text>
+        </view>
+        <!-- 右侧内容 -->
+        <view class="meal-row-body">
+          <view class="meal-row-name-line">
+            <text class="meal-row-name">{{item.name}}</text>
+            <view class="meal-row-diff diff-{{item.difficulty}}">
+              {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+            </view>
           </view>
-          <view class="meal-card-body">
-            <text class="meal-card-name">{{item.name}}</text>
-            <text class="meal-card-desc">{{item.desc}}</text>
-            <view class="meal-card-meta">
-              <text class="meal-meta-item">⏱ {{item.cookTime}}分钟</text>
-              <text class="meal-meta-sep">·</text>
-              <text class="meal-meta-item">{{item.nutrients[0]}}</text>
-            </view>
-            <view class="meal-card-tags">
-              <text
-                class="meal-tag pregnancy-tag"
-                wx:for="{{item.tags}}"
-                wx:for-item="tag"
-                wx:key="index"
-              >{{tag}}</text>
-            </view>
+          <text class="meal-row-desc">{{item.desc}}</text>
+          <view class="meal-row-meta">
+            <text class="meal-meta-item">⏱ {{item.cookTime}}分钟</text>
+            <text class="meal-meta-sep">·</text>
+            <text class="meal-meta-item">{{item.nutrients[0]}}</text>
+            <text class="meal-meta-sep" wx:if="{{item.nutrients[1]}}">·</text>
+            <text class="meal-meta-item" wx:if="{{item.nutrients[1]}}">{{item.nutrients[1]}}</text>
+          </view>
+          <view class="meal-row-tags">
+            <text
+              class="meal-tag pregnancy-tag"
+              wx:for="{{item.tags}}"
+              wx:for-item="tag"
+              wx:key="index"
+            >{{tag}}</text>
           </view>
         </view>
-      </scroll-view>
+        <view class="meal-row-arrow">›</view>
+      </view>
     </view>
   </view>
 

@@ -301,6 +301,12 @@ page {
   border-radius: 0 14rpx 14rpx 0;
 }
 
+.daily-hint {
+  font-size: 20rpx;
+  color: #FF6B35;
+  margin-top: 6rpx;
+}
+
 /* ==================== 热门食材 ==================== */
 .hot-ingredients-grid {
   display: grid;
@@ -329,117 +335,123 @@ page {
   font-weight: 500;
 }
 
-/* ==================== 减脂餐 & 孕妇餐 卡片 ==================== */
-.special-meal-scroll {
-  margin: 0 -28rpx;
-  padding: 0 28rpx;
-}
-
-.meal-scroll-view {
+/* ==================== 减脂餐 & 孕妇餐 竖向列表 ==================== */
+.meal-list {
   display: flex;
-  white-space: nowrap;
-  padding-bottom: 8rpx;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
-.meal-card {
-  display: inline-flex;
-  flex-direction: column;
-  width: 240rpx;
-  margin-right: 16rpx;
+.meal-row {
+  display: flex;
+  align-items: stretch;
   border-radius: 16rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.07);
+  background: #FFFFFF;
+}
+
+/* 左侧色块 */
+.meal-row-left {
+  width: 90rpx;
   flex-shrink: 0;
-  vertical-align: top;
-  white-space: normal;
-}
-
-.meal-card-top {
-  height: 90rpx;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20rpx;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 16rpx 0;
 }
 
-.fat-loss-top {
-  background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+.fat-loss-left {
+  background: linear-gradient(160deg, #4CAF50 0%, #81C784 100%);
 }
 
-.pregnancy-top {
-  background: linear-gradient(135deg, #E91E63 0%, #F48FB1 100%);
+.pregnancy-left {
+  background: linear-gradient(160deg, #E91E63 0%, #F48FB1 100%);
 }
 
-.meal-card-emoji {
-  font-size: 40rpx;
+.meal-row-emoji {
+  font-size: 36rpx;
 }
 
-.meal-card-calories {
-  font-size: 22rpx;
+.meal-row-cal {
+  font-size: 18rpx;
   font-weight: 700;
   color: #FFFFFF;
-  background: rgba(255,255,255,0.25);
-  padding: 4rpx 10rpx;
-  border-radius: 20rpx;
+  background: rgba(255,255,255,0.28);
+  padding: 3rpx 8rpx;
+  border-radius: 16rpx;
 }
 
-.pregnancy-calories {
-  background: rgba(255,255,255,0.25);
-}
-
-.meal-card-body {
+/* 右侧内容 */
+.meal-row-body {
   flex: 1;
-  padding: 16rpx 16rpx 18rpx;
-  background: #FFFFFF;
+  padding: 18rpx 16rpx;
   display: flex;
   flex-direction: column;
   gap: 8rpx;
+  min-width: 0;
 }
 
-.meal-card-name {
-  font-size: 28rpx;
+.meal-row-name-line {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-wrap: wrap;
+}
+
+.meal-row-name {
+  font-size: 30rpx;
   font-weight: 600;
   color: #2D2D2D;
-  white-space: normal;
   line-height: 1.3;
 }
 
-.meal-card-desc {
-  font-size: 22rpx;
-  color: #888888;
-  line-height: 1.4;
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+.meal-row-diff {
+  font-size: 20rpx;
+  padding: 3rpx 12rpx;
+  border-radius: 14rpx;
 }
 
-.meal-card-meta {
+.diff-easy   { background: #E8F5E9; color: #388E3C; }
+.diff-medium { background: #FFF8E1; color: #F57F17; }
+.diff-hard   { background: #FCE4EC; color: #C62828; }
+
+.meal-row-desc {
+  font-size: 24rpx;
+  color: #888888;
+  line-height: 1.5;
+}
+
+.meal-row-meta {
   display: flex;
   align-items: center;
-  gap: 6rpx;
+  gap: 8rpx;
+  flex-wrap: wrap;
 }
 
 .meal-meta-item {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #AAAAAA;
 }
 
 .meal-meta-sep {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #CCCCCC;
 }
 
-.meal-card-tags {
+.meal-row-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6rpx;
+  gap: 8rpx;
+  margin-top: 4rpx;
 }
 
 .meal-tag {
-  font-size: 18rpx;
-  padding: 3rpx 10rpx;
-  border-radius: 12rpx;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 14rpx;
 }
 
 .fat-loss-tag {
@@ -450,6 +462,18 @@ page {
 .pregnancy-tag {
   color: #E91E63;
   background: #FCE4EC;
+}
+
+/* 右侧箭头 */
+.meal-row-arrow {
+  width: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 36rpx;
+  color: #CCCCCC;
+  font-weight: 300;
 }
 
 /* ==================== 菜系宫格 ==================== */

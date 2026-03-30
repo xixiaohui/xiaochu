@@ -216,12 +216,17 @@ Page({
   },
 
   /**
-   * 点击减脂餐项目，用食材生成菜谱
+   * 点击减脂餐项目 → 跳转到减脂餐菜系详情页
+   * 传入 cuisineId 时直接跳详情页，否则兜底到 AI 生成
    */
   onFatLossMealTap(e) {
-    const { name, ingredients } = e.currentTarget.dataset;
+    const { name, ingredients, cuisineid } = e.currentTarget.dataset;
+    if (cuisineid) {
+      wx.navigateTo({ url: `/pages/cuisine-detail/index?id=${cuisineid}` });
+      return;
+    }
+    // 兜底：用食材跳 AI 生成
     const app = getApp();
-    // 提取食材名称（去掉克重等后缀）
     const cleanIngredients = (ingredients || []).map(ing =>
       ing.replace(/\d+[g|ml|个|只|根|片|朵|颗|块]/g, '').trim()
     ).filter(i => i.length > 0).slice(0, 5);
@@ -231,10 +236,16 @@ Page({
   },
 
   /**
-   * 点击孕妇营养餐项目，用食材生成菜谱
+   * 点击孕妇营养餐项目 → 跳转到对应菜系详情页
+   * 传入 cuisineId 时直接跳详情页，否则兜底到 AI 生成
    */
   onPregnancyMealTap(e) {
-    const { name, ingredients } = e.currentTarget.dataset;
+    const { name, ingredients, cuisineid } = e.currentTarget.dataset;
+    if (cuisineid) {
+      wx.navigateTo({ url: `/pages/cuisine-detail/index?id=${cuisineid}` });
+      return;
+    }
+    // 兜底：用食材跳 AI 生成
     const app = getApp();
     const cleanIngredients = (ingredients || []).map(ing =>
       ing.replace(/\d+[g|ml|个|只|根|片|朵|颗|块]/g, '').trim()
@@ -245,17 +256,35 @@ Page({
   },
 
   /**
-   * 点击今日推荐，跳转菜谱生成
+   * 点击今日推荐，跳转对应菜系详情页
+   * - sourceType === 'cuisine'  → 跳转该菜系详情页（goToCuisineDetail）
+   * - sourceType === 'fat_loss' / 'pregnancy' → 跳转对应特色菜系详情页，
+   *   若无 cuisineId 则用食材跳 recipe 页作为兜底
    */
-  onDailyRecommendationTap() {
+  onDailyRecommendationTap(e) {
     const { dailyRecommendation } = this.data;
     if (!dailyRecommendation) return;
+
+    // 优先从 dataset 取（WXML 已通过 data-cuisine-id 传入）
+    const sourceType = (e && e.currentTarget && e.currentTarget.dataset.sourceType) || dailyRecommendation.sourceType;
+    const cuisineId  = (e && e.currentTarget && e.currentTarget.dataset.cuisineId)  || dailyRecommendation.cuisineId;
+    const { name, ingredients } = dailyRecommendation;
+
+    if (sourceType === 'cuisine' && cuisineId) {
+      // 跳转到对应菜系详情页
+      wx.navigateTo({ url: `/pages/cuisine-detail/index?id=${cuisineId}` });
+      return;
+    }
+
+    // 减脂餐 / 孕妇营养餐：用食材跳转 AI 生成菜谱页
     const app = getApp();
-    const cleanIngredients = (dailyRecommendation.ingredients || []).map(ing =>
+    const cleanIngredients = (ingredients || []).map(ing =>
       ing.replace(/\d+[g|ml|个|只|根|片|朵|颗|块]/g, '').trim()
     ).filter(i => i.length > 0).slice(0, 5);
-    app.globalData.presetIngredients = cleanIngredients.length > 0 ? cleanIngredients : [dailyRecommendation.name];
-    wx.switchTab({ url: '/pages/cuisine/index' });
+    app.globalData.presetIngredients = cleanIngredients.length > 0 ? cleanIngredients : [name];
+    if (sourceType === 'fat_loss') app.globalData.presetMode = 'fat_loss';
+    if (sourceType === 'pregnancy') app.globalData.presetMode = 'pregnancy';
+    wx.switchTab({ url: '/pages/recipe/recipe' });
   },
 
   /**
@@ -271,6 +300,7 @@ Page({
           ...dish,
           sourceType: 'cuisine',
           sourceName: cuisine.name,
+          cuisineId: cuisine.id,       // 用于跳转菜系详情页
           emoji: cuisine.emoji,
           color: cuisine.color,
           tags: dish.ingredients ? dish.ingredients.slice(0, 3) : [],

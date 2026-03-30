@@ -2071,6 +2071,7 @@ const getDailyRecommendation = () => {
         ...dish,
         sourceType: 'cuisine',
         sourceName: cuisine.name,
+        cuisineId: cuisine.id,       // 用于跳转菜系详情页
         emoji: cuisine.emoji,
         color: cuisine.color,
         tags: dish.ingredients ? dish.ingredients.slice(0, 3) : [],
