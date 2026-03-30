@@ -6,7 +6,9 @@
     "pages/cuisine/index",
     "pages/cuisine-detail/index",
     "pages/example/index",
-    "pages/upload/index"
+    "pages/upload/index",
+    "pages/fat-loss-meals/index",
+    "pages/pregnancy-meals/index"
     
 
     
@@ -29,7 +31,14 @@
         "text": "菜系",
         "iconPath": "images/icons/examples.png",
         "selectedIconPath": "images/icons/examples-active.png"
+      },
+      {
+        "pagePath": "pages/fat-loss-meals/index",
+        "text": "减脂菜谱",
+        "iconPath": "images/icons/goods.png",
+        "selectedIconPath": "images/icons/goods-active.png"
       }
+
      
     ]
   },

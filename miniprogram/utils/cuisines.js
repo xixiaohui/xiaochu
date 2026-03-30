@@ -1008,7 +1008,7 @@ const normalizeCuisineDishes = (cuisine) => {
 CUISINES.forEach(normalizeCuisineDishes);
 
 // 可选自检：如需本地调试可临时打开下面这行
-console.log(CUISINES.map(item => ({ id: item.id, count: item.representativeDishes.length })));
+// console.log(CUISINES.map(item => ({ id: item.id, count: item.representativeDishes.length })));
 
 
 // ==================== 减脂餐数据 ====================
