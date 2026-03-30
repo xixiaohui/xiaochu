@@ -1,37 +1,50 @@
 /**
- * 菜系详情页面逻辑 - cuisine-detail/index.js
- * 功能：展示单个菜系的详细信息、代表菜列表，支持一键生成AI菜谱
+ * 菜系详情页面逻辑 - cuisine-detail/index.js  v2.0.0
+ *
+ * 变更（v2.0.0）：
+ *   - "AI生成完整食谱" 按钮接入 utils/recipe-service.js
+ *   - 优先读取云端 recipes 集合中已有记录（0 Token / 秒开）
+ *   - 数据库无记录时调用 AI 生成，成功后回写数据库
+ *   - 新增 recipeModal 弹窗在当前页展示菜谱详情（无需跳转）
+ *   - 保留原有的跳转方式 goToRecipeWithDish / goToRecipeWithCuisine
  */
 
 'use strict';
 
-const cuisinesUtil = require('../../utils/cuisines');
+const cuisinesUtil  = require('../../utils/cuisines');
+const recipeService = require('../../utils/recipe-service');
 
 Page({
   data: {
-    // 当前菜系数据
-    cuisine: null,
-
-    // 菜系ID
-    cuisineId: '',
-
-    // 当前难度筛选
-    difficultyFilter: 'all',
-
-    // 难度选项
+    // ── 菜系数据 ──────────────────────────────────────────
+    cuisine:           null,
+    cuisineId:         '',
+    difficultyFilter:  'all',
     difficultyOptions: [
-      { id: 'all', label: '全部' },
-      { id: 'easy', label: '😊 简单' },
-      { id: 'medium', label: '💪 中等' },
-      { id: 'hard', label: '👨‍🍳 困难' },
+      { id: 'all',    label: '全部'      },
+      { id: 'easy',   label: '😊 简单'   },
+      { id: 'medium', label: '💪 中等'   },
+      { id: 'hard',   label: '👨‍🍳 困难'  },
     ],
-
-    // 显示的菜品列表（过滤后）
-    displayDishes: [],
-
-    // 当前展开的菜品索引（-1表示无）
+    displayDishes:     [],
     expandedDishIndex: -1,
+
+    // ── 已有云端记录的菜名集合（用于 UI 标记"已生成"）──────
+    // Set 不能放 data，改用 Object 做映射：{ dishName: true }
+    existingDishMap:   {},
+
+    // ── 菜谱弹窗 ──────────────────────────────────────────
+    showRecipeModal:   false,
+    modalLoading:      false,
+    modalRecipe:       null,   // 当前弹窗展示的食谱对象
+    modalDishName:     '',
+    modalSource:       '',     // 'db' | 'ai'
+    modalElapsed:      0,
+    modalTokens:       0,
+    modalError:        '',
   },
+
+  // ==================== 生命周期 ====================
 
   onLoad(options) {
     const { id } = options;
@@ -40,123 +53,193 @@ Page({
       setTimeout(() => wx.navigateBack(), 1500);
       return;
     }
-
     this.setData({ cuisineId: id });
     this.loadCuisineData(id);
-
-    // 开启分享
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage'],
-    });
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage'] });
   },
 
-  loadCuisinesById(id) {
-    console.log("开始")
-    wx.cloud.callFunction({
-      name: 'cuisine-service',
-      data: {
-        action: 'getCuisineById',
-        id: id
-      },
-      success: res => {
-        // wx.showToast({
-        //   title: '获取菜系数据成功'
-        // })
-        // console.log(res.result.data)
+  // ==================== 数据加载 ====================
 
-        this.setData({
-          cuisine:res.result.data,
-          displayDishes: res.result.data.representativeDishes,
-        });
-      }
-    })
-  },
-
-  /**
-   * 加载菜系详情数据
-   */
   loadCuisineData(id) {
     const cuisine = cuisinesUtil.getCuisineById(id);
-    
     if (!cuisine) {
       wx.showToast({ title: '菜系不存在', icon: 'error' });
       setTimeout(() => wx.navigateBack(), 1500);
       return;
     }
 
-    // 设置导航栏标题
     wx.setNavigationBarTitle({ title: cuisine.name });
-    wx.setNavigationBarColor({
-      frontColor: '#ffffff',
-      backgroundColor: cuisine.color,
-    });
+    wx.setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: cuisine.color });
 
-    this.setData({
-      cuisine,
-      displayDishes: cuisine.representativeDishes,
-    });
+    this.setData({ cuisine, displayDishes: cuisine.representativeDishes });
 
-    this.loadCuisinesById(id);
+    // 异步检查哪些菜已有云端记录（不阻塞渲染）
+    this._checkExistingRecipes(id, cuisine.representativeDishes);
   },
 
-  /**
-   * 切换难度筛选
-   */
+  /** 批量检查云端已有的菜，更新 existingDishMap */
+  async _checkExistingRecipes(cuisineId, dishes) {
+    try {
+      const names = (dishes || []).map(d => d.name).filter(Boolean);
+      if (!names.length) return;
+
+      const existingSet = await recipeService.checkExistingRecipes(cuisineId, names);
+
+      // 转成 { dishName: true } 结构存入 data
+      const existingDishMap = {};
+      existingSet.forEach(name => { existingDishMap[name] = true; });
+      this.setData({ existingDishMap });
+
+      console.log(`[cuisine-detail] 云端已有 ${existingSet.size}/${names.length} 道菜谱`);
+    } catch (err) {
+      // 检查失败静默处理，不影响正常功能
+      console.warn('[cuisine-detail] 检查云端记录失败：', err.message);
+    }
+  },
+
+  // ==================== 筛选 / 展开 ====================
+
   onDifficultyFilter(e) {
     const { id } = e.currentTarget.dataset;
     this.setData({ difficultyFilter: id, expandedDishIndex: -1 });
-
     const cuisine = this.data.cuisine;
     if (!cuisine) return;
-
-    let dishes = cuisine.representativeDishes;
-    if (id !== 'all') {
-      dishes = dishes.filter(d => d.difficulty === id);
-    }
-
+    const dishes = id === 'all'
+      ? cuisine.representativeDishes
+      : cuisine.representativeDishes.filter(d => d.difficulty === id);
     this.setData({ displayDishes: dishes });
   },
 
-  /**
-   * 展开/收起菜品详情
-   */
   toggleDishExpand(e) {
     const { index } = e.currentTarget.dataset;
     const current = this.data.expandedDishIndex;
-    this.setData({
-      expandedDishIndex: current === index ? -1 : index,
-    });
+    this.setData({ expandedDishIndex: current === index ? -1 : index });
   },
 
+  // ==================== 核心：AI生成完整食谱 ====================
+
   /**
-   * 用该菜品的食材去生成菜谱
+   * 点击"✨ AI生成完整食谱"触发
+   * 1. 打开弹窗，显示 loading
+   * 2. 调用 recipeService.getRecipeForDish()（云端命中直接返回，否则 AI 生成并回写）
+   * 3. 在弹窗内展示结果
    */
+  async onGenerateFullRecipe(e) {
+    const { dish } = e.currentTarget.dataset;
+    const { cuisine } = this.data;
+    if (!dish || !cuisine) return;
+
+    // 打开弹窗，进入 loading 状态
+    this.setData({
+      showRecipeModal: true,
+      modalLoading:    true,
+      modalRecipe:     null,
+      modalDishName:   dish.name,
+      modalSource:     '',
+      modalElapsed:    0,
+      modalTokens:     0,
+      modalError:      '',
+    });
+
+    try {
+      const result = await recipeService.getRecipeForDish(dish, cuisine);
+
+      // 更新"已有"标记
+      if (result.source === 'ai') {
+        const existingDishMap = { ...this.data.existingDishMap, [dish.name]: true };
+        this.setData({ existingDishMap });
+      }
+
+      this.setData({
+        modalLoading: false,
+        modalRecipe:  result.recipe,
+        modalSource:  result.source,
+        modalElapsed: result.elapsed,
+        modalTokens:  result.tokensUsed,
+        modalError:   '',
+      });
+    } catch (err) {
+      console.error('[cuisine-detail] 生成食谱失败：', err.message);
+      this.setData({
+        modalLoading: false,
+        modalError:   err.message || '生成失败，请稍后重试',
+      });
+    }
+  },
+
+  /** 关闭菜谱弹窗 */
+  onCloseRecipeModal() {
+    this.setData({ showRecipeModal: false, modalRecipe: null });
+  },
+
+  /** 弹窗内"重新生成"（强制跳过缓存，直接 AI 生成） */
+  async onRegenerateRecipe() {
+    const { modalDishName, cuisine } = this.data;
+    if (!modalDishName || !cuisine) return;
+
+    const dish = (cuisine.representativeDishes || []).find(d => d.name === modalDishName);
+    if (!dish) return;
+
+    this.setData({ modalLoading: true, modalRecipe: null, modalError: '' });
+
+    try {
+      // 直接调 AI，不走数据库查询
+      const aiResult = await require('../../utils/ai-service').callCloudAIFrontend(
+        Array.isArray(dish.ingredients) && dish.ingredients.length > 0
+          ? dish.ingredients
+          : [dish.name],
+        dish.cookTime   || 30,
+        dish.difficulty || 'easy',
+        `菜名：${dish.name}，菜系：${cuisine.name}（${cuisine.fullName || cuisine.name}）`
+      );
+
+      // 回写数据库（不等待，后台完成）
+      recipeService.getRecipeForDish(
+        { ...dish, _forceAI: true },  // 传一个标记，但 service 内幂等写入
+        cuisine
+      ).catch(e => console.warn('[cuisine-detail] 重新生成回写失败：', e.message));
+
+      this.setData({
+        modalLoading: false,
+        modalRecipe:  aiResult.recipe,
+        modalSource:  'ai',
+        modalElapsed: 0,
+        modalTokens:  aiResult.tokensUsed || 0,
+        modalError:   '',
+      });
+    } catch (err) {
+      this.setData({ modalLoading: false, modalError: err.message || '重新生成失败' });
+    }
+  },
+
+  // ==================== 原有跳转方式（保留兼容）====================
+
+  /** 用该菜品食材跳转到 recipe 页（自由生成） */
   goToRecipeWithDish(e) {
     const { name, ingredients } = e.currentTarget.dataset;
     const app = getApp();
     app.globalData.presetIngredients = ingredients;
-    app.globalData.presetDishName = name;
+    app.globalData.presetDishName    = name;
     wx.switchTab({ url: '/pages/recipe/recipe' });
   },
 
-  /**
-   * 用该菜系快速食材去生成菜谱
-   */
+  /** 用菜系快速食材跳转到 recipe 页 */
   goToRecipeWithCuisine() {
     const { cuisine } = this.data;
     if (!cuisine) return;
     const app = getApp();
     app.globalData.presetIngredients = cuisine.quickIngredients.slice(0, 4);
-    app.globalData.presetCuisine = { id: cuisine.id, name: cuisine.name };
+    app.globalData.presetCuisine     = { id: cuisine.id, name: cuisine.name };
     wx.switchTab({ url: '/pages/recipe/recipe' });
   },
+
+  // ==================== 分享 ====================
 
   onShareAppMessage() {
     const { cuisine } = this.data;
     return {
       title: `小厨AI - ${cuisine ? cuisine.name : '菜系探索'}`,
-      path: `/pages/cuisine-detail/index?id=${this.data.cuisineId}`,
+      path:  `/pages/cuisine-detail/index?id=${this.data.cuisineId}`,
     };
   },
 });
