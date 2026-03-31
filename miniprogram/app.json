@@ -8,7 +8,8 @@
     "pages/example/index",
     "pages/upload/index",
     "pages/fat-loss-meals/index",
-    "pages/pregnancy-meals/index"
+    "pages/pregnancy-meals/index",
+    "pages/chinese-snacks/index"
     
 
     
@@ -43,6 +44,12 @@
         "text": "孕妇营养餐",
         "iconPath": "images/icons/goods.png",
         "selectedIconPath": "images/icons/goods-active.png"
+      },
+      {
+        "pagePath": "pages/chinese-snacks/index",
+        "text": "中国小吃",
+        "iconPath": "images/icons/examples.png",
+        "selectedIconPath": "images/icons/examples-active.png"
       }
 
      
