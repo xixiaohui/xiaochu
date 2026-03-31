@@ -462,6 +462,7 @@ page {
   border-radius: 16rpx;
   padding: 20rpx 12rpx;
   margin-top: 12rpx;
+  margin-right: 25px;
 }
 
 .fat-nut-item {
@@ -512,6 +513,7 @@ page {
   padding: 12rpx 16rpx;
   background: #FAFAFA;
   border-radius: 12rpx;
+  margin-right: 25px;
 }
 
 .ing-name {
@@ -580,6 +582,7 @@ page {
   border-radius: 16rpx;
   padding: 20rpx;
   border-left: 6rpx solid #4CAF50;
+  margin-right: 25px;
 }
 
 /* 重新生成 */

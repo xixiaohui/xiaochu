@@ -26,18 +26,17 @@
         "iconPath": "images/icons/home.png",
         "selectedIconPath": "images/icons/home-active.png"
       },
-      
-      {
-        "pagePath": "pages/cuisine/index",
-        "text": "菜系",
-        "iconPath": "images/icons/examples.png",
-        "selectedIconPath": "images/icons/examples-active.png"
-      },
       {
         "pagePath": "pages/fat-loss-meals/index",
         "text": "减脂菜谱",
         "iconPath": "images/icons/goods.png",
         "selectedIconPath": "images/icons/goods-active.png"
+      },
+      {
+        "pagePath": "pages/cuisine/index",
+        "text": "菜系",
+        "iconPath": "images/icons/examples.png",
+        "selectedIconPath": "images/icons/examples-active.png"
       },
       {
         "pagePath": "pages/pregnancy-meals/index",

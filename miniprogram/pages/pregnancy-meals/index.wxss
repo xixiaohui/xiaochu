@@ -427,6 +427,7 @@ page {
   padding: 16rpx 0 12rpx;
   border-bottom: 2rpx solid #F5F5F5;
   margin-bottom: 16rpx;
+  margin-right: 25px;
 }
 
 .recipe-badges {
@@ -497,6 +498,7 @@ page {
   border-radius: 14rpx;
   padding: 16rpx;
   border-left: 6rpx solid #E91E63;
+  margin-right: 25px;
 }
 
 /* 注意事项 */
@@ -513,6 +515,7 @@ page {
   padding: 16rpx;
   border-left: 6rpx solid #F44336;
   margin-top: 10rpx;
+  margin-right: 25px;
 }
 
 /* 通用区块 */
@@ -541,6 +544,7 @@ page {
   padding: 12rpx 16rpx;
   background: #FFF0F5;
   border-radius: 12rpx;
+  margin-right: 25px;
 }
 
 .ing-name {
@@ -559,6 +563,7 @@ page {
   display: flex;
   gap: 20rpx;
   margin-bottom: 20rpx;
+  margin-right: 25px;
   align-items: flex-start;
 }
 
@@ -603,6 +608,7 @@ page {
   background: #FFF0F5;
   border-radius: 16rpx;
   padding: 24rpx 16rpx;
+  margin-right: 25px;
 }
 
 .nut-item {

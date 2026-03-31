@@ -481,6 +481,7 @@ page {
   border-radius: 16rpx;
   padding: 20rpx 12rpx;
   margin-top: 12rpx;
+  margin-right: 25px;
 }
 
 .nut-item {
@@ -526,12 +527,13 @@ page {
 
 .ingredient-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   padding: 12rpx 16rpx;
   background: #FAFAFA;
   border-radius: 12rpx;
   border-left: 6rpx solid #D32F2F;
+  margin-right: 25px;
 }
 
 .ing-name {
@@ -570,6 +572,7 @@ page {
 .step-content {
   flex: 1;
   padding-top: 8rpx;
+  margin-right: 25px;
 }
 
 .step-desc {
@@ -605,6 +608,7 @@ page {
 /* 重新生成 */
 .regen-btn {
   margin-top: 24rpx;
+  margin-right: 25px;
   text-align: center;
   padding: 20rpx;
   border: 2rpx solid #DDDDDD;
@@ -616,6 +620,7 @@ page {
 /* 海报生成按钮 */
 .poster-btn {
   margin-top: 20rpx;
+  margin-right: 25px;
   text-align: center;
   padding: 24rpx;
   background: linear-gradient(135deg, #D32F2F, #FF5722);
