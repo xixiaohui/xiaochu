@@ -1,2 +1,270 @@
-<!--pages/chinese-snacks/index.wxml-->
-<text>pages/chinese-snacks/index.wxml</text>
+<!-- 中国小吃页面 - chinese-snacks/index.wxml  v1.0.0 -->
+
+<view class="page">
+
+  <!-- ========== 顶部 Hero ========== -->
+  <view class="hero">
+    <view class="hero-deco hero-deco-1"></view>
+    <view class="hero-deco hero-deco-2"></view>
+    <view class="hero-content">
+      <view class="hero-icon-wrap">
+        <text class="hero-icon">🍜</text>
+      </view>
+      <view class="hero-text">
+        <view class="hero-title">中国小吃</view>
+        <view class="hero-sub">舌尖上的中国 · {{allSnacks.length}}道名吃</view>
+      </view>
+      <view class="hero-badge">
+        <text class="hero-badge-num">{{displaySnacks.length}}</text>
+        <text class="hero-badge-label">当前显示</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 筛选栏 ========== -->
+  <view class="filter-wrap">
+    <!-- 省份筛选 -->
+    <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeProvince === item.id ? 'filter-chip-active province-active' : ''}}"
+          wx:for="{{provinces}}"
+          wx:key="id"
+          bindtap="onProvinceFilter"
+          data-id="{{item.id}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+    <!-- 分类筛选 -->
+    <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+      <view class="filter-row">
+        <view
+          class="filter-chip {{activeCategory === item.id ? 'filter-chip-active category-active' : ''}}"
+          wx:for="{{filterCategories}}"
+          wx:key="id"
+          bindtap="onCategoryFilter"
+          data-id="{{item.id}}"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- ========== 小吃卡片网格 ========== -->
+  <view class="snack-grid">
+
+    <view
+      class="snack-card"
+      wx:for="{{displaySnacks}}"
+      wx:key="id"
+      bindtap="onSnackTap"
+      data-snack="{{item}}"
+    >
+      <!-- 卡片顶部色块 -->
+      <view class="card-top">
+        <text class="card-emoji">{{item.emoji}}</text>
+        <!-- 已生成标记 -->
+        <view class="card-cached" wx:if="{{existingMap[item.name]}}">✅</view>
+      </view>
+
+      <!-- 卡片主体 -->
+      <view class="card-body">
+        <view class="card-name">{{item.name}}</view>
+        <view class="card-origin">
+          <text class="origin-province">{{item.province}}</text>
+          <text class="origin-city" wx:if="{{item.city && item.city !== '各地'}}"> · {{item.city}}</text>
+        </view>
+        <view class="card-desc">{{item.desc}}</view>
+
+        <!-- 底部信息行 -->
+        <view class="card-footer">
+          <view class="card-meta">
+            <text class="meta-cal">🔥{{item.calories}}卡</text>
+          </view>
+          <view class="card-diff diff-{{item.difficulty}}">
+            {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{displaySnacks.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">暂无符合条件的小吃</text>
+      <text class="empty-hint">试试切换省份或分类</text>
+    </view>
+
+  </view>
+
+  <view style="height: 120rpx;"></view>
+</view>
+
+<!-- ========== 菜谱弹窗 ========== -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="onCloseModal">
+  <view class="modal" catchtap="noop">
+
+    <!-- 弹窗头部 -->
+    <view class="modal-header">
+      <view class="modal-header-left">
+        <text class="modal-snack-emoji">{{modalSnack.emoji}}</text>
+        <view class="modal-title-wrap">
+          <text class="modal-title">{{modalSnack.name}}</text>
+          <view class="modal-origin">{{modalSnack.province}}{{modalSnack.city && modalSnack.city !== '各地' ? ' · ' + modalSnack.city : ''}}</view>
+        </view>
+      </view>
+      <view class="modal-close" bindtap="onCloseModal">✕</view>
+    </view>
+
+    <!-- 来源标签 -->
+    <view class="modal-source-row" wx:if="{{!modalLoading && !modalError && modalRecipe}}">
+      <view class="source-badge {{modalSource === 'db' ? 'from-db' : 'from-ai'}}">
+        {{modalSource === 'db' ? '⚡ 云端缓存' : '🤖 AI 新生成'}}
+      </view>
+      <text class="source-meta">{{modalElapsed}}ms · {{modalSource === 'db' ? '0' : modalTokens}} Token</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="modal-loading" wx:if="{{modalLoading}}">
+      <view class="spinner"></view>
+      <text class="loading-text">
+        {{existingMap[modalSnack.name] ? '读取云端食谱...' : 'AI 生成菜谱中...'}}
+      </text>
+    </view>
+
+    <!-- 错误 -->
+    <view class="modal-error" wx:elif="{{modalError}}">
+      <text class="error-icon">😢</text>
+      <text class="error-msg">{{modalError}}</text>
+      <view class="retry-btn" bindtap="onRetry">重试</view>
+    </view>
+
+    <!-- 食谱内容 -->
+    <scroll-view class="modal-body" scroll-y wx:elif="{{modalRecipe}}">
+
+      <!-- 基础描述 -->
+      <view class="recipe-desc" wx:if="{{modalSnack.desc}}">📍 {{modalSnack.desc}}</view>
+
+      <!-- 标签 -->
+      <view class="modal-tags" wx:if="{{modalSnack.tags && modalSnack.tags.length}}">
+        <text
+          class="modal-tag"
+          wx:for="{{modalSnack.tags}}"
+          wx:for-item="tag"
+          wx:key="index"
+        >{{tag}}</text>
+      </view>
+
+      <!-- 基础信息徽章 -->
+      <view class="recipe-badges">
+        <view class="rbadge">⏱ {{modalRecipe.cookTime}}分钟</view>
+        <view class="rbadge">📊 {{modalRecipe.difficulty}}</view>
+        <view class="rbadge">👥 {{modalRecipe.servings}}人份</view>
+        <view class="rbadge red-badge">🔥 {{modalRecipe.nutrition.calories}}千卡</view>
+      </view>
+
+      <!-- 营养信息 -->
+      <view class="nut-section">
+        <view class="section-title">📊 营养参考</view>
+        <view class="nut-row">
+          <view class="nut-item">
+            <text class="nut-val red">{{modalRecipe.nutrition.calories}}</text>
+            <text class="nut-label">热量(kcal)</text>
+          </view>
+          <view class="nut-item">
+            <text class="nut-val orange">{{modalRecipe.nutrition.protein}}g</text>
+            <text class="nut-label">蛋白质</text>
+          </view>
+          <view class="nut-item">
+            <text class="nut-val yellow">{{modalRecipe.nutrition.carbs}}g</text>
+            <text class="nut-label">碳水</text>
+          </view>
+          <view class="nut-item">
+            <text class="nut-val blue">{{modalRecipe.nutrition.fat}}g</text>
+            <text class="nut-label">脂肪</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 食材清单 -->
+      <view class="recipe-section">
+        <view class="section-title">🛒 食材清单</view>
+        <view class="ingredient-list">
+          <view class="ingredient-row" wx:for="{{modalRecipe.ingredients}}" wx:key="name">
+            <text class="ing-name">{{item.name}}</text>
+            <text class="ing-amount">{{item.amount}}{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 烹饪步骤 -->
+      <view class="recipe-section">
+        <view class="section-title">👨‍🍳 制作步骤</view>
+        <view class="step-item" wx:for="{{modalRecipe.steps}}" wx:key="step">
+          <view class="step-num">{{item.step}}</view>
+          <view class="step-content">
+            <text class="step-desc">{{item.description}}</text>
+            <text class="step-tip" wx:if="{{item.tip}}">💡 {{item.tip}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- AI菜谱描述 -->
+      <view class="recipe-ai-desc" wx:if="{{modalRecipe.description}}">
+        <view class="section-title">✨ 小厨点评</view>
+        <text class="ai-desc-text">{{modalRecipe.description}}</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="regen-btn" bindtap="onRegenerateRecipe">
+        🔄 重新生成（消耗 Token）
+      </view>
+      <view class="poster-btn" bindtap="onGeneratePoster">
+        🎨 生成菜谱海报
+      </view>
+
+    </scroll-view>
+
+  </view>
+</view>
+
+<!-- ========== 海报画布（不可见，仅用于绘图）========== -->
+<canvas type="2d" id="posterCanvas" class="poster-canvas-hidden"></canvas>
+
+<!-- ========== 海报预览弹窗 ========== -->
+<view class="poster-modal-mask" wx:if="{{showPosterModal}}" bindtap="onClosePosterModal">
+  <view class="poster-modal" catchtap="noop">
+
+    <view class="poster-modal-header">
+      <text class="poster-modal-title">📸 中国小吃菜谱海报</text>
+      <view class="poster-modal-close" bindtap="onClosePosterModal">✕</view>
+    </view>
+
+    <!-- 生成中 -->
+    <view class="poster-generating" wx:if="{{posterGenerating}}">
+      <view class="poster-spinner"></view>
+      <text class="poster-gen-text">海报生成中，请稍候...</text>
+    </view>
+
+    <!-- 错误 -->
+    <view class="poster-error" wx:elif="{{posterError}}">
+      <text class="poster-error-icon">😢</text>
+      <text class="poster-error-msg">{{posterError}}</text>
+      <view class="poster-retry-btn" bindtap="onGeneratePoster">重新生成</view>
+    </view>
+
+    <!-- 预览 + 操作 -->
+    <view class="poster-preview-wrap" wx:elif="{{posterTempPath}}">
+      <image class="poster-preview-img" src="{{posterTempPath}}" mode="widthFix" bindtap="onPreviewPoster"></image>
+      <text class="poster-preview-hint">点击图片可全屏预览</text>
+      <view class="poster-actions">
+        <view class="poster-save-btn" bindtap="onSavePoster">
+          📥 保存到手机相册
+        </view>
+        <view class="poster-preview-btn" bindtap="onPreviewPoster">
+          👀 全屏预览
+        </view>
+      </view>
+    </view>
+
+  </view>
+</view>

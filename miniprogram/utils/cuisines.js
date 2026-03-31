@@ -2127,12 +2127,513 @@ const getDailyRecommendation = () => {
   return allDishes[index];
 };
 
+// ==================== 中国小吃数据 ====================
+
+/**
+ * CHINESE_SNACKS - 中国各地著名小吃，共 100 道
+ * 字段说明：
+ *   id          - 唯一标识（cs_001 ~ cs_100）
+ *   name        - 小吃名称
+ *   province    - 省份 / 地区
+ *   city        - 城市（部分）
+ *   category    - 分类（street_food/dim_sum/noodle/cake/dumpling/soup/fried/sweet）
+ *   emoji       - 表情图标
+ *   desc        - 简介
+ *   ingredients - 主要食材
+ *   cookTime    - 制作时间（分钟）
+ *   difficulty  - 难度（easy/medium/hard）
+ *   tags        - 标签
+ *   calories    - 大约热量（kcal）
+ */
+const CHINESE_SNACKS = [
+  // ── 北京 ──────────────────────────────────────────────
+  { id:'cs_001', name:'北京烤鸭', province:'北京', city:'北京', category:'roast', emoji:'🦆',
+    desc:'皮脆肉嫩，色泽红润，北京最具代表性的名吃',
+    ingredients:['鸭子','甜面酱','葱段','黄瓜条','薄饼'], cookTime:120, difficulty:'hard',
+    tags:['烤制','名吃','必打卡'], calories:350 },
+  { id:'cs_002', name:'老北京炸酱面', province:'北京', city:'北京', category:'noodle', emoji:'🍜',
+    desc:'手擀面配炸酱，黄瓜丝等各种菜码，酱香浓郁',
+    ingredients:['手擀面','猪肉末','黄酱','黄瓜','心里美萝卜'], cookTime:40, difficulty:'medium',
+    tags:['面食','酱香','经典'], calories:480 },
+  { id:'cs_003', name:'驴打滚', province:'北京', city:'北京', category:'cake', emoji:'🍡',
+    desc:'糯米外皮裹豆沙，滚黄豆面，软糯香甜',
+    ingredients:['糯米面','红豆沙','黄豆面','白糖'], cookTime:30, difficulty:'medium',
+    tags:['糯米','豆沙','传统糕点'], calories:280 },
+  { id:'cs_004', name:'豆汁焦圈', province:'北京', city:'北京', category:'street_food', emoji:'🥣',
+    desc:'老北京传统早点，豆汁酸香独特，焦圈酥脆',
+    ingredients:['绿豆','面粉','小苏打','盐'], cookTime:60, difficulty:'hard',
+    tags:['早点','发酵','老北京'], calories:180 },
+  { id:'cs_005', name:'糖葫芦', province:'北京', city:'北京', category:'sweet', emoji:'🍭',
+    desc:'山楂串裹冰糖，酸甜爽口，老少皆宜',
+    ingredients:['山楂','冰糖','白糖'], cookTime:20, difficulty:'easy',
+    tags:['甜食','酸甜','街头小吃'], calories:120 },
+
+  // ── 上海 ──────────────────────────────────────────────
+  { id:'cs_006', name:'小笼包', province:'上海', city:'上海', category:'dumpling', emoji:'🥟',
+    desc:'皮薄汤多，蟹粉猪肉馅，一口鲜汤令人回味',
+    ingredients:['面粉','猪肉','猪皮冻','蟹粉','姜末'], cookTime:60, difficulty:'hard',
+    tags:['包子','汤汁','江南点心'], calories:220 },
+  { id:'cs_007', name:'生煎包', province:'上海', city:'上海', category:'fried', emoji:'🥠',
+    desc:'底部金黄焦脆，内馅鲜美多汁，撒芝麻葱花',
+    ingredients:['面粉','猪肉','猪皮冻','芝麻','葱'], cookTime:50, difficulty:'medium',
+    tags:['煎制','早餐','沪上名点'], calories:260 },
+  { id:'cs_008', name:'南翔小笼', province:'上海', city:'南翔', category:'dumpling', emoji:'🥟',
+    desc:'百年历史，皮薄馅大，汤汁丰富，国家级非遗',
+    ingredients:['面粉','猪肉','猪皮冻','黄酒','姜'], cookTime:60, difficulty:'hard',
+    tags:['非遗','汤包','精致'], calories:230 },
+  { id:'cs_009', name:'上海葱油拌面', province:'上海', city:'上海', category:'noodle', emoji:'🍜',
+    desc:'细面配熬制葱油，简单却鲜美，上海人的早餐记忆',
+    ingredients:['细面','大葱','猪油','酱油','白糖'], cookTime:20, difficulty:'easy',
+    tags:['面食','葱香','早餐'], calories:380 },
+  { id:'cs_010', name:'蟹壳黄', province:'上海', city:'上海', category:'cake', emoji:'🥮',
+    desc:'形似蟹壳，外酥内软，葱油香咸，老克勒最爱',
+    ingredients:['面粉','猪油','葱','芝麻','盐'], cookTime:30, difficulty:'medium',
+    tags:['烤制','酥饼','葱油'], calories:300 },
+
+  // ── 广东 ──────────────────────────────────────────────
+  { id:'cs_011', name:'虾饺', province:'广东', city:'广州', category:'dim_sum', emoji:'🦐',
+    desc:'澄粉皮透明，鲜虾馅饱满，粤式早茶必备',
+    ingredients:['澄粉','虾仁','猪肉','笋','猪油'], cookTime:40, difficulty:'hard',
+    tags:['早茶','点心','水晶皮'], calories:180 },
+  { id:'cs_012', name:'肠粉', province:'广东', city:'广州', category:'dim_sum', emoji:'🌯',
+    desc:'米浆蒸制，裹虾仁叉烧，淋甜酱，滑嫩爽口',
+    ingredients:['大米粉','虾仁','叉烧','鸡蛋','酱油'], cookTime:20, difficulty:'medium',
+    tags:['早茶','米制品','滑嫩'], calories:220 },
+  { id:'cs_013', name:'老婆饼', province:'广东', city:'潮州', category:'cake', emoji:'🥮',
+    desc:'酥皮裹冬瓜糖馅，层次分明，香甜不腻',
+    ingredients:['面粉','猪油','冬瓜糖','芝麻','白糖'], cookTime:50, difficulty:'medium',
+    tags:['酥饼','潮汕','伴手礼'], calories:320 },
+  { id:'cs_014', name:'叉烧包', province:'广东', city:'广州', category:'dim_sum', emoji:'🍢',
+    desc:'松软面皮，叉烧馅甜咸适中，开口笑',
+    ingredients:['面粉','叉烧','蚝油','洋葱','糖'], cookTime:60, difficulty:'medium',
+    tags:['早茶','叉烧','蓬松'], calories:250 },
+  { id:'cs_015', name:'马蹄糕', province:'广东', city:'广州', category:'cake', emoji:'🍮',
+    desc:'荸荠粉制成，半透明，清甜爽口，夏日消暑佳品',
+    ingredients:['荸荠粉','荸荠','白糖','清水'], cookTime:30, difficulty:'easy',
+    tags:['清甜','广东甜品','夏日'], calories:150 },
+
+  // ── 四川 ──────────────────────────────────────────────
+  { id:'cs_016', name:'担担面', province:'四川', city:'成都', category:'noodle', emoji:'🌶️',
+    desc:'麻辣鲜香，芝麻酱花生酱调底，挑担走街串巷的经典',
+    ingredients:['细面','猪肉末','芝麻酱','花椒','辣椒油'], cookTime:25, difficulty:'medium',
+    tags:['麻辣','面食','成都名吃'], calories:420 },
+  { id:'cs_017', name:'龙抄手', province:'四川', city:'成都', category:'dumpling', emoji:'🥟',
+    desc:'皮薄馅嫩，清汤或红汤，成都著名面食',
+    ingredients:['面粉','猪肉','葱姜','骨汤','辣椒油'], cookTime:30, difficulty:'medium',
+    tags:['抄手','汤底','成都'], calories:280 },
+  { id:'cs_018', name:'钟水饺', province:'四川', city:'成都', category:'dumpling', emoji:'🥟',
+    desc:'皮薄馅细，辣椒红油浇淋，甜咸微辣，百年老字号',
+    ingredients:['面粉','猪肉','红油','酱油','白糖'], cookTime:30, difficulty:'medium',
+    tags:['红油','甜咸','百年老字号'], calories:300 },
+  { id:'cs_019', name:'三大炮', province:'四川', city:'成都', category:'sweet', emoji:'🍡',
+    desc:'糯米团撒红糖，扔入铁盘发出炮声，趣味十足',
+    ingredients:['糯米','红糖','黄豆面','芝麻'], cookTime:30, difficulty:'medium',
+    tags:['糯米','红糖','趣味'], calories:260 },
+  { id:'cs_020', name:'夫妻肺片', province:'四川', city:'成都', category:'street_food', emoji:'🌶️',
+    desc:'牛肉牛杂薄片，麻辣红亮，下饭神器',
+    ingredients:['牛肉','牛杂','花椒','辣椒油','芝麻'], cookTime:120, difficulty:'hard',
+    tags:['麻辣','卤制','下酒菜'], calories:320 },
+
+  // ── 湖南 ──────────────────────────────────────────────
+  { id:'cs_021', name:'长沙臭豆腐', province:'湖南', city:'长沙', category:'fried', emoji:'🧆',
+    desc:'外酥内嫩，臭香独特，刷辣椒酱，长沙街头第一小吃',
+    ingredients:['豆腐','卤水','辣椒酱','小葱'], cookTime:30, difficulty:'medium',
+    tags:['油炸','臭香','网红'], calories:200 },
+  { id:'cs_022', name:'剁椒鱼头', province:'湖南', city:'长沙', category:'street_food', emoji:'🐟',
+    desc:'红艳艳剁椒覆鱼头，蒸制，鲜辣开胃',
+    ingredients:['鱼头','剁椒','姜','蒜','蒸鱼豉油'], cookTime:30, difficulty:'easy',
+    tags:['蒸制','湘菜','辣'], calories:280 },
+  { id:'cs_023', name:'糖油粑粑', province:'湖南', city:'长沙', category:'sweet', emoji:'🍡',
+    desc:'糯米制成，外裹糖浆油炸，金黄焦脆，甜而不腻',
+    ingredients:['糯米粉','白糖','植物油'], cookTime:20, difficulty:'easy',
+    tags:['甜食','糯米','早餐'], calories:240 },
+  { id:'cs_024', name:'口味虾', province:'湖南', city:'长沙', category:'street_food', emoji:'🦞',
+    desc:'麻辣鲜香，夏夜宵夜首选，越吃越上瘾',
+    ingredients:['小龙虾','紫苏','辣椒','大蒜','花椒'], cookTime:40, difficulty:'medium',
+    tags:['麻辣','宵夜','夏季'], calories:300 },
+  { id:'cs_025', name:'猪油拌粉', province:'湖南', city:'长沙', category:'noodle', emoji:'🍜',
+    desc:'米粉配猪油辣椒，简单鲜美，长沙人的日常早餐',
+    ingredients:['米粉','猪油','酱油','辣椒','葱花'], cookTime:15, difficulty:'easy',
+    tags:['米粉','早餐','猪油'], calories:350 },
+
+  // ── 陕西 ──────────────────────────────────────────────
+  { id:'cs_026', name:'肉夹馍', province:'陕西', city:'西安', category:'street_food', emoji:'🥙',
+    desc:'白吉馍夹腊汁肉，皮酥肉烂，被称为中国汉堡',
+    ingredients:['面粉','猪肉','八角','桂皮','老汤'], cookTime:120, difficulty:'hard',
+    tags:['西安','腊汁肉','经典'], calories:450 },
+  { id:'cs_027', name:'羊肉泡馍', province:'陕西', city:'西安', category:'soup', emoji:'🍲',
+    desc:'手撕馍泡羊肉汤，汤浓肉烂，暖胃御寒',
+    ingredients:['白面馍','羊肉','粉丝','木耳','花椒'], cookTime:180, difficulty:'hard',
+    tags:['西安','羊肉','暖胃'], calories:580 },
+  { id:'cs_028', name:'凉皮', province:'陕西', city:'西安', category:'noodle', emoji:'🥗',
+    desc:'麦面凉皮配辣椒油，酸辣爽口，夏日必吃',
+    ingredients:['面粉','黄瓜','辣椒油','醋','芝麻酱'], cookTime:60, difficulty:'medium',
+    tags:['凉食','夏日','西安'], calories:320 },
+  { id:'cs_029', name:'葫芦头泡馍', province:'陕西', city:'西安', category:'soup', emoji:'🍲',
+    desc:'猪肠猪肚为主料，汤白浓郁，馍泡入汤，香而不腻',
+    ingredients:['猪大肠','白面馍','骨汤','葱姜','花椒'], cookTime:180, difficulty:'hard',
+    tags:['西安','内脏','汤汁'], calories:450 },
+  { id:'cs_030', name:'甑糕', province:'陕西', city:'西安', category:'cake', emoji:'🍰',
+    desc:'糯米红枣层叠蒸制，软糯香甜，关中传统早点',
+    ingredients:['糯米','红枣','芸豆','莲子'], cookTime:120, difficulty:'medium',
+    tags:['糯米','红枣','早点'], calories:350 },
+
+  // ── 山东 ──────────────────────────────────────────────
+  { id:'cs_031', name:'煎饼果子', province:'山东', city:'天津', category:'street_food', emoji:'🌯',
+    desc:'摊煎饼裹油条，刷酱撒葱花，北方早餐最广泛',
+    ingredients:['玉米面','面粉','鸡蛋','油条','甜面酱'], cookTime:10, difficulty:'easy',
+    tags:['早餐','摊饼','天津'], calories:380 },
+  { id:'cs_032', name:'德州扒鸡', province:'山东', city:'德州', category:'roast', emoji:'🍗',
+    desc:'五香脱骨，色泽金红，百年老字号',
+    ingredients:['鸡','八角','桂皮','老抽','冰糖'], cookTime:180, difficulty:'hard',
+    tags:['卤制','五香','德州'], calories:320 },
+  { id:'cs_033', name:'周村烧饼', province:'山东', city:'淄博', category:'cake', emoji:'🥮',
+    desc:'超薄圆饼，芝麻覆盖，香脆可口，山东特产',
+    ingredients:['面粉','芝麻','白糖','植物油'], cookTime:30, difficulty:'medium',
+    tags:['烤制','芝麻','薄脆'], calories:280 },
+  { id:'cs_034', name:'济南油旋', province:'山东', city:'济南', category:'cake', emoji:'🥐',
+    desc:'旋转花纹，葱油香气，外酥内软，济南老早点',
+    ingredients:['面粉','猪油','葱','盐'], cookTime:40, difficulty:'medium',
+    tags:['葱油','早点','酥香'], calories:320 },
+  { id:'cs_035', name:'锅贴', province:'山东', city:'各地', category:'fried', emoji:'🥟',
+    desc:'底面金黄焦脆，内馅鲜嫩多汁，北方经典煎饺',
+    ingredients:['面粉','猪肉','白菜','葱姜','酱油'], cookTime:30, difficulty:'medium',
+    tags:['煎制','饺子','北方'], calories:280 },
+
+  // ── 浙江 ──────────────────────────────────────────────
+  { id:'cs_036', name:'西湖藕粉', province:'浙江', city:'杭州', category:'sweet', emoji:'🍵',
+    desc:'藕粉冲泡，晶莹剔透，桂花香气，杭州名产',
+    ingredients:['莲藕粉','桂花','白糖','红枣'], cookTime:5, difficulty:'easy',
+    tags:['清甜','养生','杭州'], calories:120 },
+  { id:'cs_037', name:'温州鱼饼', province:'浙江', city:'温州', category:'street_food', emoji:'🐟',
+    desc:'新鲜鱼肉制成，弹牙爽口，温州传统小吃',
+    ingredients:['海鱼','淀粉','葱姜','盐','鸡蛋'], cookTime:30, difficulty:'medium',
+    tags:['鱼糕','弹牙','温州'], calories:200 },
+  { id:'cs_038', name:'宁波汤圆', province:'浙江', city:'宁波', category:'sweet', emoji:'🍡',
+    desc:'黑芝麻猪油馅，皮薄馅香，元宵必备',
+    ingredients:['糯米粉','黑芝麻','猪油','白糖'], cookTime:20, difficulty:'easy',
+    tags:['糯米','芝麻','节日'], calories:220 },
+  { id:'cs_039', name:'诸暨次坞打面', province:'浙江', city:'诸暨', category:'noodle', emoji:'🍜',
+    desc:'手打宽面，浇头丰富，汤清鲜美，浙中特色',
+    ingredients:['面粉','猪肉','豆腐','鸡蛋','骨汤'], cookTime:30, difficulty:'medium',
+    tags:['手打面','宽面','浙中'], calories:420 },
+  { id:'cs_040', name:'湖州粽子', province:'浙江', city:'湖州', category:'cake', emoji:'🎋',
+    desc:'五芳斋粽子，猪肉蛋黄馅，咸甜各异，端午必备',
+    ingredients:['糯米','猪肉','咸鸭蛋','粽叶','绳子'], cookTime:180, difficulty:'medium',
+    tags:['粽子','端午','咸甜'], calories:350 },
+
+  // ── 江苏 ──────────────────────────────────────────────
+  { id:'cs_041', name:'南京盐水鸭', province:'江苏', city:'南京', category:'street_food', emoji:'🦆',
+    desc:'盐卤腌制，皮白肉嫩，桂花香气，金陵第一名菜',
+    ingredients:['鸭子','精盐','花椒','八角','桂花'], cookTime:120, difficulty:'hard',
+    tags:['卤制','南京','名菜'], calories:280 },
+  { id:'cs_042', name:'苏州糕团', province:'江苏', city:'苏州', category:'cake', emoji:'🍰',
+    desc:'玫瑰豆沙赤豆等各式馅，松软香甜，苏式点心',
+    ingredients:['糯米粉','粳米粉','豆沙','玫瑰糖'], cookTime:60, difficulty:'medium',
+    tags:['糕团','苏式','精致'], calories:280 },
+  { id:'cs_043', name:'无锡小笼馒头', province:'江苏', city:'无锡', category:'dumpling', emoji:'🥟',
+    desc:'甜咸适中，皮薄汤丰，无锡特色早点',
+    ingredients:['面粉','猪肉','猪皮冻','白糖','酱油'], cookTime:60, difficulty:'hard',
+    tags:['早点','汤包','甜咸'], calories:220 },
+  { id:'cs_044', name:'淮安蒲菜肉圆', province:'江苏', city:'淮安', category:'street_food', emoji:'🍢',
+    desc:'蒲菜脆嫩，猪肉细腻，汤鲜味美，淮扬名吃',
+    ingredients:['蒲菜','猪肉','鸡蛋','淀粉','姜葱'], cookTime:40, difficulty:'medium',
+    tags:['淮扬','蒲菜','汤鲜'], calories:260 },
+  { id:'cs_045', name:'南京鸭血粉丝汤', province:'江苏', city:'南京', category:'soup', emoji:'🍲',
+    desc:'鸭血鸭肠鸭肝配粉丝，汤鲜味浓，南京早餐代表',
+    ingredients:['鸭血','粉丝','鸭肠','鸭肝','姜葱'], cookTime:30, difficulty:'easy',
+    tags:['汤食','早餐','南京'], calories:320 },
+
+  // ── 重庆 ──────────────────────────────────────────────
+  { id:'cs_046', name:'重庆小面', province:'重庆', city:'重庆', category:'noodle', emoji:'🌶️',
+    desc:'红汤麻辣，各式佐料丰富，重庆人的日常早餐',
+    ingredients:['碱水面','辣椒油','花椒粉','花生','芽菜'], cookTime:20, difficulty:'medium',
+    tags:['麻辣','面食','早餐'], calories:420 },
+  { id:'cs_047', name:'重庆火锅', province:'重庆', city:'重庆', category:'soup', emoji:'🫕',
+    desc:'牛油红汤，麻辣滚烫，毛肚鸭肠首选，重庆名片',
+    ingredients:['牛油','辣椒','花椒','豆瓣酱','毛肚'], cookTime:60, difficulty:'medium',
+    tags:['火锅','麻辣','重庆'], calories:600 },
+  { id:'cs_048', name:'山城小汤圆', province:'重庆', city:'重庆', category:'sweet', emoji:'🍡',
+    desc:'细小糯米球，红糖汤底，简单质朴，重庆早餐',
+    ingredients:['糯米粉','红糖','芝麻'], cookTime:20, difficulty:'easy',
+    tags:['糯米','甜汤','早餐'], calories:200 },
+  { id:'cs_049', name:'酸辣粉', province:'重庆', city:'重庆', category:'noodle', emoji:'🌶️',
+    desc:'红薯粉酸辣劲道，花生碎黄豆脆，重庆街头第一网红',
+    ingredients:['红薯粉','辣椒油','醋','花生','黄豆'], cookTime:15, difficulty:'easy',
+    tags:['酸辣','粉条','网红'], calories:380 },
+  { id:'cs_050', name:'麻花', province:'重庆', city:'各地', category:'fried', emoji:'🥨',
+    desc:'扭转油炸，酥脆香甜，北方逢年过节必备零食',
+    ingredients:['面粉','鸡蛋','白糖','植物油','芝麻'], cookTime:40, difficulty:'medium',
+    tags:['油炸','酥脆','节日'], calories:350 },
+
+  // ── 河南 ──────────────────────────────────────────────
+  { id:'cs_051', name:'烩面', province:'河南', city:'郑州', category:'noodle', emoji:'🍜',
+    desc:'宽厚面片煮羊肉汤，汤白味浓，河南第一主食',
+    ingredients:['面粉','羊肉','骨汤','枸杞','海带'], cookTime:120, difficulty:'medium',
+    tags:['羊肉','宽面','汤鲜'], calories:520 },
+  { id:'cs_052', name:'开封灌汤包', province:'河南', city:'开封', category:'dumpling', emoji:'🥟',
+    desc:'皮薄汤多，小笼蒸出，用吸管吸汤，开封名产',
+    ingredients:['面粉','猪肉','猪皮冻','葱姜','酱油'], cookTime:60, difficulty:'hard',
+    tags:['汤包','开封','非遗'], calories:220 },
+  { id:'cs_053', name:'逍遥镇胡辣汤', province:'河南', city:'周口', category:'soup', emoji:'🍲',
+    desc:'辣香浓郁，面筋粉条猪骨汤底，河南早餐必备',
+    ingredients:['面筋','粉条','猪骨','花椒','胡椒'], cookTime:120, difficulty:'hard',
+    tags:['胡辣汤','早餐','河南'], calories:280 },
+  { id:'cs_054', name:'道口烧鸡', province:'河南', city:'滑县', category:'roast', emoji:'🍗',
+    desc:'义兴张烧鸡，酥烂可口，五香浓郁，百年老字号',
+    ingredients:['鸡','花椒','八角','桂皮','丁香'], cookTime:180, difficulty:'hard',
+    tags:['烧鸡','五香','老字号'], calories:300 },
+  { id:'cs_055', name:'新郑枣糕', province:'河南', city:'新郑', category:'cake', emoji:'🍰',
+    desc:'红枣泥入面，松软香甜，营养丰富，郑州名点',
+    ingredients:['面粉','红枣','鸡蛋','白糖','植物油'], cookTime:40, difficulty:'easy',
+    tags:['红枣','糕点','营养'], calories:280 },
+
+  // ── 湖北 ──────────────────────────────────────────────
+  { id:'cs_056', name:'热干面', province:'湖北', city:'武汉', category:'noodle', emoji:'🍜',
+    desc:'碱水面拌芝麻酱，酸豆角萝卜干，武汉早餐灵魂',
+    ingredients:['碱水面','芝麻酱','酸豆角','榨菜','葱'], cookTime:15, difficulty:'easy',
+    tags:['早餐','芝麻酱','武汉'], calories:450 },
+  { id:'cs_057', name:'武汉豆皮', province:'湖北', city:'武汉', category:'street_food', emoji:'🥞',
+    desc:'糯米蛋皮包裹三鲜馅，煎制金黄，武汉特有早点',
+    ingredients:['糯米','绿豆面','鸡蛋','猪肉','香菇'], cookTime:30, difficulty:'medium',
+    tags:['早点','糯米','武汉'], calories:420 },
+  { id:'cs_058', name:'面窝', province:'湖北', city:'武汉', category:'fried', emoji:'🍩',
+    desc:'圆形中空油炸，外酥内软，武汉独有早餐',
+    ingredients:['大米粉','黄豆粉','葱','盐','油'], cookTime:20, difficulty:'medium',
+    tags:['早餐','油炸','武汉'], calories:200 },
+  { id:'cs_059', name:'三鲜豆皮', province:'湖北', city:'武汉', category:'street_food', emoji:'🥞',
+    desc:'老通城豆皮，鲜肉虾米笋丁馅，武汉名吃',
+    ingredients:['绿豆面','糯米','猪肉','虾米','竹笋'], cookTime:40, difficulty:'medium',
+    tags:['三鲜','早点','老字号'], calories:450 },
+  { id:'cs_060', name:'孝感麻糖', province:'湖北', city:'孝感', category:'sweet', emoji:'🍬',
+    desc:'芝麻麦芽糖制成，香甜酥脆，湖北特产',
+    ingredients:['芝麻','麦芽糖','白糖','糯米'], cookTime:60, difficulty:'hard',
+    tags:['芝麻','糖果','湖北'], calories:350 },
+
+  // ── 福建 ──────────────────────────────────────────────
+  { id:'cs_061', name:'沙县小吃', province:'福建', city:'沙县', category:'dim_sum', emoji:'🥟',
+    desc:'拌面扁食蒸饺，套餐丰富实惠，遍布全国',
+    ingredients:['面粉','猪肉','鸡蛋','米浆','骨汤'], cookTime:20, difficulty:'easy',
+    tags:['实惠','套餐','福建'], calories:380 },
+  { id:'cs_062', name:'厦门沙茶面', province:'福建', city:'厦门', category:'noodle', emoji:'🍜',
+    desc:'沙茶酱汤底，海鲜丰富，厦门闽南特色早餐',
+    ingredients:['碱面','沙茶酱','花生','海鲜','猪血'], cookTime:20, difficulty:'easy',
+    tags:['沙茶','海鲜','厦门'], calories:400 },
+  { id:'cs_063', name:'福州鱼丸', province:'福建', city:'福州', category:'soup', emoji:'🧆',
+    desc:'鱼肉包猪肉馅，汤清弹牙，福州非遗小吃',
+    ingredients:['草鱼','猪肉','淀粉','葱姜','猪骨汤'], cookTime:40, difficulty:'medium',
+    tags:['鱼丸','汤清','福州'], calories:180 },
+  { id:'cs_064', name:'闽南薄饼', province:'福建', city:'泉州', category:'street_food', emoji:'🌯',
+    desc:'薄春饼皮裹豆芽豆腐炒菜，清明食俗，闽南传统',
+    ingredients:['面皮','豆芽','豆腐','猪肉','胡萝卜'], cookTime:30, difficulty:'medium',
+    tags:['春卷','清明','闽南'], calories:280 },
+  { id:'cs_065', name:'光饼', province:'福建', city:'福州', category:'cake', emoji:'🥮',
+    desc:'戚继光军饼，外脆内软，可夹猪肉，福州古早味',
+    ingredients:['面粉','盐','芝麻','酵母'], cookTime:40, difficulty:'medium',
+    tags:['古早味','军饼','福州'], calories:260 },
+
+  // ── 云南 ──────────────────────────────────────────────
+  { id:'cs_066', name:'过桥米线', province:'云南', city:'昆明', category:'noodle', emoji:'🍜',
+    desc:'一锅滚汤，各式食材依次放入，云南最著名小吃',
+    ingredients:['米线','鸡骨汤','猪肉片','鸡肉','鹌鹑蛋'], cookTime:30, difficulty:'easy',
+    tags:['米线','云南','仪式感'], calories:480 },
+  { id:'cs_067', name:'汽锅鸡', province:'云南', city:'建水', category:'soup', emoji:'🫕',
+    desc:'汽锅蒸制，汤清味鲜，无需加水，云南名菜',
+    ingredients:['鸡','虫草','枸杞','姜葱','盐'], cookTime:180, difficulty:'medium',
+    tags:['蒸制','汤清','云南'], calories:320 },
+  { id:'cs_068', name:'饵块', province:'云南', city:'大理', category:'street_food', emoji:'🍢',
+    desc:'米制品烤制，刷甜酱辣酱，大理古城街头必吃',
+    ingredients:['大米','甜酱','辣椒','芥末','葱'], cookTime:15, difficulty:'easy',
+    tags:['烤制','米制品','大理'], calories:280 },
+  { id:'cs_069', name:'云南野生菌火锅', province:'云南', city:'各地', category:'soup', emoji:'🍄',
+    desc:'野生菌汤底鲜美无比，松茸牛肝菌，独特云南风味',
+    ingredients:['松茸','牛肝菌','鸡汤','青椒','大蒜'], cookTime:60, difficulty:'medium',
+    tags:['火锅','野生菌','云南'], calories:280 },
+  { id:'cs_070', name:'鲜花饼', province:'云南', city:'昆明', category:'cake', emoji:'🌸',
+    desc:'玫瑰花瓣入馅，酥皮包裹，香甜芬芳，云南特产',
+    ingredients:['面粉','猪油','玫瑰花瓣','白糖','蜂蜜'], cookTime:50, difficulty:'medium',
+    tags:['玫瑰','酥饼','云南特产'], calories:300 },
+
+  // ── 贵州 ──────────────────────────────────────────────
+  { id:'cs_071', name:'贵州米皮', province:'贵州', city:'贵阳', category:'noodle', emoji:'🌶️',
+    desc:'酸辣劲道，折耳根折豆腐独特风味，贵阳早餐',
+    ingredients:['米皮','折耳根','红油','酸豆角','花生'], cookTime:15, difficulty:'easy',
+    tags:['酸辣','早餐','贵阳'], calories:360 },
+  { id:'cs_072', name:'丝娃娃', province:'贵州', city:'贵阳', category:'street_food', emoji:'🌯',
+    desc:'薄面皮裹多种素菜，蘸酸汤，贵阳街头特色',
+    ingredients:['面皮','豆芽','萝卜','折耳根','酸汤'], cookTime:30, difficulty:'easy',
+    tags:['卷饼','素食','贵阳'], calories:180 },
+  { id:'cs_073', name:'花溪牛肉粉', province:'贵州', city:'贵阳', category:'noodle', emoji:'🍜',
+    desc:'酸辣牛肉汤底，米粉劲道，贵阳早餐必吃',
+    ingredients:['米粉','牛肉','酸汤','花椒','葱'], cookTime:20, difficulty:'easy',
+    tags:['牛肉','米粉','酸辣'], calories:420 },
+  { id:'cs_074', name:'遵义羊肉粉', province:'贵州', city:'遵义', category:'noodle', emoji:'🍜',
+    desc:'羊肉汤底鲜美，米粉软滑，遵义特色早餐',
+    ingredients:['米粉','羊肉','骨汤','辣椒','香葱'], cookTime:20, difficulty:'easy',
+    tags:['羊肉','米粉','遵义'], calories:400 },
+  { id:'cs_075', name:'糕粑稀饭', province:'贵州', city:'贵阳', category:'sweet', emoji:'🍮',
+    desc:'糕粑漂浮稀饭，糯米糕加米糊，贵阳传统早点',
+    ingredients:['糯米','大米','玫瑰糖','芝麻','花生'], cookTime:40, difficulty:'medium',
+    tags:['早点','糯米','甜食'], calories:280 },
+
+  // ── 新疆 ──────────────────────────────────────────────
+  { id:'cs_076', name:'烤羊肉串', province:'新疆', city:'乌鲁木齐', category:'street_food', emoji:'🍢',
+    desc:'鲜嫩羊肉串撒孜然辣椒粉，炭火烤制，新疆必吃',
+    ingredients:['羊肉','孜然','辣椒粉','盐','洋葱'], cookTime:20, difficulty:'easy',
+    tags:['烧烤','孜然','新疆'], calories:250 },
+  { id:'cs_077', name:'馕', province:'新疆', city:'各地', category:'cake', emoji:'🫓',
+    desc:'新疆传统面饼，坑烤而成，酥脆耐存，丝绸之路粮食',
+    ingredients:['面粉','酵母','芝麻','洋葱','盐'], cookTime:60, difficulty:'medium',
+    tags:['馕坑','面饼','新疆'], calories:350 },
+  { id:'cs_078', name:'大盘鸡', province:'新疆', city:'沙湾', category:'street_food', emoji:'🌶️',
+    desc:'鸡块土豆辣椒同炒，加宽面条，新疆豪迈名菜',
+    ingredients:['鸡','土豆','辣椒','宽面','孜然'], cookTime:60, difficulty:'medium',
+    tags:['新疆','宽面','辣味'], calories:550 },
+  { id:'cs_079', name:'抓饭', province:'新疆', city:'各地', category:'street_food', emoji:'🍚',
+    desc:'羊肉胡萝卜洋葱炒米饭，节日必备，民族特色',
+    ingredients:['大米','羊肉','胡萝卜','洋葱','葡萄干'], cookTime:60, difficulty:'medium',
+    tags:['米饭','羊肉','节日'], calories:480 },
+  { id:'cs_080', name:'烤全羊', province:'新疆', city:'各地', category:'roast', emoji:'🐑',
+    desc:'整只羊炭火慢烤，外焦里嫩，孜然香气，盛宴大菜',
+    ingredients:['整羊','孜然','辣椒粉','盐','洋葱'], cookTime:480, difficulty:'hard',
+    tags:['烤羊','盛宴','新疆'], calories:600 },
+
+  // ── 东北 ──────────────────────────────────────────────
+  { id:'cs_081', name:'哈尔滨红肠', province:'黑龙江', city:'哈尔滨', category:'street_food', emoji:'🌭',
+    desc:'俄式工艺制成，烟熏香肠，哈尔滨特产',
+    ingredients:['猪肉','大蒜','烟熏材料','盐','胡椒'], cookTime:240, difficulty:'hard',
+    tags:['烟熏','香肠','哈尔滨'], calories:280 },
+  { id:'cs_082', name:'锅包肉', province:'黑龙江', city:'哈尔滨', category:'fried', emoji:'🍖',
+    desc:'外酥里嫩，番茄汁甜酸，东北经典名菜',
+    ingredients:['猪里脊','淀粉','番茄汁','白糖','醋'], cookTime:30, difficulty:'medium',
+    tags:['甜酸','东北','酥脆'], calories:380 },
+  { id:'cs_083', name:'朝鲜冷面', province:'黑龙江', city:'延边', category:'noodle', emoji:'🍜',
+    desc:'弹牙荞麦面，冰凉牛肉汤，酸甜辣，朝鲜族传统',
+    ingredients:['荞麦面','牛肉汤','辣椒酱','苹果','鸡蛋'], cookTime:30, difficulty:'easy',
+    tags:['冷面','朝鲜族','酸甜'], calories:320 },
+  { id:'cs_084', name:'地三鲜', province:'辽宁', city:'各地', category:'street_food', emoji:'🍆',
+    desc:'土豆茄子青椒同炒，家常却下饭，东北家常菜',
+    ingredients:['土豆','茄子','青椒','蒜','酱油'], cookTime:20, difficulty:'easy',
+    tags:['家常','蔬菜','东北'], calories:280 },
+  { id:'cs_085', name:'铁锅炖大鹅', province:'吉林', city:'各地', category:'soup', emoji:'🫕',
+    desc:'铁锅慢炖，酱香浓郁，贴饼子吸汤，东北豪迈美食',
+    ingredients:['鹅','土豆','酱油','大葱','玉米贴饼'], cookTime:90, difficulty:'medium',
+    tags:['炖菜','铁锅','东北'], calories:520 },
+
+  // ── 内蒙古 ──────────────────────────────────────────────
+  { id:'cs_086', name:'手把肉', province:'内蒙古', city:'各地', category:'street_food', emoji:'🐑',
+    desc:'白煮羊肉，原味鲜美，手持骨头吃，草原豪情',
+    ingredients:['羊肉','盐','葱','姜','蒙古盐'], cookTime:120, difficulty:'easy',
+    tags:['白煮','草原','蒙古'], calories:350 },
+  { id:'cs_087', name:'奶茶', province:'内蒙古', city:'各地', category:'sweet', emoji:'🍵',
+    desc:'砖茶煮沸加牛奶，咸香回味，蒙古族日常饮品',
+    ingredients:['砖茶','牛奶','盐','黄油'], cookTime:15, difficulty:'easy',
+    tags:['奶茶','蒙古族','咸香'], calories:120 },
+  { id:'cs_088', name:'炸糕', province:'内蒙古', city:'各地', category:'fried', emoji:'🍩',
+    desc:'糯米外皮炸至金黄，豆沙馅，外脆内软，蒙古早点',
+    ingredients:['糯米粉','豆沙','植物油'], cookTime:30, difficulty:'medium',
+    tags:['油炸','糯米','早点'], calories:320 },
+  { id:'cs_089', name:'蒙古包子', province:'内蒙古', city:'各地', category:'dumpling', emoji:'🥟',
+    desc:'大个包子裹羊肉洋葱，皮厚馅大，草原风味',
+    ingredients:['面粉','羊肉','洋葱','盐','孜然'], cookTime:50, difficulty:'medium',
+    tags:['羊肉','包子','草原'], calories:380 },
+  { id:'cs_090', name:'烤羊腿', province:'内蒙古', city:'各地', category:'roast', emoji:'🦵',
+    desc:'整只羊腿腌制烤制，外焦里嫩，草原盛宴主菜',
+    ingredients:['羊腿','孜然','辣椒粉','盐','迷迭香'], cookTime:120, difficulty:'medium',
+    tags:['烤制','羊肉','草原'], calories:450 },
+
+  // ── 广西 ──────────────────────────────────────────────
+  { id:'cs_091', name:'桂林米粉', province:'广西', city:'桂林', category:'noodle', emoji:'🍜',
+    desc:'圆粉或切粉，卤水浇头，酸豆角脆爽，桂林第一小吃',
+    ingredients:['米粉','卤猪肉','酸豆角','油炸花生','卤汤'], cookTime:20, difficulty:'easy',
+    tags:['米粉','桂林','卤水'], calories:420 },
+  { id:'cs_092', name:'柳州螺蛳粉', province:'广西', city:'柳州', category:'noodle', emoji:'🐚',
+    desc:'螺蛳汤底臭香独特，腐竹花生木耳，超级网红小吃',
+    ingredients:['米粉','螺蛳','腐竹','花生','酸笋'], cookTime:30, difficulty:'medium',
+    tags:['臭香','网红','广西'], calories:450 },
+  { id:'cs_093', name:'老友粉', province:'广西', city:'南宁', category:'noodle', emoji:'🍜',
+    desc:'酸笋番茄猪肉汤底，酸辣开胃，南宁早餐代表',
+    ingredients:['米粉','猪肉','酸笋','番茄','辣椒'], cookTime:20, difficulty:'easy',
+    tags:['酸辣','早餐','南宁'], calories:380 },
+  { id:'cs_094', name:'马蹄爽', province:'广西', city:'北海', category:'sweet', emoji:'🍹',
+    desc:'荸荠椰奶制成，清甜爽口，广西夏日甜品',
+    ingredients:['荸荠','椰奶','西米','白糖','薄荷'], cookTime:20, difficulty:'easy',
+    tags:['清甜','夏日','广西'], calories:150 },
+  { id:'cs_095', name:'壮家五色糯米饭', province:'广西', city:'各地', category:'cake', emoji:'🍱',
+    desc:'植物染色糯米饭，五彩缤纷，壮族传统节日食品',
+    ingredients:['糯米','枫叶汁','紫薯','红曲','姜黄'], cookTime:60, difficulty:'medium',
+    tags:['糯米','节日','壮族'], calories:320 },
+
+  // ── 安徽 ──────────────────────────────────────────────
+  { id:'cs_096', name:'徽州毛豆腐', province:'安徽', city:'歙县', category:'street_food', emoji:'🧀',
+    desc:'长白毛豆腐煎制，刷辣酱，徽州独特风味',
+    ingredients:['豆腐','白毛发酵','辣椒酱','盐'], cookTime:20, difficulty:'medium',
+    tags:['徽州','发酵','煎制'], calories:180 },
+  { id:'cs_097', name:'黄山烧饼', province:'安徽', city:'黄山', category:'cake', emoji:'🥮',
+    desc:'猪肉梅干菜馅，炭火烤制，外脆内鲜，黄山特产',
+    ingredients:['面粉','猪肉','梅干菜','芝麻','猪油'], cookTime:40, difficulty:'medium',
+    tags:['烧饼','梅干菜','黄山'], calories:320 },
+  { id:'cs_098', name:'合肥米饺', province:'安徽', city:'合肥', category:'dumpling', emoji:'🥟',
+    desc:'米粉皮煎饺，馅料丰富，底部焦脆，合肥早点',
+    ingredients:['米粉','猪肉','韭菜','虾仁','鸡蛋'], cookTime:30, difficulty:'medium',
+    tags:['煎饺','米皮','合肥'], calories:250 },
+  { id:'cs_099', name:'淮南牛肉汤', province:'安徽', city:'淮南', category:'soup', emoji:'🍲',
+    desc:'牛骨熬制白汤，牛肉嫩滑，辣油点缀，淮南早餐',
+    ingredients:['牛肉','牛骨','粉丝','辣椒油','香菜'], cookTime:120, difficulty:'medium',
+    tags:['牛肉汤','早餐','淮南'], calories:350 },
+  { id:'cs_100', name:'蚌埠双龙汤圆', province:'安徽', city:'蚌埠', category:'sweet', emoji:'🍡',
+    desc:'水磨糯米皮，豆沙芝麻双馅，软糯香甜，安徽名点',
+    ingredients:['糯米粉','豆沙','黑芝麻','猪油','白糖'], cookTime:30, difficulty:'medium',
+    tags:['糯米','双馅','安徽'], calories:230 },
+];
+
+// ==================== 中国小吃工具函数 ====================
+
+/**
+ * 获取所有中国小吃
+ * @param {number} [limit] 限制数量
+ * @returns {Array}
+ */
+const getChineseSnacks = (limit) => {
+  return limit ? CHINESE_SNACKS.slice(0, limit) : [...CHINESE_SNACKS];
+};
+
+/**
+ * 按省份筛选小吃
+ * @param {string} province 省份名
+ * @returns {Array}
+ */
+const getSnacksByProvince = (province) => {
+  if (!province || province === 'all') return [...CHINESE_SNACKS];
+  return CHINESE_SNACKS.filter(s => s.province === province);
+};
+
+/**
+ * 按分类筛选小吃
+ * @param {string} category 分类
+ * @returns {Array}
+ */
+const getSnacksByCategory = (category) => {
+  if (!category || category === 'all') return [...CHINESE_SNACKS];
+  return CHINESE_SNACKS.filter(s => s.category === category);
+};
+
+/**
+ * 获取所有省份列表（去重）
+ * @returns {string[]}
+ */
+const getSnackProvinces = () => {
+  const provinces = [...new Set(CHINESE_SNACKS.map(s => s.province))];
+  return provinces.sort();
+};
+
 // ==================== 模块导出 ====================
 
 module.exports = {
   CUISINES,
   FAT_LOSS_MEALS,
   PREGNANCY_MEALS,
+  CHINESE_SNACKS,
   getCuisineById,
   getCuisineList,
   findRelatedCuisines,
@@ -2143,4 +2644,8 @@ module.exports = {
   getPregnancyMealsByNutrient,
   getFatLossMealsByCalories,
   getDailyRecommendation,
+  getChineseSnacks,
+  getSnacksByProvince,
+  getSnacksByCategory,
+  getSnackProvinces,
 };
