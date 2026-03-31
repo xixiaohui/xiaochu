@@ -84,7 +84,7 @@ function getTheme(type, color) {
  * 微信限制 Canvas 最大像素，实际用 scale 模拟
  */
 function getPosterSize() {
-  const sysInfo = wx.getSystemInfoSync();
+  const sysInfo = wx.getWindowInfo();
   const screenW = sysInfo.screenWidth  || 375;
   const screenH = sysInfo.screenHeight || 812;
   // 逻辑像素 × dpr 得到物理像素，再 × 3 倍比例
@@ -311,7 +311,7 @@ function drawPoster(ctx, recipe, mealInfo, themeType, themeColor, W, H) {
   const SECTION_FONT_SIZE = W * 0.042;
   ctx.font      = `bold ${SECTION_FONT_SIZE}px sans-serif`;
   ctx.fillStyle = '#2D2D2D';
-  ctx.fillText('🛒 食材清单', PAD, curY + SECTION_FONT_SIZE);
+  ctx.fillText('🛒 食材清单', PAD, curY + SECTION_FONT_SIZE-40);
   curY += SECTION_FONT_SIZE * 1.6;
 
   const ingredients = recipe.ingredients || [];
@@ -515,6 +515,8 @@ async function generatePoster(options) {
       wx.getImageInfo({
         src: '/images/xiaochu.png',
         success(imgInfo) {
+          console.log("加载二维码成功")
+          console.log(imgInfo)
           try {
             const img = canvas.createImage();
             img.onload = () => {
@@ -522,12 +524,14 @@ async function generatePoster(options) {
               resolve();
             };
             img.onerror = () => resolve(); // 失败静默
-            img.src = imgInfo.path;
+            // img.src = imgInfo.path;
+            img.src = '/images/xiaochu.png';
           } catch (e) {
             resolve();
           }
         },
         fail() {
+          console.log("加载二维码图片失败")
           // 画占位框
           ctx.strokeStyle = 'rgba(255,255,255,0.5)';
           ctx.lineWidth   = 2;
