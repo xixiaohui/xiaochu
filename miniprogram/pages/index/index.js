@@ -40,6 +40,14 @@ Page({
         bgColor: '#E91E63',
         action: 'pregnancy',
       },
+      {
+        id: 4,
+        title: '中国小吃',
+        subtitle: '舌尖上的中国·300道名吃',
+        emoji: '🀄',
+        bgColor: '#D32F2F',
+        action: 'chinese-snacks',
+      },
     ],
 
     // 当前轮播索引
@@ -158,6 +166,9 @@ Page({
     } else if (action === 'pregnancy') {
       // 跳转孕妇营养餐列表页（暂时导航到菜系页）
       wx.switchTab({ url: '/pages/pregnancy-meals/index' });
+    } else if(action === 'chinese-snacks'){
+      // 跳转到中国小吃
+      wx.switchTab({ url: '/pages/chinese-snacks/index' });
     }
   },
 
@@ -185,6 +196,13 @@ Page({
    */
   goToCuisineList() {
     wx.switchTab({ url: '/pages/cuisine/index' });
+  },
+
+  /**
+   * 跳转到中国小吃列表页
+   */
+  goToChineseSnacksList() {
+    wx.switchTab({ url: '/pages/chinese-snacks/index' });
   },
 
   /**
@@ -285,6 +303,7 @@ Page({
 
     if (sourceType === 'cuisine' && cuisineId) {
       // 跳转到对应菜系详情页
+      console.log("cuisineId is",cuisineId)
       wx.navigateTo({ url: `/pages/cuisine-detail/index?id=${cuisineId}` });
       return;
     }

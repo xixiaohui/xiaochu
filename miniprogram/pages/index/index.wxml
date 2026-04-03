@@ -55,7 +55,7 @@
       <view class="func-arrow">›</view>
     </view> -->
 
-    <view class="func-item func-item-sub" bindtap="goToCuisineList">
+    <view class="func-item func-item-sub" bindtap="goToChineseSnacksList">
       <view class="func-icon-wrap func-icon-purple">
         <text class="func-icon">🍜</text>
       </view>
@@ -65,12 +65,23 @@
       </view>
       <view class="func-arrow">›</view>
     </view>
+
+    <view class="func-item func-item-main" bindtap="goToCuisineList">
+      <view class="func-icon-wrap func-icon-orange">
+        <text class="func-icon">✨</text>
+      </view>
+      <view class="func-info">
+        <view class="func-name">中国小吃</view>
+        <view class="func-desc">舌尖上的中国·300道名吃</view>
+      </view>
+      <view class="func-arrow">›</view>
+    </view>
   </view>
 
   <!-- ========== 今天吃什么 - 每日推荐 ========== -->
   <view class="section-block daily-section" wx:if="{{dailyRecommendation}}">
     <view class="section-title-row">
-      <text class="section-title">🌟 今天吃什么</text>
+      <text class="section-title">🌟 今天吃什么?</text>
       <text class="section-more" bindtap="refreshDailyRecommendation">换一道</text>
     </view>
     <!-- cuisine 类型：点击跳菜系详情；其余类型：点击跳 AI 生成 -->
