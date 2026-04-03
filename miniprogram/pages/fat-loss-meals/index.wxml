@@ -146,7 +146,7 @@
     <view class="modal-loading" wx:if="{{modalLoading}}">
       <view class="spinner"></view>
       <text class="loading-text">
-        {{existingMap[modalMeal.name] ? '读取云端食谱...' : 'AI 生成减脂食谱中...'}}
+        {{existingMap[modalMeal.name] ? '读取云端食谱...' : '生成减脂食谱中...'}}
       </text>
     </view>
 
@@ -223,9 +223,9 @@
       </view>
 
       <!-- 重新生成 -->
-      <view class="regen-btn" bindtap="onRegenerateRecipe">
+      <!-- <view class="regen-btn" bindtap="onRegenerateRecipe">
         🔄 重新生成（消耗 Token）
-      </view>
+      </view> -->
 
       <!-- 海报生成 -->
       <view class="poster-btn" bindtap="onGeneratePoster">

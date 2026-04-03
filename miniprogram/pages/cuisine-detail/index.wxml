@@ -98,7 +98,7 @@
             bindtap="onGenerateFullRecipe"
             data-dish="{{item}}"
           >
-            <text>{{existingDishMap[item.name] ? '📖 查看完整食谱' : '✨ AI生成完整食谱'}}</text>
+            <text>{{existingDishMap[item.name] ? '📖 查看完整食谱' : '✨ 生成完整食谱'}}</text>
           </view>
         </view>
       </view>
@@ -139,7 +139,7 @@
     <!-- 加载中 -->
     <view class="rm-loading" wx:if="{{modalLoading}}">
       <view class="rm-loading-spinner"></view>
-      <text class="rm-loading-text">{{existingDishMap[modalDishName] ? '读取云端食谱...' : 'AI 生成中，请稍候...'}}</text>
+      <text class="rm-loading-text">{{existingDishMap[modalDishName] ? '读取云端食谱...' : '生成中，请稍候...'}}</text>
     </view>
 
     <!-- 错误 -->
@@ -210,9 +210,9 @@
       </view>
 
       <!-- 重新生成按钮 -->
-      <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
+      <!-- <view class="rm-regen-btn" bindtap="onRegenerateRecipe">
         🔄 重新生成（消耗 Token）
-      </view>
+      </view> -->
      
       <!-- 海报生成 -->
       <view class="rm-poster-btn" bindtap="onGeneratePoster">

@@ -81,7 +81,7 @@ Page({
   // ==================== 生命周期 ====================
 
   onLoad() {
-    const allSnacks = cuisinesUtil.getChineseSnacks(100);
+    const allSnacks = cuisinesUtil.getChineseSnacks(300);
 
     // 生成省份列表
     const provinceSet = [...new Set(allSnacks.map(s => s.province))];
@@ -117,7 +117,7 @@ Page({
         const res = await col
           .where({
             sourceDishName: db.command.in(batch),
-            category:       db.command.in(['chinese_snack', 'chinese_snack_generated']),
+            category:       db.command.in(['chinese-snacks','chinese_snack', 'chinese_snack_generated']),
           })
           .field({ sourceDishName: true })
           .limit(batch.length)
@@ -263,7 +263,7 @@ Page({
       db.collection(RECIPES_COLLECTION)
         .where({
           sourceDishName: dishName,
-          category: db.command.in(['chinese_snack', 'chinese_snack_generated']),
+          category: db.command.in(['chinese-snacks','chinese_snack', 'chinese_snack_generated']),
           status: 'active',
         })
         .orderBy('createdAt', 'desc')

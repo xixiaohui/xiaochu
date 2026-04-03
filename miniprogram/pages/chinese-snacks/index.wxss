@@ -619,7 +619,7 @@ page {
 
 /* 海报生成按钮 */
 .poster-btn {
-  margin-top: 20rpx;
+  margin-top: 25px;
   margin-right: 25px;
   text-align: center;
   padding: 24rpx;

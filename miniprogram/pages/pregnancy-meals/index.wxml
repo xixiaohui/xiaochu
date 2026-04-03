@@ -146,7 +146,7 @@
     <view class="modal-loading" wx:if="{{modalLoading}}">
       <view class="spinner"></view>
       <text class="loading-text">
-        {{existingMap[modalMeal.name] ? '读取云端食谱...' : 'AI 生成孕期食谱中...'}}
+        {{existingMap[modalMeal.name] ? '读取云端食谱...' : '生成孕期食谱中...'}}
       </text>
     </view>
 

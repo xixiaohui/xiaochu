@@ -127,7 +127,7 @@
     <view class="modal-loading" wx:if="{{modalLoading}}">
       <view class="spinner"></view>
       <text class="loading-text">
-        {{existingMap[modalSnack.name] ? '读取云端食谱...' : 'AI 生成菜谱中...'}}
+        {{existingMap[modalSnack.name] ? '读取云端食谱...' : '生成菜谱中...'}}
       </text>
     </view>
 
@@ -215,9 +215,9 @@
       </view>
 
       <!-- 操作按钮 -->
-      <view class="regen-btn" bindtap="onRegenerateRecipe">
+      <!-- <view class="regen-btn" bindtap="onRegenerateRecipe">
         🔄 重新生成（消耗 Token）
-      </view>
+      </view> -->
       <view class="poster-btn" bindtap="onGeneratePoster">
         🎨 生成菜谱海报
       </view>
